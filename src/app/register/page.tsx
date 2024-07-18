@@ -11,7 +11,6 @@ const Register = () => {
           src="/register.png"
           alt="Background"
           layout="fill"
-          objectFit="cover"
           quality={100}
         />
       </div>

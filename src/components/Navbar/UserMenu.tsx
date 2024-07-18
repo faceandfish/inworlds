@@ -5,8 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import ProfilesMenu from "../ProfilesMenu";
 import { useState } from "react";
+import { User } from "@/app/lib/definitions";
+import UserAvatar from "../UserAvatar";
 
-const UserMenu = (session: any) => {
+const UserMenu = (user: User) => {
   const [profileMenu, setProfileMenu] = useState(false);
 
   const handleClick = () => {
@@ -23,18 +25,15 @@ const UserMenu = (session: any) => {
       <Link href="/mail" className="group/message">
         <GoBell className="text-3xl" />
         <div className="absolute left-16 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/message:visible group-hover/message:opacity-100 transition-opacity duration-300">
-          新消息
+          新消息{user.name}
         </div>
       </Link>
       {/* 个人头像 */}
       <div className="group/profiles ">
-        <Image
-          src={"/login.png"}
-          alt={"text"}
-          width={10}
-          height={10}
-          className="w-10 h-10 bg-slate-600 rounded-full "
+        <UserAvatar
+          user={user}
           onClick={handleClick}
+          className="w-10 h-10 bg-slate-600 rounded-full cursor-pointer"
         />
         {profileMenu && <ProfilesMenu />}
         {/* <div className="absolute right-0 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/profiles:visible group-hover/profiles:opacity-100 transition-opacity duration-300">
