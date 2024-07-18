@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { MdOutlineHealthAndSafety } from "react-icons/md";
@@ -11,7 +12,6 @@ import { MdOutlineErrorOutline } from "react-icons/md";
 import { MdOutlineAnalytics } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa6";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
 
 const ProfilesMenu = () => {
   return (
@@ -81,7 +81,7 @@ const ProfilesMenu = () => {
           </Link>
         </li>
         <li className="group/item   px-4 py-2 hover:bg-gray-100 ">
-          <button onClick={() => signOut()} className="flex items-center">
+          <button className="flex items-center">
             <AiOutlineLogout className="text-2xl mr-5" />
             <div className=" text-base mr-32">退出帳號</div>
             <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />

@@ -6,7 +6,7 @@ import Image from "next/image";
 import ProfilesMenu from "../ProfilesMenu";
 import { useState } from "react";
 
-const UserMenu = ({ session }) => {
+const UserMenu = (session: any) => {
   const [profileMenu, setProfileMenu] = useState(false);
 
   const handleClick = () => {
@@ -29,8 +29,8 @@ const UserMenu = ({ session }) => {
       {/* 个人头像 */}
       <div className="group/profiles ">
         <Image
-          src={session?.image || "/login.png"}
-          alt={session?.name || "text"}
+          src={"/login.png"}
+          alt={"text"}
           width={10}
           height={10}
           className="w-10 h-10 bg-slate-600 rounded-full "

@@ -1,49 +1,53 @@
-import { signIn } from "@/auth";
+"use client";
+import { signIn } from "next-auth/react";
+import { useForm } from "react-hook-form";
+
 import Image from "next/image";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import React from "react";
-import { z } from "zod";
 
-const loginSchema = z.object({
-  emailOrUsername: z.string().min(1, "Email or username is required"),
-  password: z.string().min(1, "Password is required"),
-});
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 
 const Login = () => {
-  async function handleLogin(formData: FormData) {
-    "use server";
+  const [loginError, setLoginError] = useState("");
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-    const validatedFields = loginSchema.safeParse({
-      emailOrUsername: formData.get("emailOrUsername"),
-      password: formData.get("password"),
-    });
+  const onSubmit = async (data: any) => {
+    try {
+      const response = await fetch(
+        "https://8.142.44.107:8088/inworlds/api/login",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
 
-    if (!validatedFields.success) {
-      throw new Error("Invalid input");
+      if (!response.ok) {
+        const errorResponse = await response.json();
+        console.error("Server error response:", errorResponse);
+        throw new Error(
+          "Login failed: " + (errorResponse.message || response.statusText)
+        );
+      }
+      const result = await response.json();
+      console.log("Login successful:", result);
+      localStorage.setItem("token", result.token);
+      router.push("/");
+    } catch (error) {
+      // 处理错误...
+      console.error("Login error");
+      setLoginError(
+        error instanceof Error
+          ? error.message
+          : "Login failed. Please try again."
+      );
     }
-
-    const { emailOrUsername, password } = validatedFields.data;
-
-    const result = await signIn("credentials", {
-      emailOrUsername,
-      password,
-      redirect: false,
-    });
-
-    if (result?.error) {
-      // Handle error (e.g., show error message)
-      throw new Error("Invalid credentials");
-    }
-
-    redirect("/");
-  }
-
-  const handleGoogleSignIn = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>
-  ) => {
-    e.preventDefault(); // 防止表单提交（如果按钮在表单内）
-    signIn("google", { redirectTo: "/" });
   };
   return (
     <div className="relative h-screen">
@@ -58,39 +62,42 @@ const Login = () => {
       </div>
       <div className="absolute top-1/2 right-32 transform -translate-y-1/2 rounded-2xl  z-10 bg-white px-10 py-8">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
-        <form action={handleLogin}>
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="username"
+              htmlFor="loginAct"
             >
               Username or Email
             </label>
             <input
               className="shadow appearance-none border rounded w-96 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="emailOrUsername"
+              {...register("loginAct", {
+                required: "Username or Email is required",
+              })}
               type="text"
               placeholder="Enter your Username or Email"
-              name="emailOrUsername"
+              name="loginAct"
               required
             />
           </div>
           <div className="mb-6">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="password"
+              htmlFor="loginPwd"
             >
               Password
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
+              {...register("loginPwd", { required: "Password is required" })}
               type="password"
               placeholder="Enter your password"
-              name="password"
+              name="loginPwd"
               required
             />
           </div>
+
           <div className="flex items-center justify-between">
             <button
               className="hover:bg-orange-500 bg-orange-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
@@ -101,11 +108,7 @@ const Login = () => {
           </div>
         </form>
         <div className="mt-4 text-center">
-          <button
-            className="hover:bg-gray-200 bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full flex items-center justify-center"
-            type="button"
-            onClick={handleGoogleSignIn}
-          >
+          <button className="hover:bg-gray-200 bg-white border border-gray-300 text-gray-700 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full flex items-center justify-center">
             <Image
               src="/google.svg"
               alt="Google Logo"
