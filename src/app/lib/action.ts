@@ -12,23 +12,22 @@ export const login = async (
   credentials: LoginCredentials
 ): Promise<LoginResponse> => {
   try {
-    console.log("Sending login request...");
+    // 创建 FormData 对象
+    const formData = new FormData();
+    formData.append("loginAct", credentials.loginAct);
+    formData.append("loginPwd", credentials.loginPwd);
+
     const response = await fetch(`${API_BASE_URL}/login`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(credentials),
+      // 不需要设置 Content-Type，fetch 会自动设置正确的值
+      body: formData,
     });
-
-    console.log("Received response:", response);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
-    console.log("Parsed response data:", data);
 
     if (data.code !== 200) {
       throw new Error(data.msg || "Login failed");
@@ -36,47 +35,85 @@ export const login = async (
 
     return data;
   } catch (error) {
-    console.error("Error in login function:", error);
     throw error; // 重新抛出错误，让调用者处理
   }
 };
 
 export async function getUserInfo(): Promise<UserResponse> {
-  const token = localStorage.getItem("token"); // 假设我们在登录后将 token 存储在 localStorage
-  const response = await fetch(`${API_BASE_URL}/user/principal`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  if (!response.ok) {
-    throw new Error("Failed to fetch user info");
+  if (typeof window === "undefined") {
+    return { code: 401, msg: "Not authenticated", data: null };
   }
 
-  return response.json();
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+    return { code: 401, msg: "Not authenticated", data: null };
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/user/principal`, {
+      method: "GET", // 明确指定方法
+      headers: {
+        //Authorization: `Bearer ${token}`, // 确保这里的格式正确
+        token: token,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data = await response.json();
+
+    return { code: 200, msg: "Success", data: data.data };
+  } catch (error) {
+    return { code: 500, msg: "Error fetching user info", data: null };
+  }
 }
 
 export async function logout(): Promise<{ code: number; msg: string }> {
   const token = localStorage.getItem("token");
-  const response = await fetch(`${API_BASE_URL}/logout`, {
-    method: "POST", // 使用 POST 方法，但 GET 也应该可以工作
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
 
-  if (!response.ok) {
-    throw new Error("Logout failed");
+  if (!token) {
+    console.error("No token found in localStorage");
+    throw new Error("No authentication token found");
   }
 
-  const result = await response.json();
+  try {
+    const response = await fetch(`${API_BASE_URL}/logout`, {
+      method: "POST",
+      headers: {
+        token: token,
+        "Content-Type": "application/json",
+      },
+    });
 
-  if (result.code === 200) {
-    // 清除本地存储的 token
-    localStorage.removeItem("token");
+    if (!response.ok) {
+      const errorBody = await response.text();
+      console.error(
+        `Logout failed with status ${response.status}. Response body:`,
+        errorBody
+      );
+      throw new Error(
+        `Logout failed: ${response.status} ${response.statusText}`
+      );
+    }
+
+    const result = await response.json();
+
+    if (result.code === 200) {
+      localStorage.removeItem("token");
+      console.log("Logout successful, token removed from localStorage");
+    } else {
+      console.warn(
+        "Logout API returned non-200 code:",
+        result.code,
+        result.msg
+      );
+    }
+
+    return result;
+  } catch (error) {
+    console.error("Error during logout:", error);
+    throw error;
   }
-
-  return result;
 }
 
 export async function register(

@@ -8,7 +8,11 @@ import { useState } from "react";
 import { User } from "@/app/lib/definitions";
 import UserAvatar from "../UserAvatar";
 
-const UserMenu = (user: User) => {
+interface UserMenuProps {
+  user: User;
+}
+
+const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
   const [profileMenu, setProfileMenu] = useState(false);
 
   const handleClick = () => {

@@ -19,14 +19,14 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export type UserResponse =
+  | { code: 200; msg: string; data: User }
+  | { code: 401; msg: string; data: null }
+  | { code: 500; msg: string; data: null };
+
 export interface LoginResponse extends ApiResponse<string> {
   // data 字段是 JWT token
   data: string;
-}
-
-export interface UserResponse extends ApiResponse<User> {
-  // data 字段是用户信息
-  data: User;
 }
 
 export interface RegisterCredentials {

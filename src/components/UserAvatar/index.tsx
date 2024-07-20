@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import Image from "next/image";
 
 interface UserAvatarProps {
@@ -15,25 +15,42 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   onClick,
   className = "",
 }) => {
-  // 生成随机颜色
-  const getRandomColor = () => {
-    return "#" + Math.floor(Math.random() * 16777215).toString(16);
+  // 基于字符串生成哈希值
+  const hashCode = (str: string) => {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      const char = str.charCodeAt(i);
+      hash = (hash << 5) - hash + char;
+      hash = hash & hash; // Convert to 32bit integer
+    }
+    return hash;
   };
 
-  // 获取对比色
-  const getContrastColor = (hexcolor: string) => {
-    // 将十六进制颜色转换为RGB
-    const r = parseInt(hexcolor.slice(1, 3), 16);
-    const g = parseInt(hexcolor.slice(3, 5), 16);
-    const b = parseInt(hexcolor.slice(5, 7), 16);
-    // 计算亮度
-    const yiq = (r * 299 + g * 587 + b * 114) / 1000;
-    // 返回黑色或白色
-    return yiq >= 128 ? "black" : "white";
+  // 生成基于用户名的固定颜色
+  const generatePastelColor = (name: string) => {
+    const hash = hashCode(name);
+    const hue = hash % 360; // 使用哈希值来确定色相
+    return `hsl(${hue}, 70%, 80%)`; // 保持低饱和度和高亮度
   };
 
-  const backgroundColor = getRandomColor();
-  const textColor = getContrastColor(backgroundColor);
+  // 使用 useMemo 来确保颜色只生成一次
+  const backgroundColor = useMemo(
+    () => generatePastelColor(user.name),
+    [user.name]
+  );
+
+  // 对比色生成函数，生成低饱和度的文字颜色
+  const getContrastColor = (bgColor: string) => {
+    const [h, s, l] = bgColor.match(/\d+/g)!.map(Number);
+    const textHue = (h + 180) % 360; // 对比色
+    const textLightness = l > 50 ? 30 : 70; // 根据背景亮度调整文字亮度
+    return `hsl(${textHue}, 30%, ${textLightness}%)`; // 降低饱和度
+  };
+
+  const textColor = useMemo(
+    () => getContrastColor(backgroundColor),
+    [backgroundColor]
+  );
   const initial = user.name.charAt(0).toUpperCase();
 
   return (

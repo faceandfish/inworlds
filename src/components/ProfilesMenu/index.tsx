@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { MdOutlineHealthAndSafety } from "react-icons/md";
@@ -12,17 +11,25 @@ import { MdOutlineErrorOutline } from "react-icons/md";
 import { MdOutlineAnalytics } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa6";
 import Link from "next/link";
+import { User } from "@/app/lib/definitions";
+import { userInfo } from "../UserContext";
+import LogoutButton from "./Logout";
 
 const ProfilesMenu = () => {
+  const { user } = userInfo();
+  console.log("🚀 ~ ProfilesMenu ~ user:", user);
+
   return (
     <div className="absolute top-12 right-10">
       <ul className=" bg-white shadow w-72  py-2 rounded-md ">
         <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
-          <Link href="#" className="flex items-center">
-            <HiOutlineHome className="text-2xl mr-5" />
-            <div className=" text-base mr-32">我的主頁</div>
-            <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
-          </Link>
+          {user && (
+            <Link href={`/profile/${user.id}`} className="flex items-center">
+              <HiOutlineHome className="text-2xl mr-5" />
+              <div className=" text-base mr-32">我的主頁</div>
+              <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
+            </Link>
+          )}
         </li>
         <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
           <Link href="#" className="flex items-center">
@@ -81,11 +88,7 @@ const ProfilesMenu = () => {
           </Link>
         </li>
         <li className="group/item   px-4 py-2 hover:bg-gray-100 ">
-          <button className="flex items-center">
-            <AiOutlineLogout className="text-2xl mr-5" />
-            <div className=" text-base mr-32">退出帳號</div>
-            <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
-          </button>
+          <LogoutButton />
         </li>
       </ul>
     </div>

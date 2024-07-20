@@ -21,18 +21,16 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const loadUser = async () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const response = await getUserInfo();
-          if (response.code === 200) {
-            setUser(response.data);
-          }
-        } catch (error) {
-          console.error("Failed to load user:", error);
+      try {
+        const response = await getUserInfo();
+        if (response.code === 200 && response.data) {
+          setUser(response.data);
         }
+      } catch (error) {
+        console.error("Failed to load user:", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     loadUser();
@@ -45,10 +43,11 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export const useUser = () => {
+export const userInfo = () => {
   const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error("useUser must be used within a UserProvider");
+    throw new Error("userInfo must be used within a UserProvider");
   }
   return context;
 };
+console.log("🚀 ~ userInfo:", userInfo());

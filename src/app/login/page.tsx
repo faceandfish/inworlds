@@ -7,7 +7,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LoginCredentials } from "../lib/definitions";
 import { getUserInfo, login } from "../lib/action";
-import { useUser } from "@/components/UserContext";
+import { userInfo } from "@/components/UserContext";
 
 const Login = () => {
   const [credentials, setCredentials] = useState<LoginCredentials>({
@@ -18,7 +18,7 @@ const Login = () => {
   const [error, setError] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
-  const { setUser } = useUser();
+  const { setUser } = userInfo();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
