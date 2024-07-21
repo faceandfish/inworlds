@@ -50,4 +50,3 @@ export const userInfo = () => {
   }
   return context;
 };
-console.log("🚀 ~ userInfo:", userInfo());

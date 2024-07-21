@@ -54,13 +54,13 @@ export async function getUserInfo(): Promise<UserResponse> {
     const response = await fetch(`${API_BASE_URL}/user/principal`, {
       method: "GET", // 明确指定方法
       headers: {
-        //Authorization: `Bearer ${token}`, // 确保这里的格式正确
-        token: token,
+        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     });
 
     const data = await response.json();
+    console.log("🚀 ~ getUserInfo ~ data:", data);
 
     return { code: 200, msg: "Success", data: data.data };
   } catch (error) {
@@ -80,8 +80,8 @@ export async function logout(): Promise<{ code: number; msg: string }> {
     const response = await fetch(`${API_BASE_URL}/logout`, {
       method: "POST",
       headers: {
-        token: token,
-        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        // "Content-Type": "application/json",
       },
     });
 

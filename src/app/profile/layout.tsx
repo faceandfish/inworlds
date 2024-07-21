@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { userInfo } from "@/components/UserContext";
 
@@ -22,7 +23,7 @@ export default function ProfileLayout({
       <main>
         {React.Children.map(children, (child) =>
           React.isValidElement(child)
-            ? React.cloneElement(child, { user })
+            ? React.cloneElement(child, { user } as any)
             : child
         )}
       </main>
