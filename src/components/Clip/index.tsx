@@ -4,7 +4,7 @@ import React from "react";
 function Clip() {
   return (
     <Link href="/books">
-      <div className="flex  w-96s h-56 flex-1 bg-gray-100">
+      <div className="flex  w-96 h-56 flex-1 bg-gray-100">
         <div className="w-44 h-56 bg-orange-400 rounded flex-shrink-0">
           封面
         </div>

@@ -1,32 +1,17 @@
-"use client";
 import React from "react";
-import { userInfo } from "@/components/UserContext";
+import Navbar from "@/components/Navbar"; // 确保导入路径正确
 
-export default function ProfileLayout({
-  children,
-}: {
+interface ProfileLayoutProps {
   children: React.ReactNode;
-}) {
-  const { user, loading } = userInfo();
+}
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (!user) {
-    return <div>User not found</div>;
-  }
-
+const ProfileLayout: React.FC<ProfileLayoutProps> = ({ children }) => {
   return (
     <div>
-      {/* 这里可以添加 profile 页面的通用布局元素 */}
-      <main>
-        {React.Children.map(children, (child) =>
-          React.isValidElement(child)
-            ? React.cloneElement(child, { user } as any)
-            : child
-        )}
-      </main>
+      <Navbar />
+      <main>{children}</main>
     </div>
   );
-}
+};
+
+export default ProfileLayout;

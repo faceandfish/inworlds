@@ -5,6 +5,16 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { User } from "@/app/lib/definitions";
 import { getUserInfo } from "@/app/lib/action";
 
+const defaultUser: User = {
+  id: 1,
+  loginAct: "Wus",
+  name: "face",
+  email: "123@gmail.com",
+  followers: 100,
+  articles: 5,
+  bio: "这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。",
+};
+
 interface UserContextType {
   user: User | null;
   setUser: (user: User | null) => void;
@@ -25,9 +35,12 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         const response = await getUserInfo();
         if (response.code === 200 && response.data) {
           setUser(response.data);
+        } else {
+          setUser(defaultUser);
         }
       } catch (error) {
         console.error("Failed to load user:", error);
+        setUser(defaultUser);
       } finally {
         setLoading(false);
       }

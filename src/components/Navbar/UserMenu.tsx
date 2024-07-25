@@ -4,20 +4,31 @@ import { GoBell } from "react-icons/go";
 import Link from "next/link";
 import Image from "next/image";
 import ProfilesMenu from "../ProfilesMenu";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { User } from "@/app/lib/definitions";
 import UserAvatar from "../UserAvatar";
 
-interface UserMenuProps {
-  user: User;
-}
-
-const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
+const UserMenu = ({ user }: { user: User }) => {
   const [profileMenu, setProfileMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
-  const handleClick = () => {
-    setProfileMenu(!profileMenu);
+  const handleAvatarClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // 阻止事件冒泡
+    setProfileMenu((prev) => !prev);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setProfileMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="flex  justify-center items-center gap-10 relative">
       <Link href="/write" className=" group/write">
@@ -29,20 +40,13 @@ const UserMenu: React.FC<UserMenuProps> = ({ user }) => {
       <Link href="/mail" className="group/message">
         <GoBell className="text-3xl" />
         <div className="absolute left-16 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/message:visible group-hover/message:opacity-100 transition-opacity duration-300">
-          新消息{user.name}
+          新消息
         </div>
       </Link>
       {/* 个人头像 */}
-      <div className="group/profiles ">
-        <UserAvatar
-          user={user}
-          onClick={handleClick}
-          className="w-10 h-10 bg-slate-600 rounded-full cursor-pointer"
-        />
+      <div className="group/profiles " ref={menuRef}>
+        <UserAvatar user={user} onClick={handleAvatarClick} />
         {profileMenu && <ProfilesMenu />}
-        {/* <div className="absolute right-0 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/profiles:visible group-hover/profiles:opacity-100 transition-opacity duration-300">
-            個人主頁
-          </div> */}
       </div>
     </div>
   );

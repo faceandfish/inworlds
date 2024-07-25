@@ -12,10 +12,19 @@ export const login = async (
   credentials: LoginCredentials
 ): Promise<LoginResponse> => {
   try {
+    console.log("Login function called with credentials:", credentials);
     // 创建 FormData 对象
     const formData = new FormData();
+
     formData.append("loginAct", credentials.loginAct);
     formData.append("loginPwd", credentials.loginPwd);
+
+    console.log("FormData contents:");
+    formData.forEach((value, key) => {
+      console.log(key, value);
+    });
+
+    console.log("Sending request to:", `${API_BASE_URL}/login`);
 
     const response = await fetch(`${API_BASE_URL}/login`, {
       method: "POST",
@@ -23,11 +32,14 @@ export const login = async (
       body: formData,
     });
 
+    console.log("Response status:", response.status);
+
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
     const data = await response.json();
+    console.log("Server response data:", data);
 
     if (data.code !== 200) {
       throw new Error(data.msg || "Login failed");
@@ -55,6 +67,7 @@ export async function getUserInfo(): Promise<UserResponse> {
       method: "GET", // 明确指定方法
       headers: {
         Authorization: `Bearer ${token}`,
+
         "Content-Type": "application/json",
       },
     });
@@ -69,7 +82,11 @@ export async function getUserInfo(): Promise<UserResponse> {
 }
 
 export async function logout(): Promise<{ code: number; msg: string }> {
+  console.log("Logout function called");
+  console.log("All localStorage items:", { ...localStorage });
+
   const token = localStorage.getItem("token");
+  console.log("🚀 ~ logout ~ token:", token);
 
   if (!token) {
     console.error("No token found in localStorage");
@@ -77,13 +94,15 @@ export async function logout(): Promise<{ code: number; msg: string }> {
   }
 
   try {
+    console.log("Attempting to fetch from API");
     const response = await fetch(`${API_BASE_URL}/logout`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        // "Content-Type": "application/json",
       },
     });
+
+    console.log("API response received, status:", response.status);
 
     if (!response.ok) {
       const errorBody = await response.text();
@@ -97,6 +116,7 @@ export async function logout(): Promise<{ code: number; msg: string }> {
     }
 
     const result = await response.json();
+    console.log("API result:", result);
 
     if (result.code === 200) {
       localStorage.removeItem("token");

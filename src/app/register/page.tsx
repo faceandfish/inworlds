@@ -1,9 +1,60 @@
-import React from "react";
-
+"use client";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { RegisterCredentials } from "../lib/definitions";
+import { register } from "../lib/action";
 
 const Register = () => {
+  const router = useRouter();
+  const [formData, setFormData] = useState<RegisterCredentials>({
+    loginAct: "",
+    email: "",
+    loginPwd: "",
+    reLoginPwd: "",
+  });
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    // Basic validation
+    if (formData.loginPwd !== formData.reLoginPwd) {
+      setError("Passwords do not match");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await register(formData);
+
+      if (response.code === 200) {
+        // Registration successful
+        router.push("/login");
+      } else {
+        // Registration failed
+        setError(response.msg || "Registration failed");
+      }
+    } catch (error) {
+      setError("An error occurred during registration");
+      console.error("Registration error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative h-screen">
       <div className="absolute inset-0">
@@ -14,21 +65,25 @@ const Register = () => {
           quality={100}
         />
       </div>
-      <div className="absolute top-1/2 right-32 transform -translate-y-1/2 rounded-2xl  z-10 bg-white px-10 py-8">
+      <div className="absolute top-1/2 right-32 transform -translate-y-1/2 rounded-2xl z-10 bg-white px-10 py-8">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-        <form>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="username"
+              htmlFor="loginAct"
             >
               Username
             </label>
             <input
               className="shadow appearance-none border rounded w-96 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="username"
+              id="loginAct"
               type="text"
               placeholder="Enter your username"
+              value={formData.loginAct}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="mb-4">
@@ -43,52 +98,62 @@ const Register = () => {
               id="email"
               type="email"
               placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="password"
+              htmlFor="loginPwd"
             >
               Password
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="password"
+              id="loginPwd"
               type="password"
               placeholder="Enter your password"
+              value={formData.loginPwd}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="confirm-password"
+              htmlFor="reLoginPwd"
             >
               Confirm Password
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="confirm-password"
+              id="reLoginPwd"
               type="password"
               placeholder="Confirm your password"
+              value={formData.reLoginPwd}
+              onChange={handleChange}
+              required
             />
           </div>
           <div className="flex items-center justify-between">
             <button
-              className=" hover:bg-orange-500 bg-orange-400  text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-              type="button"
+              className="hover:bg-orange-500 bg-orange-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+              type="submit"
+              disabled={isLoading}
             >
-              Register
+              {isLoading ? "Registering..." : "Register"}
             </button>
           </div>
           <div className="mt-3 text-center">
-            already have an account
+            Already have an account?
             <Link
               href="/login"
               className="text-orange-400 hover:text-orange-500"
             >
               {" "}
-              login
+              Login
             </Link>
           </div>
         </form>

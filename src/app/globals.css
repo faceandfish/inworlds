@@ -6,3 +6,9 @@
   padding: 0;
   margin: 0;
 }
+
+@layer components {
+  .custom-radio {
+    @apply appearance-none w-5 h-5 border-2 border-black rounded-full checked:border-black focus:outline-none focus:ring-black relative after:absolute after:top-1/2 after:left-1/2 after:-translate-x-1/2 after:-translate-y-1/2 after:w-2 after:h-2 after:rounded-full after:bg-black after:opacity-0 checked:after:opacity-100;
+  }
+}

@@ -2,7 +2,7 @@ import React from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { MdOutlineHealthAndSafety } from "react-icons/md";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
-import { AiOutlineLogout } from "react-icons/ai";
+
 import { IoLanguageOutline } from "react-icons/io5";
 import { CgProfile } from "react-icons/cg";
 import { SlLocationPin } from "react-icons/sl";
@@ -20,7 +20,7 @@ const ProfilesMenu = () => {
   console.log("🚀 ~ ProfilesMenu ~ user:", user);
 
   return (
-    <div className="absolute top-12 right-10">
+    <div className="absolute top-12 right-10 z-10">
       <ul className=" bg-white shadow w-72  py-2 rounded-md ">
         <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
           {user && (
@@ -87,9 +87,8 @@ const ProfilesMenu = () => {
             <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
           </Link>
         </li>
-        <li className="group/item   px-4 py-2 hover:bg-gray-100 ">
-          <LogoutButton />
-        </li>
+
+        <LogoutButton />
       </ul>
     </div>
   );
