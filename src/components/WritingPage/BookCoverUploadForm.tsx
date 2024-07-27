@@ -6,12 +6,18 @@ import React, { useState, ChangeEvent, useRef } from "react";
 const BookCoverUploadForm: React.FC = () => {
   const [coverImage, setCoverImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [bookInfo, setBookInfo] = useState<BookInfo>({
+  const [bookInfo, setBookInfo] = useState<
+    Omit<BookInfo, "onSaveDraft" | "onPublish" | "updateSectionContent">
+  >({
+    id: 0, // 或者使用一个适当的初始 ID
     title: "",
     description: "",
     category: "female-story",
     ageRating: "under18",
     coverImage: null,
+    content: "",
+    wordCount: 0,
+    lastSaved: new Date().toISOString(),
   });
   const handleEditClick = () => {
     fileInputRef.current?.click();

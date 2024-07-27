@@ -5,16 +5,6 @@ import React, { createContext, useState, useContext, useEffect } from "react";
 import { User } from "@/app/lib/definitions";
 import { getUserInfo } from "@/app/lib/action";
 
-const defaultUser: User = {
-  id: 1,
-  loginAct: "Wus",
-  name: "face",
-  email: "123@gmail.com",
-  followers: 100,
-  articles: 5,
-  bio: "这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。这个用户很懒，还没有填写个人介绍。",
-};
-
 interface UserContextType {
   user: User | null;
   setUser: (user: User | null) => void;
@@ -23,11 +13,19 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
+export const UserProvider = ({
   children,
+  initialUser,
+}: {
+  children: React.ReactNode;
+  initialUser: User | null;
 }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    if (initialUser.code === 200) {
+      return initialUser.data;
+    }
+    return null;
+  });
 
   useEffect(() => {
     const loadUser = async () => {
@@ -35,12 +33,9 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
         const response = await getUserInfo();
         if (response.code === 200 && response.data) {
           setUser(response.data);
-        } else {
-          setUser(defaultUser);
         }
       } catch (error) {
         console.error("Failed to load user:", error);
-        setUser(defaultUser);
       } finally {
         setLoading(false);
       }
@@ -56,7 +51,7 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
-export const userInfo = () => {
+export const useUserInfo = () => {
   const context = useContext(UserContext);
   if (context === undefined) {
     throw new Error("userInfo must be used within a UserProvider");

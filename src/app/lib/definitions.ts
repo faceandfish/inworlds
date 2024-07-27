@@ -1,28 +1,30 @@
 export interface User {
   // 基本信息
-  id: string;
-  loginAct: string;
-  avatarUrl: string;
-  bio: string;
-  mail: string;
+  id: number;
+  name?: string; //昵称 最好是修改成 displayName
+  authorname?: string; //作者名
+  loginAct: string; // 用户名 最好是修改成 userName
+  avatarFile: string; //头像  最好是改成 avatarUrl
+  introduction?: string; //简介
+  email: string; //邮箱
+  createdAt: string; //注册时间
 
   // 计数
-  articlesCount: number;
-  followersCount: number;
-  followingCount: number;
-  favoritesCount: number;
+  articlesCount?: number; //文章数量
+  followersCount: number; //粉丝数量
+  followingCount: number; //关注人数
+  favoritesCount: number; //收藏数量
 
   // 文章
-  articles: {
+  articles?: {
     items: Array<{
       id: string;
       title: string;
-      summary: string;
-      createdAt: string;
+      description: string;
+      createdAt: string; //创建时间
       // 其他文章相关字段
     }>;
     page: number;
-    hasMore: boolean;
   };
 
   // 粉丝
@@ -30,11 +32,9 @@ export interface User {
     items: Array<{
       id: string;
       loginAct: string;
-      avatarUrl: string;
+      avatarFile: string;
       // 其他需要的粉丝信息
     }>;
-    page: number;
-    hasMore: boolean;
   };
 
   // 关注
@@ -42,46 +42,45 @@ export interface User {
     items: Array<{
       id: string;
       loginAct: string;
-      avatarUrl: string;
+      avatarFile: string;
       // 其他需要的关注用户信息
     }>;
-    page: number;
-    hasMore: boolean;
   };
 
   // 收藏
   favorites: {
     items: Array<{
       id: string;
-      itemType: "article" | "comment" | "user";
-      itemId: string;
+      coverImage: File | null; //封面
+      title: string;
       // 其他收藏相关字段
     }>;
-    page: number;
-    hasMore: boolean;
   };
 }
 
+//一本书的内容
 export interface BookInfo {
   id: number;
-  title: string;
-  description: string;
-  category:
-    | "female-story"
+  title: string; //书名
+  description: string; //简介
+  category: //分类
+  | "female-story"
     | "male-story"
     | "children-story"
     | "literature-story"
     | "biography";
-  ageRating: "under18" | "adult" | "allAges";
-  coverImage: File | null;
-  content: string;
-  authorNote?: string;
-  wordCount: number;
-  lastSaved: string;
-  onSaveDraft: () => void;
-  onPublish: () => void;
-  updateSectionContent: (id: number, content: string) => void;
+  ageRating: "under18" | "adult" | "allAges"; //年龄分级
+  coverImage: File | null; //封面
+  content: string; //小说内容
+  authorNote?: string; //作者留言
+  wordCount: number; //字数统计
+  lastSaved: string; //最后保存时间
+  createdAt: string;
+  onSaveDraft: () => void; //保存到草稿箱
+  onPublish: () => void; //公开发布
+  updateSectionContent: (id: number, content: string) => void; // 修改内容
 }
+
 export interface TotalPages {
   totalPages: number;
 }
@@ -117,4 +116,19 @@ export interface RegisterCredentials {
 export interface RegisterResponse {
   code: number;
   msg: string;
+}
+
+export interface UpdateProfileCredentials {
+  id: number;
+  loginPwd?: string;
+  reLoginPwd?: string;
+  name?: string;
+  avatarFile?: File;
+  introduction?: string;
+}
+
+export interface UpdateProfileResponse {
+  code: number;
+  msg: string;
+  data: null;
 }

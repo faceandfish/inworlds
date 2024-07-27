@@ -1,16 +1,16 @@
+"use client";
 import { useState } from "react";
-
 import UserAvatar from "../UserAvatar";
 import Clip from "../Clip";
 import Link from "next/link";
-import { userInfo } from "../UserContext";
+import { useUserInfo } from "../UserContext";
 import { User } from "@/app/lib/definitions";
 
 function PersonPage({ user }: { user: User }) {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   // 获取当前用户信息
-  const { user: currentUser } = userInfo();
+  const { user: currentUser } = useUserInfo();
 
   // 比较当前用户ID和页面显示的用户ID
   const isCurrentUser = currentUser?.id === user.id;
@@ -36,7 +36,7 @@ function PersonPage({ user }: { user: User }) {
             {user.loginAct}
           </h1>
           <p className="text-gray-500 max-w-md mx-auto mb-6 line-clamp-2">
-            {user.bio || "这个用户很懒，还没有填写个人介绍。"}
+            {user.introduction || "这个用户很懒，还没有填写个人介绍。"}
           </p>
           <div className="flex justify-center items-center space-x-8">
             <div className="text-center">
@@ -52,23 +52,28 @@ function PersonPage({ user }: { user: User }) {
               <div className="text-sm text-gray-600">粉丝</div>
             </div>
 
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-800">
-                {user.followingCount || 0}
-              </div>
-              <div className="text-sm text-gray-600">关注</div>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold text-gray-800">
-                {user.favoritesCount || 0}
-              </div>
-              <div className="text-sm text-gray-600">收藏</div>
-            </div>
+            {isCurrentUser && (
+              <>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-800">
+                    {user.followingCount || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">关注</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-gray-800">
+                    {user.favoritesCount || 0}
+                  </div>
+                  <div className="text-sm text-gray-600">收藏</div>
+                </div>
+              </>
+            )}
+
             {isCurrentUser ? (
               <div>
-                <Link href="#">
+                <Link href={`/profile/${user.id}/edit`}>
                   <button className="ml-4 px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600 transition duration-300 ease-in-out">
-                    修改简介
+                    修改资料
                   </button>
                 </Link>
                 <Link href="#">
@@ -87,14 +92,14 @@ function PersonPage({ user }: { user: User }) {
                       : "bg-orange-400 hover:bg-orange-500"
                   } transition duration-300 ease-in-out`}
                 >
-                  {isSubscribed ? "取消订阅" : "订阅专栏"}
+                  {isSubscribed ? "取消关注" : "关注"}
                 </button>
                 <button
                   className="ml-4 px-4 py-2 rounded-md text-white 
                       bg-orange-400 hover:bg-orange-500
                   transition duration-300 ease-in-out"
                 >
-                  打赏作者
+                  打赏
                 </button>
               </div>
             )}

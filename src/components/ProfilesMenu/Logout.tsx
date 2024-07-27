@@ -4,12 +4,12 @@ import { useRouter } from "next/navigation";
 import { AiOutlineLogout } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { logout } from "@/app/lib/action";
-import { userInfo } from "../UserContext";
+import { useUserInfo } from "../UserContext";
 
 const LogoutButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { setUser } = userInfo();
+  const { setUser } = useUserInfo();
 
   const handleLogout = useCallback(async () => {
     console.log("handleLogout called");

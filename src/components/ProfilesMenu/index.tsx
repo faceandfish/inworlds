@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { MdOutlineHealthAndSafety } from "react-icons/md";
@@ -12,11 +13,11 @@ import { MdOutlineAnalytics } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa6";
 import Link from "next/link";
 import { User } from "@/app/lib/definitions";
-import { userInfo } from "../UserContext";
+import { useUserInfo } from "../UserContext";
 import LogoutButton from "./Logout";
 
 const ProfilesMenu = () => {
-  const { user } = userInfo();
+  const { user } = useUserInfo();
   console.log("🚀 ~ ProfilesMenu ~ user:", user);
 
   return (

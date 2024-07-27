@@ -5,10 +5,10 @@ import { notFound, useParams } from "next/navigation";
 
 import { User } from "@/app/lib/definitions";
 import PersonPage from "@/components/PersonPage";
-import { userInfo } from "@/components/UserContext";
+import { useUserInfo } from "@/components/UserContext";
 
 const ProfilePage = () => {
-  const { user } = userInfo();
+  const { user } = useUserInfo();
   if (!user) {
     return <div>User not found</div>;
   }
@@ -18,8 +18,7 @@ const ProfilePage = () => {
   // 检查 URL 中的 username 是否匹配用户的 loginAct 或 name
   if (
     typeof username === "string" &&
-    user.loginAct.toLowerCase() !== username.toLowerCase() &&
-    user.name.toLowerCase() !== username.toLowerCase()
+    user.loginAct.toLowerCase() !== username.toLowerCase()
   ) {
     notFound();
   }

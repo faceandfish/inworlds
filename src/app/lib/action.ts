@@ -4,6 +4,8 @@ import {
   UserResponse,
   RegisterCredentials,
   RegisterResponse,
+  UpdateProfileCredentials,
+  UpdateProfileResponse,
 } from "./definitions";
 
 const API_BASE_URL = "http://8.142.44.107:8088/inworlds/api";
@@ -153,3 +155,48 @@ export async function register(
 
   return response.json();
 }
+
+export const updateProfile = async (
+  credentials: UpdateProfileCredentials,
+  token: string
+): Promise<UpdateProfileResponse> => {
+  try {
+    const formData = new FormData();
+
+    // 添加必需的 id 字段
+    formData.append("id", credentials.id.toString());
+
+    // 添加可选字段
+    if (credentials.loginPwd) formData.append("loginPwd", credentials.loginPwd);
+    if (credentials.reLoginPwd)
+      formData.append("reLoginPwd", credentials.reLoginPwd);
+    if (credentials.name) formData.append("name", credentials.name);
+    if (credentials.introduction)
+      formData.append("introduction", credentials.introduction);
+    if (credentials.avatarFile)
+      formData.append("avatarFile", credentials.avatarFile);
+
+    const response = await fetch(`${API_BASE_URL}/user/profile`, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`, // 正确的 token 格式
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data: UpdateProfileResponse = await response.json();
+
+    if (data.code !== 200) {
+      throw new Error(data.msg || "Profile update failed");
+    }
+
+    return data;
+  } catch (error) {
+    console.error("Error updating profile:", error);
+    throw error;
+  }
+};
