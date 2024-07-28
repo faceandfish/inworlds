@@ -7,6 +7,7 @@ import {
   UpdateProfileCredentials,
   UpdateProfileResponse,
 } from "./definitions";
+import { getToken, removeToken, setToken } from "./token";
 
 const API_BASE_URL = "http://8.142.44.107:8088/inworlds/api";
 
@@ -47,6 +48,11 @@ export const login = async (
       throw new Error(data.msg || "Login failed");
     }
 
+    // 保存 token 到 cookie
+    if (data.data && data.data.token) {
+      setToken(data.data.token);
+    }
+
     return data;
   } catch (error) {
     throw error; // 重新抛出错误，让调用者处理
@@ -54,31 +60,34 @@ export const login = async (
 };
 
 export async function getUserInfo(): Promise<UserResponse> {
-  if (typeof window === "undefined") {
-    return { code: 401, msg: "Not authenticated", data: null };
-  }
-
-  const token = localStorage.getItem("token");
-
+  const token = getToken();
   if (!token) {
     return { code: 401, msg: "Not authenticated", data: null };
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/user/principal`, {
-      method: "GET", // 明确指定方法
+    const response = await fetch("/api/userinfo", {
+      method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
-
         "Content-Type": "application/json",
       },
     });
 
     const data = await response.json();
     console.log("🚀 ~ getUserInfo ~ data:", data);
-
-    return { code: 200, msg: "Success", data: data.data };
+    if (data.code === 200) {
+      return data;
+    } else if (data.code === 903) {
+      console.log("Token expired, removing token");
+      removeToken();
+      return { code: 903, msg: "Token expired", data: null };
+    } else {
+      console.error("Unexpected response:", data);
+      return { code: data.code, msg: data.msg, data: null };
+    }
   } catch (error) {
+    console.error("Error fetching user info:", error);
     return { code: 500, msg: "Error fetching user info", data: null };
   }
 }
@@ -87,7 +96,7 @@ export async function logout(): Promise<{ code: number; msg: string }> {
   console.log("Logout function called");
   console.log("All localStorage items:", { ...localStorage });
 
-  const token = localStorage.getItem("token");
+  const token = getToken();
   console.log("🚀 ~ logout ~ token:", token);
 
   if (!token) {
@@ -121,8 +130,7 @@ export async function logout(): Promise<{ code: number; msg: string }> {
     console.log("API result:", result);
 
     if (result.code === 200) {
-      localStorage.removeItem("token");
-      console.log("Logout successful, token removed from localStorage");
+      removeToken();
     } else {
       console.warn(
         "Logout API returned non-200 code:",

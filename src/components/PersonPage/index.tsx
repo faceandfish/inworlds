@@ -3,14 +3,14 @@ import { useState } from "react";
 import UserAvatar from "../UserAvatar";
 import Clip from "../Clip";
 import Link from "next/link";
-import { useUserInfo } from "../UserContext";
 import { User } from "@/app/lib/definitions";
+import UserInfo from "../UserInfo";
 
 function PersonPage({ user }: { user: User }) {
   const [isSubscribed, setIsSubscribed] = useState(false);
 
   // 获取当前用户信息
-  const { user: currentUser } = useUserInfo();
+  const { user: currentUser } = UserInfo();
 
   // 比较当前用户ID和页面显示的用户ID
   const isCurrentUser = currentUser?.id === user.id;

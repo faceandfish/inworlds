@@ -3,7 +3,7 @@ import Image from "next/image";
 import { User } from "@/app/lib/definitions";
 
 interface UserAvatarProps {
-  user: User;
+  user: User | null;
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   className?: string;
 }
@@ -13,6 +13,9 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   onClick,
   className = "",
 }) => {
+  if (!user || !user.loginAct) {
+    return <div className="h-10 w-10 rounded-full bg-slate-200"></div>; // 或者返回一个默认头像
+  }
   // 基于字符串生成哈希值
   const hashCode = () => {
     const str = user.loginAct;

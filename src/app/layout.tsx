@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { UserProvider } from "@/components/UserContext";
 import { getUserInfo } from "./lib/action";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -16,12 +15,14 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getUserInfo();
-
+  const userInfoResponse = await getUserInfo();
   return (
     <html lang="en">
       <body className={inter.className}>
-        <UserProvider initialUser={user}>{children}</UserProvider>
+        {userInfoResponse.code === 200 && (
+          <div>{JSON.stringify(userInfoResponse.data)}</div>
+        )}
+        {children}
       </body>
     </html>
   );

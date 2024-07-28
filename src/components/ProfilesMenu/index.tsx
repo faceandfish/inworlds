@@ -13,11 +13,11 @@ import { MdOutlineAnalytics } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa6";
 import Link from "next/link";
 import { User } from "@/app/lib/definitions";
-import { useUserInfo } from "../UserContext";
 import LogoutButton from "./Logout";
+import UserInfo from "../UserInfo";
 
 const ProfilesMenu = () => {
-  const { user } = useUserInfo();
+  const { user } = UserInfo();
   console.log("🚀 ~ ProfilesMenu ~ user:", user);
 
   return (

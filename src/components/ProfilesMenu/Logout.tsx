@@ -4,12 +4,13 @@ import { useRouter } from "next/navigation";
 import { AiOutlineLogout } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { logout } from "@/app/lib/action";
-import { useUserInfo } from "../UserContext";
+import UserInfo from "../UserInfo";
+import { removeToken } from "@/app/lib/token";
 
 const LogoutButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { setUser } = useUserInfo();
+  const { user, refetch } = UserInfo(); // 使用你的 UserInfo 函数
 
   const handleLogout = useCallback(async () => {
     console.log("handleLogout called");
@@ -21,26 +22,20 @@ const LogoutButton = () => {
 
     setIsLoading(true);
     try {
-      const result = await logout();
+      const result = await logout(); // 调用后端的登出 API
       console.log("登出结果:", result.msg);
-
-      // 清除用户状态
-      setUser(null);
-
-      // 清除localStorage中的token（如果有的话）
-      localStorage.removeItem("token");
+      // 重新获取用户信息，这应该会将用户状态设置为 null
+      await refetch();
 
       // 重定向到首页或登录页
-      //await router.push("/");
-
-      // 强制刷新页面以确保所有状态都被重置
-      window.location.reload();
+      router.push("/login");
     } catch (error) {
       console.error("登出过程中发生错误:", error);
+      alert("登出失败，请稍后重试");
     } finally {
       setIsLoading(false);
     }
-  }, [router, setUser]);
+  }, [router, refetch]);
 
   return (
     <button

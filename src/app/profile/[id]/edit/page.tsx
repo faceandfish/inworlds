@@ -4,14 +4,14 @@ import { EditProfileForm } from "@/components/PersonPage/EditProfileForm";
 import { User } from "@/app/lib/definitions";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUserInfo } from "@/components/UserContext";
+import UserInfo from "@/components/UserInfo";
 
 export default function EditProfilePage() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const { user } = useUserInfo();
+    const { user } = UserInfo();
     if (user) {
       setCurrentUser(user);
     } else {

@@ -1,14 +1,11 @@
 "use client";
 import React from "react";
-
 import { notFound, useParams } from "next/navigation";
-
-import { User } from "@/app/lib/definitions";
 import PersonPage from "@/components/PersonPage";
-import { useUserInfo } from "@/components/UserContext";
+import UserInfo from "@/components/UserInfo";
 
 const ProfilePage = () => {
-  const { user } = useUserInfo();
+  const { user } = UserInfo();
   if (!user) {
     return <div>User not found</div>;
   }
