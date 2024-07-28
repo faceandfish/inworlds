@@ -11,6 +11,8 @@ import { getToken, removeToken, setToken } from "./token";
 
 const API_BASE_URL = "http://8.142.44.107:8088/inworlds/api";
 
+let token: string | null = null;
+
 export const login = async (
   credentials: LoginCredentials
 ): Promise<LoginResponse> => {
@@ -50,7 +52,8 @@ export const login = async (
 
     // 保存 token 到 cookie
     if (data.data && data.data.token) {
-      setToken(data.data.token);
+      token = data.data.token;
+      console.log("🚀 ~ token:", token);
     }
 
     return data;
@@ -60,13 +63,14 @@ export const login = async (
 };
 
 export async function getUserInfo(): Promise<UserResponse> {
-  const token = getToken();
+  console.log(token);
+
   if (!token) {
     return { code: 401, msg: "Not authenticated", data: null };
   }
 
   try {
-    const response = await fetch("/api/userinfo", {
+    const response = await fetch(`${API_BASE_URL}/user/principal`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -76,12 +80,9 @@ export async function getUserInfo(): Promise<UserResponse> {
 
     const data = await response.json();
     console.log("🚀 ~ getUserInfo ~ data:", data);
+
     if (data.code === 200) {
       return data;
-    } else if (data.code === 903) {
-      console.log("Token expired, removing token");
-      removeToken();
-      return { code: 903, msg: "Token expired", data: null };
     } else {
       console.error("Unexpected response:", data);
       return { code: data.code, msg: data.msg, data: null };

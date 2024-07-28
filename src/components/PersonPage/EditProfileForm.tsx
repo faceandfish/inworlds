@@ -5,12 +5,13 @@ import { useRouter } from "next/navigation";
 
 import { UpdateProfileCredentials, User } from "@/app/lib/definitions";
 import { updateProfile } from "@/app/lib/action";
+import useUserInfo from "../UserInfo";
 
-import UserInfo from "../UserInfo";
+
 
 export function EditProfileForm({ user }: { user: User }) {
   const router = useRouter();
-  const { user: currentUser } = UserInfo();
+  const { user: currentUser } = useUserInfo();
   const [formData, setFormData] = useState<UpdateProfileCredentials>({
     id: user.id, // 确保 id 是数字类型
     name: user.name || "",

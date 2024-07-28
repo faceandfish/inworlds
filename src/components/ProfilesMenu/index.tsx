@@ -14,10 +14,10 @@ import { FaChevronRight } from "react-icons/fa6";
 import Link from "next/link";
 import { User } from "@/app/lib/definitions";
 import LogoutButton from "./Logout";
-import UserInfo from "../UserInfo";
+import { useUserInfo } from "../UserInfo";
 
 const ProfilesMenu = () => {
-  const { user } = UserInfo();
+  const { user } = useUserInfo();
   console.log("🚀 ~ ProfilesMenu ~ user:", user);
 
   return (

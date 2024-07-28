@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { getUserInfo } from "./lib/action";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -15,15 +14,9 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const userInfoResponse = await getUserInfo();
   return (
     <html lang="en">
-      <body className={inter.className}>
-        {userInfoResponse.code === 200 && (
-          <div>{JSON.stringify(userInfoResponse.data)}</div>
-        )}
-        {children}
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   );
 }

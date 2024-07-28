@@ -4,10 +4,10 @@ import Logo from "./Logo";
 import SearchBar from "./SearchBar";
 import AuthButtons from "./AuthButtons";
 import UserMenu from "./UserMenu";
-import UserInfo from "../UserInfo";
+import { useUserInfo } from "../UserInfo";
 
 const Navbar: React.FC = () => {
-  const { user } = UserInfo();
+  const { user } = useUserInfo();
   console.log("🚀 ~ navbar:", user);
 
   return (

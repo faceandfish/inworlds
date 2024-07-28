@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 import { AiOutlineLogout } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { logout } from "@/app/lib/action";
-import UserInfo from "../UserInfo";
+import UserInfo, { useUserInfo } from "../UserInfo";
 import { removeToken } from "@/app/lib/token";
 
 const LogoutButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user, refetch } = UserInfo(); // 使用你的 UserInfo 函数
+  const { user, refetch } = useUserInfo(); // 使用你的 UserInfo 函数
 
   const handleLogout = useCallback(async () => {
     console.log("handleLogout called");

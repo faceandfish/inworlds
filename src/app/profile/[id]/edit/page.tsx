@@ -1,33 +1,20 @@
-"use client";
-
 import { EditProfileForm } from "@/components/PersonPage/EditProfileForm";
 import { User } from "@/app/lib/definitions";
-import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import UserInfo from "@/components/UserInfo";
+import { getUserInfo } from "@/app/lib/action";
 
-export default function EditProfilePage() {
+export default async function EditProfilePage() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const { data } = await getUserInfo();
 
-  useEffect(() => {
-    const { user } = UserInfo();
-    if (user) {
-      setCurrentUser(user);
-    } else {
-      // 如果没有用户信息，重定向到登录页面
-      router.push("/login");
-    }
-  }, [router]);
-
-  if (!currentUser) {
-    return <div>加载中...</div>;
+  if (!data) {
+    return router.push("/login");
   }
 
   return (
     <div className="max-w-2xl mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
       <h1 className="text-2xl font-bold mb-6 text-gray-800">编辑个人资料</h1>
-      <EditProfileForm user={currentUser} />
+      <EditProfileForm user={data} />
     </div>
   );
 }

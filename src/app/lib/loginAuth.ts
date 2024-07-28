@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login, getUserInfo } from "../lib/action";
-import { LoginCredentials, User } from "../lib/definitions";
+import { LoginCredentials, User, UserResponse } from "../lib/definitions";
+import { setToken } from "./token";
 
 export function useAuth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,11 +16,13 @@ export function useAuth() {
     try {
       const loginResponse = await login(credentials);
       if (loginResponse.code === 200) {
-        localStorage.setItem("token", loginResponse.data);
-        const userResponse = await getUserInfo();
-        if (userResponse.code === 200) {
-          // Assuming you have a way to set the user globally
-          // setUser(userResponse.data);
+        setToken(loginResponse.data);
+
+        const userResponse = await fetch("/api/userinfo");
+        const json = (await userResponse.json()) as UserResponse;
+        console.log("🚀 ~ handleLogin ~ json:", json);
+
+        if (json.code === 200) {
           router.push("/");
         } else {
           throw new Error("Failed to fetch user info");
