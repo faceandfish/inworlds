@@ -17,8 +17,12 @@ export function useAuth() {
       const loginResponse = await login(credentials);
       if (loginResponse.code === 200) {
         setToken(loginResponse.data);
+        console.log("loginResponse.data:", loginResponse.data);
 
-        const userResponse = await fetch("/api/userinfo");
+        const userResponse = await fetch("/api/userinfo", {
+          headers: { Authorization: `Bearer ${loginResponse.data}` },
+        });
+
         const json = (await userResponse.json()) as UserResponse;
         console.log("🚀 ~ handleLogin ~ json:", json);
 
@@ -30,6 +34,10 @@ export function useAuth() {
       } else {
         throw new Error(loginResponse.msg || "Login failed");
       }
+      console.log("🚀 ~ handleLogin ~ loginResponse:", loginResponse);
+      console.log("🚀 ~ handleLogin ~ loginResponse:", loginResponse);
+      console.log("🚀 ~ handleLogin ~ loginResponse.data:", loginResponse.data);
+      console.log("🚀 ~ handleLogin ~ loginResponse.data:", loginResponse.data);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "An unexpected error occurred"

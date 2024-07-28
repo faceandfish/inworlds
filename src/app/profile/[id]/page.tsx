@@ -1,7 +1,7 @@
 import React from "react";
 import { notFound, useParams } from "next/navigation";
 import PersonPage from "@/components/PersonPage";
-import UserInfo from "@/components/UserInfo";
+import UserInfo from "@/components/useUserInfo";
 import { getUserInfo } from "@/app/lib/action";
 
 const ProfilePage = async () => {

@@ -13,7 +13,9 @@ export function useUserInfo() {
     try {
       setLoading(true);
       setError(null);
-      const response: Response = await fetch("/api/userinfo");
+      const response: Response = await fetch("/api/userinfo", {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+      });
       const json = (await response.json()) as UserResponse;
       if (json.code === 200) {
         setUser(json.data);

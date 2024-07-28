@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { AiOutlineLogout } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { logout } from "@/app/lib/action";
-import UserInfo, { useUserInfo } from "../UserInfo";
+import UserInfo, { useUserInfo } from "../useUserInfo";
 import { removeToken } from "@/app/lib/token";
 
 const LogoutButton = () => {

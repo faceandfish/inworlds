@@ -14,7 +14,7 @@ import { FaChevronRight } from "react-icons/fa6";
 import Link from "next/link";
 import { User } from "@/app/lib/definitions";
 import LogoutButton from "./Logout";
-import { useUserInfo } from "../UserInfo";
+import { useUserInfo } from "../useUserInfo";
 
 const ProfilesMenu = () => {
   const { user } = useUserInfo();

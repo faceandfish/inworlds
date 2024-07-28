@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { UpdateProfileCredentials, User } from "@/app/lib/definitions";
 import { updateProfile } from "@/app/lib/action";
-import useUserInfo from "../UserInfo";
-
-
+import useUserInfo from "../useUserInfo";
 
 export function EditProfileForm({ user }: { user: User }) {
   const router = useRouter();

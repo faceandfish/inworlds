@@ -50,23 +50,21 @@ export const login = async (
       throw new Error(data.msg || "Login failed");
     }
 
-    // 保存 token 到 cookie
-    if (data.data && data.data.token) {
-      token = data.data.token;
-      console.log("🚀 ~ token:", token);
-    }
-
     return data;
   } catch (error) {
     throw error; // 重新抛出错误，让调用者处理
   }
 };
 
-export async function getUserInfo(): Promise<UserResponse> {
-  console.log(token);
+let originToken: string = "";
 
+export async function getUserInfo(
+  token: string = originToken
+): Promise<UserResponse> {
   if (!token) {
     return { code: 401, msg: "Not authenticated", data: null };
+  } else {
+    originToken = token;
   }
 
   try {
@@ -132,6 +130,7 @@ export async function logout(): Promise<{ code: number; msg: string }> {
 
     if (result.code === 200) {
       removeToken();
+      originToken = "";
     } else {
       console.warn(
         "Logout API returned non-200 code:",

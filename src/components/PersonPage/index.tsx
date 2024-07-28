@@ -4,7 +4,7 @@ import UserAvatar from "../UserAvatar";
 import Clip from "../Clip";
 import Link from "next/link";
 import { User } from "@/app/lib/definitions";
-import { useUserInfo } from "../UserInfo";
+import { useUserInfo } from "../useUserInfo";
 
 function PersonPage({ user }: { user: User }) {
   const [isSubscribed, setIsSubscribed] = useState(false);

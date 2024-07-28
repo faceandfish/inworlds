@@ -4,7 +4,7 @@ import Logo from "./Logo";
 import SearchBar from "./SearchBar";
 import AuthButtons from "./AuthButtons";
 import UserMenu from "./UserMenu";
-import { useUserInfo } from "../UserInfo";
+import { useUserInfo } from "../useUserInfo";
 
 const Navbar: React.FC = () => {
   const { user } = useUserInfo();
