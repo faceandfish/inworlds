@@ -3,16 +3,19 @@ import { useState } from "react";
 import UserAvatar from "../UserAvatar";
 import Clip from "../Clip";
 import Link from "next/link";
-import { User } from "@/app/lib/definitions";
+
 import { useUserInfo } from "../useUserInfo";
 
-function PersonPage({ user }: { user: User }) {
+function PersonPage() {
+  const { user } = useUserInfo();
+  const currentUser = user;
   const [isSubscribed, setIsSubscribed] = useState(false);
 
-  // 获取当前用户信息
-  const { user: currentUser } = useUserInfo();
-
   // 比较当前用户ID和页面显示的用户ID
+  if (!user) {
+    return <div>Loading...</div>;
+  }
+
   const isCurrentUser = currentUser?.id === user.id;
 
   const handleSubscribe = () => {
@@ -71,7 +74,7 @@ function PersonPage({ user }: { user: User }) {
 
             {isCurrentUser ? (
               <div>
-                <Link href={`/profile/${user.id}/edit`}>
+                <Link href={`/profile/${user.id}/setting`}>
                   <button className="ml-4 px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600 transition duration-300 ease-in-out">
                     修改资料
                   </button>

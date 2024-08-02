@@ -1,10 +1,10 @@
-export interface User {
+export interface UserInfo {
   // 基本信息
   id: number;
   name?: string; //昵称 最好是修改成 displayName
   authorname?: string; //作者名
   loginAct: string; // 用户名 最好是修改成 userName
-  avatarFile: string; //头像  最好是改成 avatarUrl
+  avatarFile?: string; //头像  最好是改成 avatarUrl
   introduction?: string; //简介
   email: string; //邮箱
   createdAt: string; //注册时间
@@ -58,6 +58,13 @@ export interface User {
   };
 }
 
+export interface Chapter {
+  id: number;
+  number: string; // 例如: "第一章", "第二章" 等
+  title: string;
+  content?: string; // 章节内容，可选
+}
+
 //一本书的内容
 export interface BookInfo {
   id: number;
@@ -79,6 +86,34 @@ export interface BookInfo {
   onSaveDraft: () => void; //保存到草稿箱
   onPublish: () => void; //公开发布
   updateSectionContent: (id: number, content: string) => void; // 修改内容
+  status: boolean; // 书籍状态，是否完结
+  latestChapterNumber: number; //最近章节
+  latestChapterTitle: string; //最新章节名
+  chapters: Chapter[]; // 章节列表
+}
+
+//留言
+export interface Comment {
+  id: number;
+  content: string; //留言内容
+  username: string; // 用户名
+  createdAt: string; //留言时间
+  likes: number; // 喜欢
+  bookId: number;
+}
+
+export interface MonthlyIncome {
+  month: string;
+  income: number;
+}
+
+//收入
+export interface IncomeData {
+  totalIncome: number;
+  adIncome: number;
+  donationIncome: number;
+  copyrightIncome: number;
+  monthlyIncome: MonthlyIncome[];
 }
 
 export interface TotalPages {
@@ -97,7 +132,7 @@ export interface ApiResponse<T> {
 }
 
 export type UserResponse =
-  | { code: 200; msg: string; data: User }
+  | { code: 200; msg: string; data: UserInfo }
   | { code: 401; msg: string; data: null }
   | { code: 500; msg: string; data: null };
 
@@ -123,7 +158,7 @@ export interface UpdateProfileCredentials {
   loginPwd?: string;
   reLoginPwd?: string;
   name?: string;
-  avatarFile?: File;
+  avatarFile?: string;
   introduction?: string;
 }
 

@@ -1,11 +1,11 @@
 "use client";
 import { getUserInfo } from "@/app/lib/action";
-import { User, UserResponse } from "@/app/lib/definitions";
+import { UserInfo, UserResponse } from "@/app/lib/definitions";
 
 import { useState, useEffect, useCallback } from "react";
 
 export function useUserInfo() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

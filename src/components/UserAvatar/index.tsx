@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import Image from "next/image";
-import { User } from "@/app/lib/definitions";
+import { UserInfo } from "@/app/lib/definitions";
 
 interface UserAvatarProps {
-  user: User | null;
+  user: UserInfo | null;
   onClick?: (event: React.MouseEvent<HTMLElement>) => void;
   className?: string;
 }
@@ -16,6 +16,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
   if (!user || !user.loginAct) {
     return <div className="h-10 w-10 rounded-full bg-slate-200"></div>; // 或者返回一个默认头像
   }
+
   // 基于字符串生成哈希值
   const hashCode = () => {
     const str = user.loginAct;
@@ -53,12 +54,21 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
       className={`relative w-10 h-10 rounded-full overflow-hidden ${className}`}
       onClick={onClick}
     >
-      <div
-        style={{ backgroundColor, color: textColor }}
-        className={`w-full h-full flex items-center justify-center  ${textSizeClass}  font-bold cursor-pointer`}
-      >
-        {initial}
-      </div>
+      {user.avatarFile ? (
+        <Image
+          src={user.avatarFile}
+          alt={`${user.loginAct}'s avatar`}
+          layout="fill"
+          objectFit="cover"
+        />
+      ) : (
+        <div
+          style={{ backgroundColor, color: textColor }}
+          className={`w-full h-full flex items-center justify-center  ${textSizeClass}  font-bold cursor-pointer`}
+        >
+          {initial}
+        </div>
+      )}
     </div>
   );
 };

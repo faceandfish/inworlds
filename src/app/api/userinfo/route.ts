@@ -7,7 +7,7 @@ import { getUserInfo } from "@/app/lib/action";
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse<UserResponse>> {
-  const token = request.headers.get("Authorization")?.replace("Bearer", "");
+  const token = request.headers.get("Authorization")?.replace("Bearer ", "");
   console.log("🚀 ~ apitoken:", token);
 
   const { data } = await getUserInfo(token);

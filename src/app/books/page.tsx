@@ -1,105 +1,84 @@
+"use client";
+import {
+  BookHeader,
+  BookDescription,
+  ChapterList,
+  ContentTabs,
+} from "@/components/Book";
 import Navbar from "@/components/Navbar";
 
-import React from "react";
+import { mockBooks, mockUser, mockComments } from "@/mockData";
 
-function Books() {
+import React, { useState } from "react";
+import { BookInfo, Comment, UserInfo } from "../lib/definitions";
+import CommentItem from "@/components/CommentItem";
+
+interface BookPageProps {
+  book: BookInfo;
+  author: UserInfo;
+  comments: Comment[];
+}
+
+const page: React.FC<BookPageProps> = (
+  {
+    // 注释掉实际的 props
+    // book,
+    // author,
+    // comments,
+  }
+) => {
+  const [activeTab, setActiveTab] = useState<"comments" | "chapters">(
+    "comments"
+  );
+
+  const handleLike = (id: number) => {
+    console.log(`Like comment ${id}`);
+    // 实现点赞逻辑
+  };
+
+  const handleReply = (id: number) => {
+    console.log(`Reply to comment ${id}`);
+    // 实现回复逻辑
+  };
+  // 使用假数据
+  const book = mockBooks[0];
+  const author = mockUser;
+  const comments = mockComments;
+  const chapters = [
+    { number: "第一章", title: "椒鹽炸杏鮑菇" },
+    { number: "第二章", title: "美味的冒險" },
+    { number: "第三章", title: "神秘的食譜" },
+    { number: "第四章", title: "廚房的魔法" },
+  ];
+
   return (
-    <div>
+    <>
       <Navbar />
-
-      <div className="w-5/6 mx-auto ">
-        <div className="flex justify-between mt-10 w-full h-56 ">
-          <div className="flex gap-10">
-            <div className="w-44 h-56 bg-orange-400 rounded-xl "></div>
-            <div className="flex flex-col justify-around ">
-              <h2>書名</h2>
-              <p>連載中...</p>
-              <p>最新章節：第八十章 章節名字 2024年12月12日</p>
-              <div>
-                <button className="hover:bg-orange-500  bg-orange-400 px-5 py-2 rounded text-white mr-10">
-                  立即閱讀
-                </button>
-                <button className="hover:text-orange-400">訂閱本書</button>
+      <div className="w-5/6 mx-auto">
+        <BookHeader book={book} author={author} />
+        <BookDescription book={book} />
+        <div className="mt-10">
+          <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+          <div className="">
+            {activeTab === "comments" && (
+              <div className="divide-y">
+                {comments.map((comment) => (
+                  <CommentItem
+                    key={comment.id}
+                    {...comment}
+                    onLike={handleLike}
+                    onReply={handleReply}
+                    isAdminView={false}
+                  />
+                ))}
               </div>
-            </div>
-          </div>
-          <div className=" w-80 border-l border-gray-100  flex flex-col items-center justify-around">
-            <div className="w-10 h-10 rounded-full bg-slate-400"></div>
-            <p>作者暱稱</p>
-            <p>作者簡介...</p>
-            <button className="hover:bg-orange-500  bg-orange-400 px-5 py-2 rounded text-white ">
-              訂閱
-            </button>
-          </div>
-        </div>
-        {/* 作品簡介 */}
-        <div className="w-full h-32  my-16">
-          <p className="text-xl pb-2 border-b border-gray-100">作品簡介</p>
-          <p className=" font-light mt-2 px-10">這裡作品簡介...</p>
-        </div>
-        {/* 章節目錄 */}
-        <div className="w-full h-48 ">
-          <p className="text-xl pb-2 border-b border-gray-100">章節目錄</p>
-          <div className="font-light my-2 px-10">
-            <div className=" flex my-5 justify-between ">
-              <div className="flex gap-5">
-                <p>第一章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第二章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第三章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第四章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-            </div>
-            <div className=" flex my-5 justify-between ">
-              <div className="flex gap-5">
-                <p>第一章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第二章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第三章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第四章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-            </div>
-            <div className=" flex my-5 justify-between ">
-              <div className="flex gap-5">
-                <p>第一章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第二章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第三章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-              <div className="flex gap-5">
-                <p>第四章</p>
-                <p>椒鹽炸杏鮑菇</p>
-              </div>
-            </div>
+            )}
+            {activeTab === "chapters" && <ChapterList book={book} />}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
-}
+};
 
-export default Books;
+export default page;

@@ -12,40 +12,43 @@ import { MdOutlineErrorOutline } from "react-icons/md";
 import { MdOutlineAnalytics } from "react-icons/md";
 import { FaChevronRight } from "react-icons/fa6";
 import Link from "next/link";
-import { User } from "@/app/lib/definitions";
 import LogoutButton from "./Logout";
 import { useUserInfo } from "../useUserInfo";
 
 const ProfilesMenu = () => {
   const { user } = useUserInfo();
   console.log("🚀 ~ ProfilesMenu ~ user:", user);
+  if (!user) {
+    return;
+  }
 
   return (
     <div className="absolute top-12 right-10 z-10">
       <ul className=" bg-white shadow w-72  py-2 rounded-md ">
         <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
-          {user && (
-            <Link href={`/profile/${user.id}`} className="flex items-center">
-              <HiOutlineHome className="text-2xl mr-5" />
-              <div className=" text-base mr-32">我的主頁</div>
-              <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
-            </Link>
-          )}
-        </li>
-        <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
-          <Link href="#" className="flex items-center">
-            <CgProfile className="text-2xl mr-5" />
-            <div className=" text-base mr-32">個人資料</div>
+          <Link href={`/profile/${user.id}`} className="flex items-center">
+            <HiOutlineHome className="text-2xl mr-5" />
+            <div className=" text-base mr-32">我的主頁</div>
             <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
           </Link>
         </li>
         <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
+          <Link
+            href={`/profile/${user.id}/setting`}
+            className="flex items-center"
+          >
+            <CgProfile className="text-2xl mr-5" />
+            <div className=" text-base mr-32">账号修改</div>
+            <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
+          </Link>
+        </li>
+        {/* <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
           <Link href="#" className="flex items-center">
             <MdOutlineHealthAndSafety className="text-2xl mr-5" />
             <div className=" text-base mr-32">安全設置</div>
             <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />
           </Link>
-        </li>
+        </li> */}
         <li className="group/item  border-b border-gray-100 px-4 py-2 hover:bg-gray-100 ">
           <Link href="#" className="flex items-center">
             <RiMoneyDollarCircleLine className="text-2xl mr-5" />
@@ -54,7 +57,7 @@ const ProfilesMenu = () => {
           </Link>
         </li>
         <li className="group/item  border-b border-gray-100 px-4 py-2  hover:bg-gray-100 ">
-          <Link href="./studio" className="flex items-center">
+          <Link href={`/studio`} className="flex items-center">
             <MdOutlineAnalytics className="text-2xl mr-5 " />
             <div className=" text-base mr-28">作家工作室</div>
             <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000  ease-in-out" />

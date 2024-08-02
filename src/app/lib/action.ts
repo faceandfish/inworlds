@@ -68,13 +68,16 @@ export async function getUserInfo(
   }
 
   try {
-    const response = await fetch(`${API_BASE_URL}/user/principal`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      "http://8.142.44.107:8088/inworlds/api/user/principal",
+      {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
     const data = await response.json();
     console.log("🚀 ~ getUserInfo ~ data:", data);
