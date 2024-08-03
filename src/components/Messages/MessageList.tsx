@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { Message, SystemNotification, UserInfo } from "@/app/lib/definitions";
 import { BiBell } from "react-icons/bi";
 
@@ -15,6 +15,18 @@ const MessageList: React.FC<MessageListProps> = ({
   systemNotifications,
   isViewingSystemMessages,
 }) => {
+  // 新增: 创建 ref 和 scrollToBottom 函数
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  // 新增: 使用 useEffect 在消息更新时滚动到底部
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, systemNotifications]);
+
   return (
     <div className="flex-grow overflow-y-auto h-80">
       {isViewingSystemMessages ? (
@@ -41,6 +53,7 @@ const MessageList: React.FC<MessageListProps> = ({
               </div>
             </div>
           ))}
+          <div ref={messagesEndRef} /> {/* 新增: 添加引用元素 */}
         </div>
       ) : (
         // 普通消息列表
@@ -72,6 +85,7 @@ const MessageList: React.FC<MessageListProps> = ({
               </div>
             );
           })}
+          <div ref={messagesEndRef} /> {/* 新增: 添加引用元素 */}
         </div>
       )}
     </div>
