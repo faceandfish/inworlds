@@ -5,10 +5,10 @@ import Link from "next/link";
 import Image from "next/image";
 import ProfilesMenu from "../ProfilesMenu";
 import { useEffect, useRef, useState } from "react";
-import { User } from "@/app/lib/definitions";
+import { UserInfo } from "@/app/lib/definitions";
 import UserAvatar from "../UserAvatar";
 
-const UserMenu = ({ user }: { user: User }) => {
+const UserMenu = ({ user }: { user: UserInfo }) => {
   const [profileMenu, setProfileMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -37,7 +37,7 @@ const UserMenu = ({ user }: { user: User }) => {
           立即開始創作
         </div>
       </Link>
-      <Link href="/mail" className="group/message">
+      <Link href="/messages" className="group/message">
         <GoBell className="text-3xl" />
         <div className="absolute left-16 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/message:visible group-hover/message:opacity-100 transition-opacity duration-300">
           新消息

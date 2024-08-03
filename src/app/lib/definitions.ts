@@ -11,9 +11,9 @@ export interface UserInfo {
 
   // 计数
   articlesCount?: number; //文章数量
-  followersCount: number; //粉丝数量
-  followingCount: number; //关注人数
-  favoritesCount: number; //收藏数量
+  followersCount?: number; //粉丝数量
+  followingCount?: number; //关注人数
+  favoritesCount?: number; //收藏数量
 
   // 文章
   articles?: {
@@ -28,7 +28,7 @@ export interface UserInfo {
   };
 
   // 粉丝
-  followers: {
+  followers?: {
     items: Array<{
       id: string;
       loginAct: string;
@@ -38,7 +38,7 @@ export interface UserInfo {
   };
 
   // 关注
-  following: {
+  following?: {
     items: Array<{
       id: string;
       loginAct: string;
@@ -48,7 +48,7 @@ export interface UserInfo {
   };
 
   // 收藏
-  favorites: {
+  favorites?: {
     items: Array<{
       id: string;
       coverImage: File | null; //封面
@@ -167,3 +167,52 @@ export interface UpdateProfileResponse {
   msg: string;
   data: null;
 }
+
+// messages用户聊天所需接口
+
+//系统消息
+export interface SystemNotification {
+  id: number;
+  content: string;
+  createdAt: string;
+  isRead: boolean;
+}
+
+//Message单条消息的结构
+export interface Message {
+  id: number;
+  senderId: number; // 发送人id
+  receiverId: number; // 收件人id
+  content: string; // 信息内容
+  createdAt: string; // 信息创建时间
+}
+
+//Conversation 接口定义了对话的结构，包括参与者和最后一条消息。
+export interface Conversation {
+  id: number;
+  participants: number[]; // 参与对话的用户 ID 数组
+  lastMessage: Message;
+  unreadCount: number;
+  systemNotifications?: SystemNotification[];
+}
+
+//MessagingState 接口可用于管理消息页面的整体状态。
+export interface MessagingState {
+  conversations: Conversation[];
+  selectedConversation: Conversation | null;
+  messages: Message[];
+  systemNotifications: SystemNotification[]; // 新增：系统通知数组
+}
+
+//SendMessageRequest 和相关的响应接口定义了发送消息的API请求和响应结构。
+export interface SendMessageRequest {
+  senderId: number;
+  receiverId: number;
+  content: string;
+}
+
+export interface SendMessageResponse extends ApiResponse<Message> {}
+
+export interface GetConversationsResponse extends ApiResponse<Conversation[]> {}
+
+export interface GetMessagesResponse extends ApiResponse<Message[]> {}

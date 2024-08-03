@@ -1,6 +1,12 @@
 // src/mocks/mockData.ts
 
-import { UserInfo, BookInfo, Comment, IncomeData } from "@/app/lib/definitions";
+import {
+  UserInfo,
+  BookInfo,
+  Comment,
+  IncomeData,
+  SystemNotification,
+} from "@/app/lib/definitions";
 
 export const mockUser: UserInfo = {
   id: 1,
@@ -156,4 +162,140 @@ export const mockIncomeData: IncomeData = {
     { month: "2023-05", income: 10000 },
     { month: "2023-06", income: 10500 },
   ],
+};
+
+// 在文件末尾添加以下内容:
+
+import { Conversation, Message } from "@/app/lib/definitions";
+
+// 添加更多模拟用户
+export const mockUsers: UserInfo[] = [
+  mockUser,
+  {
+    id: 2,
+    name: "李四",
+    authorname: "科幻大师",
+    loginAct: "lisi",
+    introduction: "专注于科幻小说创作",
+    email: "lisi@example.com",
+    createdAt: "2023-02-01T00:00:00Z",
+    articlesCount: 8,
+    followersCount: 800,
+    followingCount: 40,
+    favoritesCount: 25,
+  },
+  {
+    id: 3,
+    name: "王五",
+    authorname: "悬疑之王",
+    loginAct: "wangwu",
+    introduction: "善于创作悬疑推理小说",
+    email: "wangwu@example.com",
+    createdAt: "2023-03-01T00:00:00Z",
+    articlesCount: 12,
+    followersCount: 1200,
+    followingCount: 60,
+    favoritesCount: 35,
+  },
+];
+
+// 添加系统通知的模拟数据
+export const mockSystemNotifications: SystemNotification[] = [
+  {
+    id: 1,
+    content: "欢迎使用我们的新消息系统！如有任何问题，请随时联系客服。",
+    createdAt: "2024-08-01T10:00:00Z",
+    isRead: false,
+  },
+  {
+    id: 2,
+    content: "系统将于下周进行维护升级，届时可能会有短暂服务中断。",
+    createdAt: "2024-08-02T14:30:00Z",
+    isRead: false,
+  },
+];
+
+// 添加模拟会话数据
+export const mockConversations: Conversation[] = [
+  {
+    id: 1,
+    participants: [1, 2],
+    lastMessage: {
+      id: 1,
+      senderId: 2,
+      receiverId: 1,
+      content: "嗨，张三！我看了你的新书，真的很棒！",
+      createdAt: "2023-08-01T10:00:00Z",
+    },
+    unreadCount: 1,
+    systemNotifications: mockSystemNotifications, // 添加系统通知到对话中
+  },
+  {
+    id: 2,
+    participants: [1, 3],
+    lastMessage: {
+      id: 2,
+      senderId: 1,
+      receiverId: 3,
+      content: "王五，我们下周一开个作者交流会，你有空吗？",
+      createdAt: "2023-08-02T14:30:00Z",
+    },
+    unreadCount: 0,
+  },
+];
+
+// 添加模拟消息数据
+export const mockMessages: Message[] = [
+  {
+    id: 1,
+    senderId: 2,
+    receiverId: 1,
+    content: "嗨，张三！我看了你的新书，真的很棒！",
+    createdAt: "2023-08-01T10:00:00Z",
+  },
+  {
+    id: 2,
+    senderId: 1,
+    receiverId: 2,
+    content: "谢谢李四！我很高兴你喜欢。你最近在写什么新作品吗？",
+    createdAt: "2023-08-01T10:05:00Z",
+  },
+  {
+    id: 3,
+    senderId: 2,
+    receiverId: 1,
+    content: "是的，我正在构思一个新的科幻系列。有机会我们可以讨论一下。",
+    createdAt: "2023-08-01T10:10:00Z",
+  },
+  {
+    id: 4,
+    senderId: 1,
+    receiverId: 2,
+    content: "那太好了！期待与你交流。",
+    createdAt: "2023-08-01T10:15:00Z",
+  },
+  {
+    id: 5,
+    senderId: 1,
+    receiverId: 3,
+    content: "王五，我们下周一开个作者交流会，你有空吗？",
+    createdAt: "2023-08-02T14:30:00Z",
+  },
+  {
+    id: 6,
+    senderId: 3,
+    receiverId: 1,
+    content: "好的，张三。我查看了日程，下周一下午有空。具体几点？",
+    createdAt: "2023-08-02T15:00:00Z",
+  },
+];
+
+// 获取当前用户的函数（这里假设当前用户是张三）
+export const getCurrentUser = (): UserInfo => mockUsers[0];
+// 更新或添加获取模拟数据的函数
+export const getMockConversations = (): Conversation[] => {
+  return mockConversations;
+};
+export const getMockSystemNotifications = (): SystemNotification[] => {
+  return mockSystemNotifications;
 };
