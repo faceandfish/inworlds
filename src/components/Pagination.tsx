@@ -1,10 +1,10 @@
 import React from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { TotalPages } from "@/app/lib/definitions";
+import { PaginatedData } from "@/app/lib/definitions";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 
-const Pagination: React.FC<TotalPages> = ({ totalPages }) => {
+const Pagination: React.FC<PaginatedData> = ({ totalPages }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentPage = Number(searchParams.get("page")) || 1;

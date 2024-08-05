@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 function Category() {
@@ -17,7 +18,7 @@ function Category() {
           最新
         </li>
         <li className="w-28 h-10 hover:text-white hover:bg-orange-400 flex items-center justify-center">
-          作者專區
+          <Link href="/for-authors">作者專區</Link>
         </li>
         <li className="w-28 h-10 hover:text-white hover:bg-orange-400 flex items-center justify-center">
           版權交易

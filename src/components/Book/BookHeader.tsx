@@ -1,9 +1,9 @@
-import { BookInfo, UserInfo } from "@/app/lib/definitions";
+import { BookInfo, CreatorUserInfo } from "@/app/lib/definitions";
 import { AuthorInfo } from "./AuthorInfo";
 
 interface BookHeaderProps {
   book: BookInfo;
-  author: UserInfo;
+  author: CreatorUserInfo;
 }
 
 export const BookHeader: React.FC<BookHeaderProps> = ({ book, author }) => {

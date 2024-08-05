@@ -1,218 +1,252 @@
-export interface UserInfo {
-  // 基本信息
+// 基础用户信息
+interface BaseUserInfo {
   id: number;
-  name?: string; //昵称 最好是修改成 displayName
-  authorname?: string; //作者名
-  loginAct: string; // 用户名 最好是修改成 userName
-  avatarFile?: string; //头像  最好是改成 avatarUrl
-  introduction?: string; //简介
-  email: string; //邮箱
-  createdAt: string; //注册时间
-
-  // 计数
-  articlesCount?: number; //文章数量
-  followersCount?: number; //粉丝数量
-  followingCount?: number; //关注人数
-  favoritesCount?: number; //收藏数量
-
-  // 文章
-  articles?: {
-    items: Array<{
-      id: string;
-      title: string;
-      description: string;
-      createdAt: string; //创建时间
-      // 其他文章相关字段
-    }>;
-    page: number;
-  };
-
-  // 粉丝
-  followers?: {
-    items: Array<{
-      id: string;
-      loginAct: string;
-      avatarFile: string;
-      // 其他需要的粉丝信息
-    }>;
-  };
-
-  // 关注
-  following?: {
-    items: Array<{
-      id: string;
-      loginAct: string;
-      avatarFile: string;
-      // 其他需要的关注用户信息
-    }>;
-  };
-
-  // 收藏
-  favorites?: {
-    items: Array<{
-      id: string;
-      coverImage: File | null; //封面
-      title: string;
-      // 其他收藏相关字段
-    }>;
-  };
+  username: string;
+  displayName?: string;
+  email: string;
+  avatarUrl?: string;
+  introduction?: string;
+  createdAt: string;
 }
 
-export interface Chapter {
-  id: number;
-  number: string; // 例如: "第一章", "第二章" 等
+// 用于创建新用户的接口
+export interface CreateUserRequest {
+  username: string;
+  email: string;
+  password: string;
+  displayName?: string;
+  introduction?: string;
+}
+
+// 用于用户登录的接口
+export interface LoginRequest {
+  username: string;
+  password: string;
+}
+
+// 用于更新用户信息的接口
+export interface UpdateUserRequest {
+  displayName?: string;
+  email?: string;
+  avatarUrl?: string;
+  introduction?: string;
+}
+
+// 用于更改密码的接口
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+// 普通用户信息
+export interface RegularUserInfo extends BaseUserInfo {
+  userType: "regular";
+}
+
+// 创作者用户信息
+export interface CreatorUserInfo extends BaseUserInfo {
+  userType: "creator";
+  authorName?: string;
+  articlesCount: number;
+  followersCount: number;
+  followingCount: number;
+  favoritesCount: number;
+}
+
+// 统一的用户信息类型
+export type UserInfo = RegularUserInfo | CreatorUserInfo;
+
+// 文章信息
+export interface ArticleInfo {
+  id: string;
   title: string;
-  content?: string; // 章节内容，可选
+  description: string;
+  createdAt: string;
+  authorId: number; // 添加作者ID
+  content?: string; // 可选的文章内容
+  category?: string; // 可选的文章分类
+  tags?: string[]; // 可选的文章标签
 }
 
-//一本书的内容
+// 用户关系信息
+export interface UserRelationInfo {
+  id: string;
+  username: string;
+  avatarUrl: string;
+  relationshipType: "follower" | "following";
+}
+
+// 收藏信息
+export interface FavoriteInfo {
+  id: string;
+  coverImageUrl: string | null;
+  title: string;
+  type: "book" | "article"; // 区分收藏的是书籍还是文章
+  creatorId: number; // 创作者ID
+}
+
+// 分页数据
+export interface PaginatedData<T> {
+  items?: T[];
+  page?: number;
+  totalPages?: number;
+  totalItems?: number; // 添加总项目数
+}
+
+// 图片上传请求
+export interface ImageUploadRequest {
+  file: File;
+  type: "avatar" | "bookCover" | "articleImage";
+}
+
+// 图片上传响应
+export interface ImageUploadResponse {
+  url: string;
+  fileId: string; // 可能需要的文件标识符
+}
+
+// 书籍信息
 export interface BookInfo {
   id: number;
-  title: string; //书名
-  description: string; //简介
-  category: //分类
-  | "female-story"
+  title: string;
+  description: string;
+  authorName: string;
+  category:
+    | "female-story"
     | "male-story"
     | "children-story"
     | "literature-story"
     | "biography";
-  ageRating: "under18" | "adult" | "allAges"; //年龄分级
-  coverImage: File | null; //封面
-  content: string; //小说内容
-  authorNote?: string; //作者留言
-  wordCount: number; //字数统计
-  lastSaved: string; //最后保存时间
+  ageRating: "under18" | "adult" | "allAges";
+  coverImageUrl: string | null;
+  authorNote?: string;
+  wordCount: number;
+  lastSaved: string;
   createdAt: string;
-  onSaveDraft: () => void; //保存到草稿箱
-  onPublish: () => void; //公开发布
-  updateSectionContent: (id: number, content: string) => void; // 修改内容
-  status: boolean; // 书籍状态，是否完结
-  latestChapterNumber: number; //最近章节
-  latestChapterTitle: string; //最新章节名
-  chapters: Chapter[]; // 章节列表
+  status: "draft" | "published" | "completed";
+  latestChapterNumber: number;
+  latestChapterTitle: string;
+  authorId: number; // 添加作者ID
+  tags?: string[]; // 可选的标签
+  followersCount: number; //收藏本书的人数
 }
 
-//留言
-export interface Comment {
+// 章节信息
+export interface ChapterInfo {
   id: number;
-  content: string; //留言内容
-  username: string; // 用户名
-  createdAt: string; //留言时间
-  likes: number; // 喜欢
+  number: string;
+  title: string;
+  content?: string;
+  createdAt: string;
+  lastModified: string;
+  wordCount: number;
+}
+
+// 评论信息
+export interface CommentInfo {
+  id: number;
+  content: string;
+  username: string;
+  createdAt: string;
+  likes: number;
   bookId: number;
+  parentCommentId?: number; // 用于回复功能
+  userId: number; // 评论者ID
 }
 
-export interface MonthlyIncome {
-  month: string;
-  income: number;
-}
-
-//收入
+// 收入数据
 export interface IncomeData {
   totalIncome: number;
   adIncome: number;
   donationIncome: number;
   copyrightIncome: number;
-  monthlyIncome: MonthlyIncome[];
+  monthlyIncome: { month: string; income: number }[];
+  currency: string; // 添加货币类型
 }
 
-export interface TotalPages {
-  totalPages: number;
-}
-
-export interface LoginCredentials {
-  loginAct: string;
-  loginPwd: string;
-}
-
+// API 响应接口
 export interface ApiResponse<T> {
   code: number;
   msg: string;
   data: T;
 }
 
-export type UserResponse =
-  | { code: 200; msg: string; data: UserInfo }
-  | { code: 401; msg: string; data: null }
-  | { code: 500; msg: string; data: null };
-
-export interface LoginResponse extends ApiResponse<string> {
-  // data 字段是 JWT token
-  data: string;
+// 登录凭证
+export interface LoginCredentials {
+  username: string;
+  password: string;
 }
 
+// 注册凭证
 export interface RegisterCredentials {
-  loginAct: string;
+  username: string;
   email: string;
-  loginPwd: string;
-  reLoginPwd: string;
+  password: string;
+  confirmPassword: string;
 }
 
-export interface RegisterResponse {
-  code: number;
-  msg: string;
-}
-
+// 更新用户资料凭证
 export interface UpdateProfileCredentials {
   id: number;
-  loginPwd?: string;
-  reLoginPwd?: string;
-  name?: string;
-  avatarFile?: string;
+  password?: string;
+  confirmPassword?: string;
+  displayName?: string;
   introduction?: string;
+  avatarUrl?: string;
 }
 
-export interface UpdateProfileResponse {
-  code: number;
-  msg: string;
-  data: null;
-}
-
-// messages用户聊天所需接口
-
-//系统消息
+// 消息系统相关接口
 export interface SystemNotification {
   id: number;
   content: string;
   createdAt: string;
   isRead: boolean;
+  type: "info" | "warning" | "error"; // 添加通知类型
 }
 
-//Message单条消息的结构
 export interface Message {
   id: number;
-  senderId: number; // 发送人id
-  receiverId: number; // 收件人id
-  content: string; // 信息内容
-  createdAt: string; // 信息创建时间
+  senderId: number;
+  receiverId: number;
+  content: string;
+  createdAt: string;
+  isRead: boolean; // 添加已读状态
 }
 
-//Conversation 接口定义了对话的结构，包括参与者和最后一条消息。
 export interface Conversation {
   id: number;
-  participants: number[]; // 参与对话的用户 ID 数组
+  participants: number[];
   lastMessage: Message;
   unreadCount: number;
   systemNotifications?: SystemNotification[];
+  createdAt: string; // 添加对话创建时间
 }
 
-//MessagingState 接口可用于管理消息页面的整体状态。
 export interface MessagingState {
   conversations: Conversation[];
   selectedConversation: Conversation | null;
   messages: Message[];
-  systemNotifications: SystemNotification[]; // 新增：系统通知数组
+  systemNotifications: SystemNotification[];
 }
 
-//SendMessageRequest 和相关的响应接口定义了发送消息的API请求和响应结构。
 export interface SendMessageRequest {
   senderId: number;
   receiverId: number;
   content: string;
 }
 
-export interface SendMessageResponse extends ApiResponse<Message> {}
+// 搜索请求接口
+export interface SearchRequest {
+  query: string;
+  type: "book" | "article" | "user";
+  filters?: {
+    category?: string;
+    ageRating?: string;
+    dateRange?: { start: string; end: string };
+  };
+  page: number;
+  pageSize: number;
+}
 
-export interface GetConversationsResponse extends ApiResponse<Conversation[]> {}
-
-export interface GetMessagesResponse extends ApiResponse<Message[]> {}
+// 搜索响应接口
+export interface SearchResponse<T> extends ApiResponse<PaginatedData<T>> {}
