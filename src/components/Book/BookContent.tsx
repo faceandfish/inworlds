@@ -40,7 +40,6 @@ export function BookContent({ book, comments, chapters }: BookContentProps) {
                 {...comment}
                 onLike={handleLike}
                 onReply={handleReply}
-                isAdminView={false}
               />
             ))}
           </div>

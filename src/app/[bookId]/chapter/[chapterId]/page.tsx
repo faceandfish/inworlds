@@ -22,10 +22,10 @@ export default function ChapterPage({ params }: ChapterPageProps) {
   console.log("All books:", allBooks);
   console.log("All chapters:", allChapters);
 
-  const book = allBooks.find((b) => b.id.toString() === bookId) as
+  const book = allBooks.find((b) => b.id!.toString() === bookId) as
     | BookInfo
     | undefined;
-  const chapter = allChapters.find((c) => c.id.toString() === chapterId) as
+  const chapter = allChapters.find((c) => c.id!.toString() === chapterId) as
     | ChapterInfo
     | undefined;
 

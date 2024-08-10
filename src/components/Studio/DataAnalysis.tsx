@@ -1,15 +1,18 @@
-import { BookInfo } from "@/app/lib/definitions";
+import { AnalyticsData, BookInfo } from "@/app/lib/definitions";
 import React, { useState, useEffect } from "react";
-
-// 定义分析数据接口
-interface AnalyticsData {
-  views: number;
-  viewsLast24h: number;
-  likes: number;
-  comments: number;
-  totalIncome: number;
-  incomeLast24h: number;
-}
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from "recharts";
+import { Card, CardContent, CardHeader } from "../Card";
 
 // 模拟书籍数据
 const booksData: Partial<BookInfo>[] = [
@@ -18,31 +21,32 @@ const booksData: Partial<BookInfo>[] = [
     title: "书籍1",
     category: "female-story",
     createdAt: "2023-01-15",
-    wordCount: 50000,
+    wordCount: 50000
   },
   {
     id: 2,
     title: "书籍2",
     category: "male-story",
     createdAt: "2023-03-22",
-    wordCount: 75000,
+    wordCount: 75000
   },
   {
     id: 3,
     title: "书籍3",
     category: "literature-story",
     createdAt: "2023-05-10",
-    wordCount: 100000,
-  },
+    wordCount: 100000
+  }
 ];
 
 const generateAnalyticsData = (bookId: number): AnalyticsData => ({
+  bookId: bookId,
   views: Math.floor(Math.random() * 10000),
   viewsLast24h: Math.floor(Math.random() * 1000),
   likes: Math.floor(Math.random() * 1000),
   comments: Math.floor(Math.random() * 500),
   totalIncome: Math.floor(Math.random() * 50000),
-  incomeLast24h: Math.floor(Math.random() * 500),
+  incomeLast24h: Math.floor(Math.random() * 500)
 });
 
 const DataAnalysis: React.FC = () => {

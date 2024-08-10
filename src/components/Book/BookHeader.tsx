@@ -1,5 +1,5 @@
 import { BookInfo, CreatorUserInfo } from "@/app/lib/definitions";
-import { AuthorInfo } from "./AuthorInfo";
+import AuthorInfo from "./AuthorInfo";
 
 interface BookHeaderProps {
   book: BookInfo;
@@ -7,7 +7,13 @@ interface BookHeaderProps {
 }
 
 export const BookHeader: React.FC<BookHeaderProps> = ({ book, author }) => {
-  const status = book.status ? "已完結" : "連載中";
+  const status =
+    book.status === "ongoing"
+      ? "连载中"
+      : book.status === "completed"
+      ? "已完结"
+      : "";
+
   const latestChapter = `第${book.latestChapterNumber}章 ${book.latestChapterTitle}`;
 
   const formatDate = (dateString: string) => {

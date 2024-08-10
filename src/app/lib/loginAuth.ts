@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { login, getUserInfo } from "../lib/action";
-import { LoginCredentials, User, UserResponse } from "../lib/definitions";
+import { LoginRequest, ApiResponse, UserInfo } from "../lib/definitions";
 import { setToken } from "./token";
 
 export function useAuth() {
@@ -9,24 +9,20 @@ export function useAuth() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleLogin = async (credentials: LoginCredentials) => {
+  const handleLogin = async (credentials: LoginRequest) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const loginResponse = await login(credentials);
-      if (loginResponse.code === 200) {
+      if (loginResponse.code === 200 && loginResponse.data) {
         setToken(loginResponse.data);
         console.log("loginResponse.data:", loginResponse.data);
 
-        const userResponse = await fetch("/api/userinfo", {
-          headers: { Authorization: `Bearer ${loginResponse.data}` },
-        });
+        const userResponse = await getUserInfo(loginResponse.data);
+        console.log("🚀 ~ handleLogin ~ userResponse:", userResponse);
 
-        const json = (await userResponse.json()) as UserResponse;
-        console.log("🚀 ~ handleLogin ~ json:", json);
-
-        if (json.code === 200) {
+        if (userResponse.code === 200) {
           router.push("/");
         } else {
           throw new Error("Failed to fetch user info");
@@ -34,14 +30,12 @@ export function useAuth() {
       } else {
         throw new Error(loginResponse.msg || "Login failed");
       }
-      console.log("🚀 ~ handleLogin ~ loginResponse:", loginResponse);
-      console.log("🚀 ~ handleLogin ~ loginResponse:", loginResponse);
-      console.log("🚀 ~ handleLogin ~ loginResponse.data:", loginResponse.data);
-      console.log("🚀 ~ handleLogin ~ loginResponse.data:", loginResponse.data);
-    } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "An unexpected error occurred"
-      );
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("发生了未知错误");
+      }
     } finally {
       setIsLoading(false);
     }

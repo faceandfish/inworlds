@@ -11,15 +11,15 @@ interface UserAvatarProps {
 const UserAvatar: React.FC<UserAvatarProps> = ({
   user,
   onClick,
-  className = "",
+  className = ""
 }) => {
-  if (!user || !user.loginAct) {
+  if (!user || !user.username) {
     return <div className="h-10 w-10 rounded-full bg-slate-200"></div>; // 或者返回一个默认头像
   }
 
   // 基于字符串生成哈希值
   const hashCode = () => {
-    const str = user.loginAct;
+    const str = user.username;
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
       console.log("str:", str.length);
@@ -47,17 +47,17 @@ const UserAvatar: React.FC<UserAvatarProps> = ({
     className.split(" ").find((cls) => cls.startsWith("text-")) || "text-xl";
 
   // 使用 loginAct 的第一个字符
-  const initial = user.loginAct.charAt(0).toUpperCase();
+  const initial = user.username.charAt(0).toUpperCase();
 
   return (
     <div
       className={`relative w-10 h-10 rounded-full overflow-hidden ${className}`}
       onClick={onClick}
     >
-      {user.avatarFile ? (
+      {user.avatarUrl ? (
         <Image
-          src={user.avatarFile}
-          alt={`${user.loginAct}'s avatar`}
+          src={user.avatarUrl}
+          alt={`${user.username}'s avatar`}
           layout="fill"
           objectFit="cover"
         />

@@ -1,9 +1,9 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   HiOutlineDocumentText,
   HiOutlineChartBarSquare,
-  HiOutlineChatBubbleBottomCenterText,
+  HiOutlineChatBubbleBottomCenterText
 } from "react-icons/hi2";
 import { AiOutlineCopyrightCircle } from "react-icons/ai";
 import { MdAttachMoney } from "react-icons/md";
@@ -20,23 +20,30 @@ const sidebarItems = [
   { icon: HiOutlineChartBarSquare, text: "數據分析" },
   { icon: HiOutlineChatBubbleBottomCenterText, text: "評論" },
   { icon: AiOutlineCopyrightCircle, text: "版權" },
-  { icon: MdAttachMoney, text: "收入" },
+  { icon: MdAttachMoney, text: "收入" }
 ];
 
 const Sidebar = () => {
   const { user } = useUserInfo();
   const [selectedItem, setSelectedItem] = useState(0);
+  const [comments, setComments] = useState([]);
+  const [books, setBooks] = useState([]);
 
   const handleItemClick = (index: any) => {
     setSelectedItem(index);
   };
+  // 假设有这样的 API 函数
+  // useEffect(() => {
+  //   fetchComments().then(setComments);
+  //   fetchBooks().then(setBooks);
+  // }, []);
 
   return (
     <div className="flex h-screen  bg-gray-50">
       <div className="w-64 bg-white  pt-10">
         <div className="mb-5 flex gap-5 flex-col items-center">
           <UserAvatar user={user} className="w-20 h-20" />
-          <p>{user?.authorname}笔名</p>
+          <p>{user?.username}笔名</p>
         </div>
 
         <ul>
@@ -63,7 +70,7 @@ const Sidebar = () => {
       <div className="flex-1 bg-white pt-10">
         {selectedItem === 0 && <WorkContent />}
         {selectedItem === 1 && <DataAnalysis />}
-        {selectedItem === 2 && <Comments />}
+        {selectedItem === 2 && <Comments comments={comments} books={books} />}
         {selectedItem === 3 && <Copyright />}
         {selectedItem === 4 && <Income />}
       </div>

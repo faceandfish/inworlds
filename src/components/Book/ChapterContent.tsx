@@ -9,7 +9,7 @@ import {
   BookOpenIcon,
   UserCircleIcon,
   DocumentTextIcon,
-  ClockIcon,
+  ClockIcon
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 
@@ -20,7 +20,7 @@ interface ChapterContentPageProps {
 
 const ChapterContent: React.FC<ChapterContentPageProps> = ({
   chapter,
-  book,
+  book
 }) => {
   const router = useRouter();
 
@@ -35,14 +35,14 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
               </Link>
 
               <ChevronRightIcon className="w-4 h-4 " />
-              <Link href={`/books/${book.id}`}>
+              <Link href={`/${book.id}`}>
                 <p className="cursor-pointer hover:text-orange-400">
                   {book.title}
                 </p>
               </Link>
             </div>
             <h2 className="text-2xl text-neutral-800 font-medium pt-8 mb-3 ">
-              {chapter.number} {chapter.title}
+              {chapter.chapterNumber} {chapter.title}
             </h2>
             <div className="flex items-center mb-8 space-x-5 text-sm text-neutral-500 ">
               <div className="flex items-center">

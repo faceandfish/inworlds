@@ -1,11 +1,11 @@
 "use client";
-import { getUserInfo } from "@/app/lib/action";
-import { UserInfo, UserResponse } from "@/app/lib/definitions";
+
+import { UserInfo, ApiResponse, CreatorUserInfo } from "@/app/lib/definitions";
 
 import { useState, useEffect, useCallback } from "react";
 
 export function useUserInfo() {
-  const [user, setUser] = useState<UserInfo | null>(null);
+  const [user, setUser] = useState<UserInfo | CreatorUserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,9 +14,9 @@ export function useUserInfo() {
       setLoading(true);
       setError(null);
       const response: Response = await fetch("/api/userinfo", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       });
-      const json = (await response.json()) as UserResponse;
+      const json = (await response.json()) as ApiResponse<UserInfo>;
       if (json.code === 200) {
         setUser(json.data);
       } else {
@@ -37,7 +37,11 @@ export function useUserInfo() {
     fetchUserInfo();
   }, [fetchUserInfo]);
 
-  return { user, loading, error, refetch };
+  const updateUser = (updatedUser: UserInfo | CreatorUserInfo) => {
+    setUser(updatedUser);
+  };
+
+  return { user, loading, error, refetch, updateUser };
 }
 
 export default useUserInfo;

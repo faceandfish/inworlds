@@ -4,7 +4,8 @@ interface BaseUserInfo {
   username: string;
   displayName?: string;
   email: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
+  avatarImage?: File | null;
   introduction?: string;
   createdAt: string;
 }
@@ -28,7 +29,8 @@ export interface LoginRequest {
 export interface UpdateUserRequest {
   displayName?: string;
   email?: string;
-  avatarUrl?: string;
+  avatarImage?: File | null;
+  avatarUrl?: string | null;
   introduction?: string;
 }
 
@@ -46,7 +48,6 @@ export interface RegularUserInfo extends BaseUserInfo {
 // 创作者用户信息
 export interface CreatorUserInfo extends BaseUserInfo {
   userType: "creator";
-  authorName?: string;
   articlesCount: number;
   followersCount: number;
   followingCount: number;
@@ -56,23 +57,11 @@ export interface CreatorUserInfo extends BaseUserInfo {
 // 统一的用户信息类型
 export type UserInfo = RegularUserInfo | CreatorUserInfo;
 
-// 文章信息
-export interface ArticleInfo {
-  id: string;
-  title: string;
-  description: string;
-  createdAt: string;
-  authorId: number; // 添加作者ID
-  content?: string; // 可选的文章内容
-  category?: string; // 可选的文章分类
-  tags?: string[]; // 可选的文章标签
-}
-
 // 用户关系信息
 export interface UserRelationInfo {
   id: string;
   username: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
   relationshipType: "follower" | "following";
 }
 
@@ -87,16 +76,17 @@ export interface FavoriteInfo {
 
 // 分页数据
 export interface PaginatedData<T> {
-  items?: T[];
-  page?: number;
-  totalPages?: number;
-  totalItems?: number; // 添加总项目数
+  currentPage: number; // 当前页码
+  pageSize: number; // 每页数据量
+  totalPage: number; // 总页数
+  totalRecord: number; // 总记录数
+  dataList: T[]; // 当前页的数据列表
 }
 
 // 图片上传请求
 export interface ImageUploadRequest {
   file: File;
-  type: "avatar" | "bookCover" | "articleImage";
+  type: "avatar" | "bookCover";
 }
 
 // 图片上传响应
@@ -105,36 +95,11 @@ export interface ImageUploadResponse {
   fileId: string; // 可能需要的文件标识符
 }
 
-// 书籍信息
-export interface BookInfo {
-  id: number;
-  title: string;
-  description: string;
-  authorName: string;
-  category:
-    | "female-story"
-    | "male-story"
-    | "children-story"
-    | "literature-story"
-    | "biography";
-  ageRating: "under18" | "adult" | "allAges";
-  coverImageUrl: string | null;
-  authorNote?: string;
-  wordCount: number;
-  lastSaved: string;
-  createdAt: string;
-  status: "draft" | "published" | "completed";
-  latestChapterNumber: number;
-  latestChapterTitle: string;
-  authorId: number; // 添加作者ID
-  tags?: string[]; // 可选的标签
-  followersCount: number; //收藏本书的人数
-}
-
 // 章节信息
 export interface ChapterInfo {
   id: number;
-  number: string;
+  bookId?: number; // 添加这个字段来关联到特定的书
+  chapterNumber: number; // 添加章节序号
   title: string;
   content?: string;
   createdAt: string;
@@ -142,10 +107,44 @@ export interface ChapterInfo {
   wordCount: number;
 }
 
+// 书籍信息
+export interface BookInfo {
+  id: number;
+  title: string;
+  description: string;
+  authorName: string;
+  authorNote?: string;
+  authorId: number; // 添加作者ID
+
+  category:
+    | "female-story"
+    | "male-story"
+    | "children-story"
+    | "literature-story"
+    | "personal-story";
+  ageRating: "under18" | "adult" | "allAges";
+  coverImageUrl: string | null;
+  coverImage: File | null;
+
+  wordCount: number;
+  lastSaved: string;
+  createdAt: string;
+  latestChapterNumber: number;
+  latestChapterTitle: string;
+
+  tags?: string[]; // 可选的标签
+  followersCount: number; //收藏本书的人数
+  chapters?: ChapterInfo[];
+
+  status: "ongoing" | "completed"; // 书籍的连载状态：连载中或已完结
+  publishStatus: "draft" | "published"; // 书籍的发布状态：草稿（仅作者可见）或已发布（所有人可见）
+}
+
 // 评论信息
 export interface CommentInfo {
   id: number;
   content: string;
+  replyCount: number;
   username: string;
   createdAt: string;
   likes: number;
@@ -162,6 +161,17 @@ export interface IncomeData {
   copyrightIncome: number;
   monthlyIncome: { month: string; income: number }[];
   currency: string; // 添加货币类型
+}
+
+// 定义分析数据接口
+export interface AnalyticsData {
+  bookId: number;
+  views: number;
+  viewsLast24h: number;
+  likes: number;
+  comments: number;
+  totalIncome: number;
+  incomeLast24h: number;
 }
 
 // API 响应接口
@@ -192,7 +202,8 @@ export interface UpdateProfileCredentials {
   confirmPassword?: string;
   displayName?: string;
   introduction?: string;
-  avatarUrl?: string;
+  avatarImage?: File | null;
+  avatarUrl: string | null;
 }
 
 // 消息系统相关接口

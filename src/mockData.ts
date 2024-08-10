@@ -8,18 +8,16 @@ import {
   SystemNotification,
   Conversation,
   Message,
-  ArticleInfo,
   FavoriteInfo,
   ChapterInfo,
   CreatorUserInfo,
-  RegularUserInfo,
+  RegularUserInfo
 } from "@/app/lib/definitions";
 
 export const mockCreatorUser: CreatorUserInfo = {
   id: 1,
   username: "zhangsan",
   displayName: "张三",
-  authorName: "梦幻作家",
   email: "zhangsan@example.com",
   avatarUrl: "/images/zhangsan-avatar.jpg",
   introduction: "一个热爱写作的梦想家",
@@ -28,7 +26,7 @@ export const mockCreatorUser: CreatorUserInfo = {
   articlesCount: 10,
   followersCount: 1000,
   followingCount: 50,
-  favoritesCount: 30,
+  favoritesCount: 30
 };
 
 export const mockRegularUser: RegularUserInfo = {
@@ -39,22 +37,8 @@ export const mockRegularUser: RegularUserInfo = {
   avatarUrl: "/images/lisi-avatar.jpg",
   introduction: "热爱阅读的普通用户",
   createdAt: "2023-02-01T00:00:00Z",
-  userType: "regular",
+  userType: "regular"
 };
-
-export const mockArticles: ArticleInfo[] = [
-  {
-    id: "1",
-    title: "我的第一本书",
-    description: "这是我写的第一本书的简介",
-    createdAt: "2023-06-01T00:00:00Z",
-    authorId: 1,
-    content: "这是文章的详细内容...",
-    category: "fiction",
-    tags: ["科幻", "冒险"],
-  },
-  // 可以添加更多文章...
-];
 
 export const mockFavorites: FavoriteInfo[] = [
   {
@@ -62,8 +46,8 @@ export const mockFavorites: FavoriteInfo[] = [
     coverImageUrl: "/images/book-cover.jpg",
     title: "最喜欢的一本书",
     type: "book",
-    creatorId: 1,
-  },
+    creatorId: 1
+  }
   // 可以添加更多收藏...
 ];
 
@@ -76,6 +60,7 @@ export const mockBooks: BookInfo[] = [
     category: "male-story",
     ageRating: "allAges",
     coverImageUrl: "/images/star-adventure-cover.jpg",
+    coverImage: null,
     authorNote: "希望读者能喜欢这个故事",
     wordCount: 100000,
     lastSaved: "2023-07-01",
@@ -85,7 +70,7 @@ export const mockBooks: BookInfo[] = [
     latestChapterTitle: "神秘的星球",
     authorId: 1,
     tags: ["科幻", "冒险", "太空"],
-    followersCount: 100,
+    followersCount: 100
   },
   {
     id: 12,
@@ -95,6 +80,7 @@ export const mockBooks: BookInfo[] = [
     category: "male-story",
     ageRating: "allAges",
     coverImageUrl: "/images/star-adventure-cover.jpg",
+    coverImage: null,
     authorNote: "希望读者能喜欢这个故事",
     wordCount: 100000,
     lastSaved: "2023-07-01",
@@ -104,7 +90,7 @@ export const mockBooks: BookInfo[] = [
     latestChapterTitle: "神秘的星球",
     authorId: 1,
     tags: ["科幻", "冒险", "太空"],
-    followersCount: 100,
+    followersCount: 100
   },
   {
     id: 121,
@@ -113,6 +99,7 @@ export const mockBooks: BookInfo[] = [
     description: "一个关于太空探索的惊心动魄的故事",
     category: "male-story",
     ageRating: "allAges",
+    coverImage: null,
     coverImageUrl: "/images/star-adventure-cover.jpg",
     authorNote: "希望读者能喜欢这个故事",
     wordCount: 100000,
@@ -123,7 +110,7 @@ export const mockBooks: BookInfo[] = [
     latestChapterTitle: "神秘的星球",
     authorId: 1,
     tags: ["科幻", "冒险", "太空"],
-    followersCount: 100,
+    followersCount: 100
   },
   {
     id: 1222,
@@ -133,6 +120,7 @@ export const mockBooks: BookInfo[] = [
     category: "male-story",
     ageRating: "allAges",
     coverImageUrl: "/images/star-adventure-cover.jpg",
+    coverImage: null,
     authorNote: "希望读者能喜欢这个故事",
     wordCount: 100000,
     lastSaved: "2023-07-01",
@@ -142,15 +130,15 @@ export const mockBooks: BookInfo[] = [
     latestChapterTitle: "神秘的星球",
     authorId: 1,
     tags: ["科幻", "冒险", "太空"],
-    followersCount: 100,
-  },
+    followersCount: 100
+  }
   // 可以添加更多书籍...
 ];
 
 export const mockChapters: ChapterInfo[] = [
   {
     id: 1,
-    number: "第一章",
+    chapterNumber: 1,
     title: "起航",
     content: `开卷第一回也。作者自云：曾历过一番梦幻之后，故将真事隐去，
 而借通灵说此《石头记》一书也，故曰“甄士隐”云云。但书中所记何事何
@@ -197,35 +185,35 @@ export const mockChapters: ChapterInfo[] = [
 `,
     createdAt: "2023-06-01",
     lastModified: "2023-06-02",
-    wordCount: 3000,
+    wordCount: 3000
   },
   {
     id: 2,
-    number: "第二章",
+    chapterNumber: 2,
     title: "起航",
     content: "这是第一章的内容...",
     createdAt: "2023-06-01T00:00:00Z",
     lastModified: "2023-06-02T10:00:00Z",
-    wordCount: 3000,
+    wordCount: 3000
   },
   {
     id: 3,
-    number: "第三章",
+    chapterNumber: 3,
     title: "起航",
     content: "这是第一章的内容...",
     createdAt: "2023-06-01T00:00:00Z",
     lastModified: "2023-06-02T10:00:00Z",
-    wordCount: 3000,
+    wordCount: 3000
   },
   {
     id: 4,
-    number: "第四章",
+    chapterNumber: 4,
     title: "起航",
     content: "这是第一章的内容...",
     createdAt: "2023-06-01T00:00:00Z",
     lastModified: "2023-06-02T10:00:00Z",
-    wordCount: 3000,
-  },
+    wordCount: 3000
+  }
   // 可以添加更多章节...
 ];
 
@@ -237,8 +225,8 @@ export const mockComments: CommentInfo[] = [
     createdAt: "2023-07-15T08:00:00Z",
     likes: 50,
     bookId: 1,
-    userId: 2,
-  },
+    userId: 2
+  }
   // 可以添加更多评论...
 ];
 
@@ -253,9 +241,9 @@ export const mockIncomeData: IncomeData = {
     { month: "2023-03", income: 9000 },
     { month: "2023-04", income: 9500 },
     { month: "2023-05", income: 10000 },
-    { month: "2023-06", income: 10500 },
+    { month: "2023-06", income: 10500 }
   ],
-  currency: "CNY",
+  currency: "CNY"
 };
 
 export const mockSystemNotifications: SystemNotification[] = [
@@ -264,15 +252,15 @@ export const mockSystemNotifications: SystemNotification[] = [
     content: "欢迎使用我们的新消息系统！如有任何问题，请随时联系客服。",
     createdAt: "2024-08-01T10:00:00Z",
     isRead: false,
-    type: "info",
+    type: "info"
   },
   {
     id: 2,
     content: "系统将于下周进行维护升级，届时可能会有短暂服务中断。",
     createdAt: "2024-08-02T14:30:00Z",
     isRead: false,
-    type: "warning",
-  },
+    type: "warning"
+  }
 ];
 
 export const mockConversations: Conversation[] = [
@@ -285,12 +273,12 @@ export const mockConversations: Conversation[] = [
       receiverId: 1,
       content: "嗨，张三！我看了你的新书，真的很棒！",
       createdAt: "2023-08-01T10:00:00Z",
-      isRead: false,
+      isRead: false
     },
     unreadCount: 1,
     systemNotifications: mockSystemNotifications,
-    createdAt: "2023-08-01T10:00:00Z",
-  },
+    createdAt: "2023-08-01T10:00:00Z"
+  }
   // 可以添加更多对话...
 ];
 
@@ -301,7 +289,7 @@ export const mockMessages: Message[] = [
     receiverId: 1,
     content: "嗨，张三！我看了你的新书，真的很棒！",
     createdAt: "2023-08-01T10:00:00Z",
-    isRead: false,
+    isRead: false
   },
   {
     id: 2,
@@ -309,8 +297,8 @@ export const mockMessages: Message[] = [
     receiverId: 2,
     content: "谢谢李四！我很高兴你喜欢。你最近在读什么新书吗？",
     createdAt: "2023-08-01T10:05:00Z",
-    isRead: true,
-  },
+    isRead: true
+  }
   // 可以添加更多消息...
 ];
 
@@ -322,7 +310,7 @@ export const getMockConversations = (): Conversation[] => mockConversations;
 export const getMockSystemNotifications = (): SystemNotification[] =>
   mockSystemNotifications;
 export const getMockBooks = (): BookInfo[] => mockBooks;
-export const getMockArticles = (): ArticleInfo[] => mockArticles;
+
 export const getMockComments = (): CommentInfo[] => mockComments;
 export const getMockIncomeData = (): IncomeData => mockIncomeData;
 export const getMockChapters = (): ChapterInfo[] => mockChapters;

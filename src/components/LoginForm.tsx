@@ -8,8 +8,8 @@ interface LoginFormProps {
 
 export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
   const [credentials, setCredentials] = useState<LoginCredentials>({
-    loginAct: "",
-    loginPwd: "",
+    username: "",
+    password: ""
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -32,10 +32,10 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           Username or Email
         </label>
         <input
-          id="loginAct"
-          name="loginAct"
+          id="username"
+          name="username"
           type="text"
-          value={credentials.loginAct}
+          value={credentials.username}
           onChange={handleChange}
           required
           className="shadow appearance-none border rounded  w-96 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -49,10 +49,10 @@ export function LoginForm({ onSubmit, isLoading }: LoginFormProps) {
           Password
         </label>
         <input
-          id="loginPwd"
-          name="loginPwd"
+          id="password"
+          name="password"
           type="password"
-          value={credentials.loginPwd}
+          value={credentials.password}
           onChange={handleChange}
           required
           className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"

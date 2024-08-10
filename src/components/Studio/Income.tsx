@@ -12,22 +12,23 @@ import {
   Tooltip,
   ResponsiveContainer,
   PieChart,
-  Pie,
+  Pie
 } from "recharts";
 import { Card, CardContent, CardHeader } from "../Card";
 
 const incomeData: IncomeData = {
+  currency: "CNY",
   totalIncome: 80000,
   adIncome: 40000,
   donationIncome: 15000,
   copyrightIncome: 25000,
-  monthlyIncome: generateMonthlyData(),
+  monthlyIncome: generateMonthlyData()
 };
 
 const ProgressBar: React.FC<{ value: number; max: number; color: string }> = ({
   value,
   max,
-  color,
+  color
 }) => {
   const percentage = (value / max) * 100;
   return (
@@ -148,18 +149,18 @@ const Income: React.FC = () => {
                       {
                         name: "广告收入",
                         value: data.adIncome,
-                        fill: "#3B82F6",
+                        fill: "#3B82F6"
                       },
                       {
                         name: "打赏收入",
                         value: data.donationIncome,
-                        fill: "#F59E0B",
+                        fill: "#F59E0B"
                       },
                       {
                         name: "版权收入",
                         value: data.copyrightIncome,
-                        fill: "#8B5CF6",
-                      },
+                        fill: "#8B5CF6"
+                      }
                     ]}
                     dataKey="value"
                     nameKey="name"

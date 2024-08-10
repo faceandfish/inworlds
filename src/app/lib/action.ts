@@ -1,213 +1,293 @@
 import {
-  LoginCredentials,
-  LoginResponse,
-  UserResponse,
-  RegisterCredentials,
-  RegisterResponse,
-  UpdateProfileCredentials,
-  UpdateProfileResponse,
+  CreateUserRequest,
+  LoginRequest,
+  UpdateUserRequest,
+  ChangePasswordRequest,
+  UserInfo,
+  ApiResponse,
+  BookInfo,
+  PaginatedData,
+  SearchRequest,
+  SearchResponse,
+  CreatorUserInfo
 } from "./definitions";
 import { getToken, removeToken, setToken } from "./token";
-
-const API_BASE_URL = "http://8.142.44.107:8088/inworlds/api";
+import axios, { AxiosResponse } from "axios";
 
 let token: string | null = null;
 
-export const login = async (
-  credentials: LoginCredentials
-): Promise<LoginResponse> => {
-  try {
-    console.log("Login function called with credentials:", credentials);
-    // 创建 FormData 对象
-    const formData = new FormData();
-
-    formData.append("loginAct", credentials.loginAct);
-    formData.append("loginPwd", credentials.loginPwd);
-
-    console.log("FormData contents:");
-    formData.forEach((value, key) => {
-      console.log(key, value);
-    });
-
-    console.log("Sending request to:", `${API_BASE_URL}/login`);
-
-    const response = await fetch(`${API_BASE_URL}/login`, {
-      method: "POST",
-      // 不需要设置 Content-Type，fetch 会自动设置正确的值
-      body: formData,
-    });
-
-    console.log("Response status:", response.status);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const data = await response.json();
-    console.log("Server response data:", data);
-
-    if (data.code !== 200) {
-      throw new Error(data.msg || "Login failed");
-    }
-
-    return data;
-  } catch (error) {
-    throw error; // 重新抛出错误，让调用者处理
+// 创建 axios 实例
+const api = axios.create({
+  headers: {
+    "Content-Type": "application/json"
   }
+});
+
+// 设置认证 token
+export const setAuthToken = (token: string) => {
+  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 };
 
-let originToken: string = "";
+// 移除认证 token
+export const removeAuthToken = () => {
+  delete api.defaults.headers.common["Authorization"];
+};
 
-export async function getUserInfo(
-  token: string = originToken
-): Promise<UserResponse> {
-  if (!token) {
-    return { code: 401, msg: "Not authenticated", data: null };
-  } else {
-    originToken = token;
-  }
-
+// 登录函数
+export const login = async (
+  credentials: LoginRequest
+): Promise<ApiResponse<string>> => {
   try {
-    const response = await fetch(
-      "http://8.142.44.107:8088/inworlds/api/user/principal",
+    const formData = new FormData();
+    formData.append("username", credentials.username);
+    formData.append("password", credentials.password);
+
+    const response: AxiosResponse<ApiResponse<string>> = await api.post(
+      "http://8.142.44.107:8088/inworlds/api/login",
+      formData,
       {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "multipart/form-data" }
       }
     );
 
-    const data = await response.json();
-    console.log("🚀 ~ getUserInfo ~ data:", data);
-
-    if (data.code === 200) {
-      return data;
-    } else {
-      console.error("Unexpected response:", data);
-      return { code: data.code, msg: data.msg, data: null };
-    }
+    return response.data;
   } catch (error) {
-    console.error("Error fetching user info:", error);
-    return { code: 500, msg: "Error fetching user info", data: null };
+    console.error("Login error:", error);
+    throw error;
   }
-}
+};
+
+// 获取用户信息
+let originToken: string = "";
+
+export const getUserInfo = async (
+  token: string = originToken
+): Promise<ApiResponse<UserInfo>> => {
+  try {
+    const response: AxiosResponse<ApiResponse<UserInfo>> = await api.get(
+      "http://8.142.44.107:8088/inworlds/api/user/principal",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取用户信息失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取用户信息时出错:", error);
+    return {
+      code: error instanceof Error && error.message ? 400 : 500,
+      msg: error instanceof Error ? error.message : "获取用户信息时出错",
+      data: null as unknown as UserInfo // 类型断言以满足返回类型要求
+    };
+  }
+};
 
 export async function logout(): Promise<{ code: number; msg: string }> {
-  console.log("Logout function called");
-  console.log("All localStorage items:", { ...localStorage });
-
-  const token = getToken();
-  console.log("🚀 ~ logout ~ token:", token);
-
+  const token = getToken() as string;
   if (!token) {
-    console.error("No token found in localStorage");
-    throw new Error("No authentication token found");
+    console.error("在localStorage中未找到token");
+    throw new Error("未找到��证token");
   }
 
   try {
-    console.log("Attempting to fetch from API");
-    const response = await fetch(`${API_BASE_URL}/logout`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    console.log("尝试从API获取数据");
+    const response = await api.post<{ code: number; msg: string }>(
+      "http://8.142.44.107:8088/inworlds/api/logout",
+      null,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
 
-    console.log("API response received, status:", response.status);
+    console.log("收到API响应，状态:", response.status);
 
-    if (!response.ok) {
-      const errorBody = await response.text();
-      console.error(
-        `Logout failed with status ${response.status}. Response body:`,
-        errorBody
-      );
-      throw new Error(
-        `Logout failed: ${response.status} ${response.statusText}`
-      );
-    }
-
-    const result = await response.json();
-    console.log("API result:", result);
+    const result = response.data;
+    console.log("API结果:", result);
 
     if (result.code === 200) {
       removeToken();
       originToken = "";
     } else {
-      console.warn(
-        "Logout API returned non-200 code:",
-        result.code,
-        result.msg
-      );
+      console.warn("注销API返回非200状态码:", result.code, result.msg);
     }
 
     return result;
   } catch (error) {
-    console.error("Error during logout:", error);
+    console.error("注销过程中出错:", error);
     throw error;
   }
 }
 
 export async function register(
-  credentials: RegisterCredentials
-): Promise<RegisterResponse> {
-  const response = await fetch(`${API_BASE_URL}/register`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(credentials),
-  });
+  credentials: CreateUserRequest
+): Promise<ApiResponse<UserInfo>> {
+  try {
+    const formData = new FormData();
+    formData.append("username", credentials.username);
+    formData.append("password", credentials.password);
+    formData.append("email", credentials.email);
 
-  if (!response.ok) {
-    throw new Error("Registration failed");
+    const response = await api.post<ApiResponse<UserInfo>>(
+      "http://8.142.44.107:8088/inworlds/api/user/register",
+      formData,
+      {
+        headers: { "Content-Type": "multipart/form-data" }
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    console.error("注册失败:", error);
+    throw error;
   }
-
-  return response.json();
 }
 
 export const updateProfile = async (
-  credentials: UpdateProfileCredentials,
+  updateData: UpdateUserRequest,
   token: string
-): Promise<UpdateProfileResponse> => {
+): Promise<ApiResponse<UserInfo>> => {
   try {
     const formData = new FormData();
 
-    // 添加必需的 id 字段
-    formData.append("id", credentials.id.toString());
-
     // 添加可选字段
-    if (credentials.loginPwd) formData.append("loginPwd", credentials.loginPwd);
-    if (credentials.reLoginPwd)
-      formData.append("reLoginPwd", credentials.reLoginPwd);
-    if (credentials.name) formData.append("name", credentials.name);
-    if (credentials.introduction)
-      formData.append("introduction", credentials.introduction);
-    if (credentials.avatarFile)
-      formData.append("avatarFile", credentials.avatarFile);
+    if (updateData.displayName)
+      formData.append("displayName", updateData.displayName);
+    if (updateData.email) formData.append("email", updateData.email);
+    if (updateData.avatarImage)
+      formData.append("avatarImage", updateData.avatarImage);
+    if (updateData.avatarUrl)
+      formData.append("avatarUrl", updateData.avatarUrl);
+    if (updateData.introduction)
+      formData.append("introduction", updateData.introduction);
 
-    const response = await fetch(`${API_BASE_URL}/user/profile`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`, // 正确的 token 格式
-      },
-      body: formData,
-    });
+    const response = await api.put<ApiResponse<UserInfo>>(
+      "http://8.142.44.107:8088/inworlds/api/user/profile",
+      formData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "更新个人资料失败");
     }
 
-    const data: UpdateProfileResponse = await response.json();
-
-    if (data.code !== 200) {
-      throw new Error(data.msg || "Profile update failed");
-    }
-
-    return data;
+    return response.data;
   } catch (error) {
-    console.error("Error updating profile:", error);
+    console.error("更新个人资料时出错:", error);
+    throw error;
+  }
+};
+
+export const changePassword = async (
+  passwordData: ChangePasswordRequest,
+  token: string
+): Promise<ApiResponse<void>> => {
+  try {
+    const response = await api.put<ApiResponse<void>>(
+      "http://8.142.44.107:8088/inworlds/api/user/profile",
+      passwordData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "修改密码失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("修改密码时出错:", error);
+    throw error;
+  }
+};
+export const uploadBookDraft = async (
+  coverImage: File,
+  bookData: Omit<
+    BookInfo,
+    | "id"
+    | "coverImageUrl"
+    | "coverImage"
+    | "authorId"
+    | "createdAt"
+    | "lastSaved"
+    | "latestChapterNumber"
+    | "latestChapterTitle"
+    | "followersCount"
+    | "chapters"
+  >,
+  status: "draft" | "published"
+): Promise<ApiResponse<BookInfo>> => {
+  try {
+    const formData = new FormData();
+    formData.append("coverImage", coverImage);
+
+    const bookDataWithStatus = {
+      ...bookData,
+      status
+    };
+
+    formData.append("bookData", JSON.stringify(bookDataWithStatus));
+
+    const response = await api.post<ApiResponse<BookInfo>>(
+      "http://8.142.44.107:8088/inworlds/api/book/draft",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data"
+        }
+      }
+    );
+
+    if (response.data.code !== 200 || !response.data.data) {
+      throw new Error(response.data.msg || "服务器返回的数据无效");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error uploading book draft:", error);
+    throw error;
+  }
+};
+
+export const updateUserType = async (
+  userId: UserInfo["id"], // 使用 UserInfo['id'] 来确保类型一致性
+  token: string
+): Promise<ApiResponse<CreatorUserInfo>> => {
+  try {
+    const response = await api.put<ApiResponse<CreatorUserInfo>>(
+      `http://8.142.44.107:8088/inworlds/api/user/${userId}/type`,
+      { userType: "creator" },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "更新用户类型失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("更新用户类型时出错:", error);
     throw error;
   }
 };
