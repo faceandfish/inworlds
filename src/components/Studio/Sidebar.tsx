@@ -7,13 +7,14 @@ import {
 } from "react-icons/hi2";
 import { AiOutlineCopyrightCircle } from "react-icons/ai";
 import { MdAttachMoney } from "react-icons/md";
-import UserAvatar from "@/components/UserAvatar";
-import useUserInfo from "../useUserInfo";
+import { useUserInfo } from "../useUserInfo";
 import WorkContent from "./WorkContent";
 import DataAnalysis from "./DataAnalysis";
 import Comments from "./Comments";
 import Copyright from "./Copyright";
 import Income from "./Income";
+import Image from "next/image";
+import { getAvatarUrl } from "@/app/lib/imageUrl";
 
 const sidebarItems = [
   { icon: HiOutlineDocumentText, text: "作品內容" },
@@ -32,6 +33,10 @@ const Sidebar = () => {
   const handleItemClick = (index: any) => {
     setSelectedItem(index);
   };
+
+  if (!user) {
+    return;
+  }
   // 假设有这样的 API 函数
   // useEffect(() => {
   //   fetchComments().then(setComments);
@@ -42,7 +47,13 @@ const Sidebar = () => {
     <div className="flex h-screen  bg-gray-50">
       <div className="w-64 bg-white  pt-10">
         <div className="mb-5 flex gap-5 flex-col items-center">
-          <UserAvatar user={user} className="w-20 h-20" />
+          <Image
+            src={getAvatarUrl(user.avatarUrl)}
+            alt={user!.displayName || "用户头像"}
+            width={200}
+            height={200}
+            className="rounded-full object-cover w-24 h-24"
+          />
           <p>{user?.username}笔名</p>
         </div>
 
@@ -70,7 +81,7 @@ const Sidebar = () => {
       <div className="flex-1 bg-white pt-10">
         {selectedItem === 0 && <WorkContent />}
         {selectedItem === 1 && <DataAnalysis />}
-        {selectedItem === 2 && <Comments comments={comments} books={books} />}
+        {selectedItem === 2 && <Comments />}
         {selectedItem === 3 && <Copyright />}
         {selectedItem === 4 && <Income />}
       </div>

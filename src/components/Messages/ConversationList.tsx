@@ -7,7 +7,7 @@ interface ConversationListProps {
   conversations: Conversation[];
   onSelectConversation: (conversation: Conversation) => void;
   currentUser: UserInfo;
-  getOtherUser: (conversation: Conversation) => UserInfo;
+  getOtherUser: (conversation: Conversation) => UserInfo | null;
   onClearUnread: (conversationId: number) => void;
   onViewSystemMessages: () => void;
 }
@@ -18,7 +18,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
   currentUser,
   getOtherUser,
   onClearUnread,
-  onViewSystemMessages,
+  onViewSystemMessages
 }) => {
   const handleConversationClick = (conversation: Conversation) => {
     onSelectConversation(conversation);
@@ -27,13 +27,17 @@ const ConversationList: React.FC<ConversationListProps> = ({
     }
   };
 
+  const validConversations = conversations.filter(
+    (conversation) => getOtherUser(conversation) !== null
+  );
+
   return (
-    <div className="bg-white shadow w-60  text-gray-600">
-      <h2 className="list-none text-2xl font-bold text-center py-5  border-b border-gray-100">
+    <div className="bg-white shadow w-60 text-gray-600">
+      <h2 className="list-none text-2xl font-bold text-center py-5 border-b border-gray-100">
         消息中心
       </h2>
 
-      <ul className="divide-y ">
+      <ul className="divide-y">
         {/* 系统通知项 */}
         <li
           onClick={onViewSystemMessages}
@@ -52,20 +56,20 @@ const ConversationList: React.FC<ConversationListProps> = ({
           </div>
         </li>
 
-        {/* 现有的会话列表 */}
-        {conversations.map((conversation) => {
-          const otherUser = getOtherUser(conversation);
+        {/* 有效的会话列表 */}
+        {validConversations.map((conversation) => {
+          const otherUser = getOtherUser(conversation)!; // 我们知道这里 otherUser 一定不为 null
           return (
             <li
               key={conversation.id}
-              className="cursor-pointer py-3 flex items-start gap-3 px-5  hover:bg-gray-100 "
+              className="cursor-pointer py-3 flex items-start gap-3 px-5 hover:bg-gray-100"
               onClick={() => handleConversationClick(conversation)}
             >
               <div className="relative flex-shrink-0">
-                <div className="rounded-full overflow-hidden  flex-shrink-0 w-10 h-10">
+                <div className="rounded-full overflow-hidden flex-shrink-0 w-10 h-10">
                   <Image
-                    src={otherUser.avatarFile || "/avatar.png"}
-                    alt={`${otherUser.name}'s avatar`}
+                    src={otherUser.avatarUrl || "/avatar.png"}
+                    alt={`${otherUser.displayName}'s avatar`}
                     style={{ objectFit: "cover" }}
                     width={40}
                     height={40}
@@ -76,7 +80,7 @@ const ConversationList: React.FC<ConversationListProps> = ({
                 )}
               </div>
               <div className="overflow-hidden">
-                <p className="font-medium text-sm">{otherUser.name}</p>
+                <p className="font-medium text-sm">{otherUser.displayName}</p>
                 <p className="text-xs text-gray-500 truncate">
                   {conversation.lastMessage.content}
                 </p>

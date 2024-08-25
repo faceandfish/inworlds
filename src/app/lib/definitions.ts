@@ -1,3 +1,24 @@
+// 文件上传接口
+export interface FileUploadData {
+  coverImage?: File | null;
+  avatarImage?: File | null;
+}
+
+// 可公开的用户信息
+export interface PublicUserInfo {
+  id: number;
+  username: string;
+  displayName: string;
+  avatarUrl?: string;
+  introduction?: string;
+  createdAt: string;
+  userType: "creator" | "regular";
+  booksCount?: number; // 只有当 userType 为 'creator' 时才有意义
+  followersCount: number;
+  followingCount: number;
+  favoritesCount: number;
+}
+
 // 基础用户信息
 interface BaseUserInfo {
   id: number;
@@ -5,9 +26,15 @@ interface BaseUserInfo {
   displayName?: string;
   email: string;
   avatarUrl?: string | null;
-  avatarImage?: File | null;
   introduction?: string;
   createdAt: string;
+  phone?: string; // 可选字段，因为可能不是所有用户都有手机号
+  language?: string; // 可选字段，可以有默认值
+  gender?: "male" | "female" | "other"; // 性别
+  birthDate?: string; // 出生日期，格式为 ISO 8601 字符串，如 "1990-01-01"
+  followersCount: number;
+  followingCount: number;
+  favoritesCount: number;
 }
 
 // 用于创建新用户的接口
@@ -15,6 +42,7 @@ export interface CreateUserRequest {
   username: string;
   email: string;
   password: string;
+  rePassword: string;
   displayName?: string;
   introduction?: string;
 }
@@ -29,9 +57,11 @@ export interface LoginRequest {
 export interface UpdateUserRequest {
   displayName?: string;
   email?: string;
-  avatarImage?: File | null;
-  avatarUrl?: string | null;
   introduction?: string;
+  phone?: string; // 可选字段，因为可能不是所有用户都有手机号
+  language?: string; // 可选字段，可以有默认值
+  gender?: "male" | "female" | "other"; // 性别
+  birthDate?: string; // 出生日期，格式为 ISO 8601 字符串，如 "1990-01-01"
 }
 
 // 用于更改密码的接口
@@ -49,9 +79,6 @@ export interface RegularUserInfo extends BaseUserInfo {
 export interface CreatorUserInfo extends BaseUserInfo {
   userType: "creator";
   articlesCount: number;
-  followersCount: number;
-  followingCount: number;
-  favoritesCount: number;
 }
 
 // 统一的用户信息类型
@@ -68,10 +95,12 @@ export interface UserRelationInfo {
 // 收藏信息
 export interface FavoriteInfo {
   id: string;
-  coverImageUrl: string | null;
+  coverImageUrl: string;
   title: string;
-  type: "book" | "article"; // 区分收藏的是书籍还是文章
-  creatorId: number; // 创作者ID
+  authorId: number; // 创作者ID
+  authorName: string; // 创作者名字
+  lastUpdated: string; // 最后更新时间
+  status: "ongoing" | "completed";
 }
 
 // 分页数据
@@ -97,14 +126,15 @@ export interface ImageUploadResponse {
 
 // 章节信息
 export interface ChapterInfo {
-  id: number;
-  bookId?: number; // 添加这个字段来关联到特定的书
-  chapterNumber: number; // 添加章节序号
+  id?: number;
+  bookId: number; // 添加这个字段来关联到特定的书
+  chapterNumber?: number; // 添加章节序号
   title: string;
-  content?: string;
-  createdAt: string;
-  lastModified: string;
-  wordCount: number;
+  content: string;
+  createdAt?: string;
+  lastModified?: string;
+  wordCount?: number;
+  authorNote?: string;
 }
 
 // 书籍信息
@@ -113,8 +143,9 @@ export interface BookInfo {
   title: string;
   description: string;
   authorName: string;
-  authorNote?: string;
+  authorIntroduction?: string;
   authorId: number; // 添加作者ID
+  authorAvatarUrl: string;
 
   category:
     | "female-story"
@@ -124,16 +155,16 @@ export interface BookInfo {
     | "personal-story";
   ageRating: "under18" | "adult" | "allAges";
   coverImageUrl: string | null;
-  coverImage: File | null;
 
-  wordCount: number;
-  lastSaved: string;
-  createdAt: string;
-  latestChapterNumber: number;
-  latestChapterTitle: string;
+  wordCount?: number;
+  lastSaved?: string;
+  createdAt?: string;
+  latestChapterNumber: number; //最新章节的编号
+  latestChapterTitle: string; //最新章节的标题
 
   tags?: string[]; // 可选的标签
   followersCount: number; //收藏本书的人数
+  commentsCount: number; //新增评论数总数
   chapters?: ChapterInfo[];
 
   status: "ongoing" | "completed"; // 书籍的连载状态：连载中或已完结
@@ -192,7 +223,7 @@ export interface RegisterCredentials {
   username: string;
   email: string;
   password: string;
-  confirmPassword: string;
+  rePassword: string;
 }
 
 // 更新用户资料凭证
@@ -261,3 +292,37 @@ export interface SearchRequest {
 
 // 搜索响应接口
 export interface SearchResponse<T> extends ApiResponse<PaginatedData<T>> {}
+
+// 打赏接口
+export interface SponsorInfo {
+  id: string;
+  username: string;
+  avatarUrl: string;
+  donationTime: string;
+}
+
+//打赏
+export interface PurchaseOption {
+  id: number;
+  coins: number;
+  price: number; // 真实价钱
+}
+
+export interface PurchaseHistory {
+  id: number;
+  userId: number;
+  coins: number;
+  amountPaid: number;
+  date: string;
+}
+
+export interface DonationHistory {
+  id: number;
+  userId: number; // 添加用户ID
+  authorId: number; // 添加作者ID
+  coins: number;
+  date: string;
+  authorName: string;
+  bookTitle: string;
+  bookId: number;
+}

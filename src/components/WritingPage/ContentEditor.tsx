@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from "react";
 import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
 import { ChapterInfo } from "@/app/lib/definitions";
+import "react-quill/dist/quill.snow.css";
 
 interface ContentEditorProps {
   chapter: ChapterInfo;
@@ -16,6 +16,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
 }) => {
   const [content, setContent] = useState(chapter.content || "");
   const [wordCount, setWordCount] = useState(0);
+  const [title, setTitle] = useState(chapter.title || "");
 
   const modules = {
     toolbar: [
@@ -48,6 +49,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newTitle = e.target.value;
+    setTitle(newTitle);
     onChapterUpdate({
       ...chapter,
       title: newTitle,
@@ -79,19 +81,23 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
 
   return (
     <div className=" w-full h-screen">
-      <h1 className="text-2xl font-medium text-gray-700 mb-6">内容编辑</h1>
+      <h1 className="text-2xl font-medium text-neutral-700 mb-6">添加新章节</h1>
+      <p className="text-neutral-600 text-center bg-neutral-100 mb-6 py-3 font-semibold text-2xl">
+        {" "}
+        {chapter.chapterNumber ? `第 ${chapter.chapterNumber} 章` : "第 1 章"}
+      </p>
 
       <div className="mb-6">
         <label
           htmlFor="chapter-title"
-          className="block text-sm font-medium text-gray-700 mb-2"
+          className="block text-sm font-medium text-neutral-600 mb-2"
         >
           章节标题
         </label>
         <input
           type="text"
           id="chapter-title"
-          value={chapter.title}
+          value={title}
           onChange={handleTitleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
           placeholder="输入章节标题"
@@ -100,10 +106,10 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
 
       <div className="mb-10">
         <div className="flex gap-10">
-          <span className="block text-sm font-medium text-gray-700 mb-2">
+          <span className="block text-sm font-medium text-neutral-600 mb-2">
             章节内容
           </span>
-          <span className="text-sm text-gray-500">字数：{wordCount}</span>
+          <span className="text-sm text-neutral-400">字数：{wordCount}</span>
         </div>
 
         <ReactQuill

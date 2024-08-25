@@ -1,15 +1,28 @@
 import React from "react";
-import { CreatorUserInfo } from "@/app/lib/definitions";
+import { BookInfo, CreatorUserInfo } from "@/app/lib/definitions";
+import Image from "next/image";
+import { getAvatarUrl } from "@/app/lib/imageUrl";
+import Link from "next/link";
 
 interface AuthorInfoProps {
-  author: CreatorUserInfo;
+  book: BookInfo;
 }
 
-export const AuthorInfo: React.FC<AuthorInfoProps> = ({ author }) => (
+export const AuthorInfo: React.FC<AuthorInfoProps> = ({ book }) => (
   <div className="w-80 border-l border-gray-100 flex flex-col items-center justify-around">
-    <div className="w-10 h-10 rounded-full bg-slate-400"></div>
-    <p>{author.displayName || "作者暱稱"}</p>
-    <p>{author.introduction || "作者簡介..."}</p>
+    <Link href={`/user/${book.authorId}`}>
+      <Image
+        src={getAvatarUrl(book.authorAvatarUrl)}
+        alt={book.authorName}
+        width={200}
+        height={200}
+        className="rounded-full w-24 h-24 cursor-pointer hover:brightness-90 transition-all duration-200"
+      />
+    </Link>
+    <p>{book.authorName || "zuozhe"}</p>
+    <p className="text-sm text-neutral-600">
+      {book.authorIntroduction || "这个用户很懒，还没有填写个人介绍。"}
+    </p>
     <button className="hover:bg-orange-500 bg-orange-400 px-5 py-2 rounded text-white">
       关注
     </button>

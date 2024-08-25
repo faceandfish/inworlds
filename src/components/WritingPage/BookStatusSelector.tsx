@@ -13,7 +13,7 @@ const BookStatusSelector: React.FC<BookStatusSelectorProps> = ({
   error
 }) => {
   return (
-    <div className="flex flex-col space-y-6 mt-10">
+    <div className="flex flex-col space-y-6 ">
       <label className="text-2xl font-medium text-gray-700">作品状态</label>
       <p className="text-sm bg-yellow-50 border-l-4 border-yellow-400  p-2  text-yellow-700">
         提示：连载中，表示作品正在创作过程中，可以持续更新；已完结，表示作品已经完成，不再更新内容。

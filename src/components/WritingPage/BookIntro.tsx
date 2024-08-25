@@ -7,9 +7,17 @@ interface BookIntroProps {
     updates: Partial<Pick<BookInfo, "title" | "description">>
   ) => void;
   error?: string;
+  descriptionRows?: number;
+  className?: string;
 }
 
-const BookIntro: React.FC<BookIntroProps> = ({ book, onBookChange, error }) => {
+const BookIntro: React.FC<BookIntroProps> = ({
+  book,
+  onBookChange,
+  error,
+  descriptionRows = 14,
+  className = ""
+}) => {
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onBookChange({ title: e.target.value });
   };
@@ -21,7 +29,7 @@ const BookIntro: React.FC<BookIntroProps> = ({ book, onBookChange, error }) => {
   };
 
   return (
-    <div className="flex flex-col h-screen py-10 items-center gap-8 w-full ">
+    <div className={`flex flex-col items-center gap-8 w-full ${className}`}>
       <div className="relative w-full">
         <label
           htmlFor="book-title"
@@ -57,13 +65,13 @@ const BookIntro: React.FC<BookIntroProps> = ({ book, onBookChange, error }) => {
           name="description"
           value={book.description}
           onChange={handleDescriptionChange}
-          rows={16}
-          className="w-full  border rounded border-gray-400 py-8 px-3 text-gray-700 leading-tight focus:outline-none focus:border-orange-400"
+          rows={descriptionRows}
+          className="w-full  border rounded border-neutral-400 py-8 px-3 text-neutral-700 leading-tight focus:outline-none focus:border-orange-400"
           placeholder="输入详情内容..."
           required
           maxLength={1000}
         />
-        <span className="text-sm text-gray-500 absolute right-3 bottom-2">
+        <span className="text-sm text-neutral-500 absolute right-3 bottom-2">
           {book.description.length}/1000
         </span>
       </div>

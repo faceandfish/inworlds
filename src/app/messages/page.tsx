@@ -1,166 +1,206 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   MessagingState,
   Conversation,
   Message,
   UserInfo,
-  SystemNotification, // 新增：导入 SystemNotification 类型
+  SystemNotification,
+  PaginatedData
 } from "@/app/lib/definitions";
 import Navbar from "@/components/Navbar";
 import ConversationList from "@/components/Messages/ConversationList";
 import MessageList from "@/components/Messages/MessageList";
 import MessageInput from "@/components/Messages/MessageInput";
 import {
-  getCurrentUser,
-  mockConversations,
-  mockMessages,
-  mockUsers,
-  mockSystemNotifications,
-} from "@/mockData";
+  fetchConversations,
+  fetchMessages,
+  fetchSystemNotifications,
+  markConversationAsRead,
+  sendMessage,
+  getUserById
+} from "../lib/action";
+import { useUserInfo } from "@/components/useUserInfo";
 
 const MessagingPage: React.FC = () => {
+  const { user } = useUserInfo();
   const [messagingState, setMessagingState] = useState<MessagingState>({
     conversations: [],
     selectedConversation: null,
     messages: [],
-    systemNotifications: [], // 新增：在 MessagingState 中添加 systemNotifications
+    systemNotifications: []
   });
-
   const [isViewingSystemMessages, setIsViewingSystemMessages] = useState(true);
-  const currentUser = getCurrentUser();
-  const useMockData = true; // 设置为 false 以使用动态数据
+  const [conversationsPage, setConversationsPage] = useState(1);
+  const [messagesPage, setMessagesPage] = useState(1);
+  const [notificationsPage, setNotificationsPage] = useState(1);
+  const [otherUsers, setOtherUsers] = useState<Record<number, UserInfo>>({});
 
   useEffect(() => {
-    if (useMockData) {
-      // 使用模拟数据初始化会话列表
+    const initializeData = async () => {
+      try {
+        const [conversationsData, notificationsData] = await Promise.all([
+          fetchConversations(conversationsPage),
+          fetchSystemNotifications(notificationsPage)
+        ]);
+
+        setMessagingState((prev) => ({
+          ...prev,
+          conversations: conversationsData.dataList,
+          systemNotifications: notificationsData.dataList
+        }));
+
+        // 获取所有对话中其他用户的信息
+        const otherUserIds = new Set(
+          conversationsData.dataList.flatMap((conv) =>
+            conv.participants.filter((id) => id !== user?.id)
+          )
+        );
+
+        const userInfoPromises = Array.from(otherUserIds).map(getUserById);
+        const userInfos = await Promise.all(userInfoPromises);
+
+        setOtherUsers(
+          userInfos.reduce((acc, userInfo) => {
+            acc[userInfo.id] = userInfo;
+            return acc;
+          }, {} as Record<number, UserInfo>)
+        );
+      } catch (error) {
+        console.error("初始化数据时出错:", error);
+      }
+    };
+
+    if (user) {
+      initializeData();
+    }
+  }, [conversationsPage, notificationsPage, user]);
+
+  const handleSelectConversation = useCallback(
+    async (conversation: Conversation) => {
+      setIsViewingSystemMessages(false);
       setMessagingState((prev) => ({
         ...prev,
-        conversations: mockConversations,
-        systemNotifications: mockSystemNotifications,
-        messages: [],
+        selectedConversation: conversation
       }));
-    } else {
-      // 原有的动态数据获取逻辑
-      // fetchConversations().then(conversations => setMessagingState(prev => ({ ...prev, conversations })));
-      // 新增：获取系统通知的逻辑
-      // fetchSystemNotifications().then(notifications => setMessagingState(prev => ({ ...prev, systemNotifications: notifications })));
+
+      try {
+        const messagesData = await fetchMessages(conversation.id, messagesPage);
+        setMessagingState((prev) => ({
+          ...prev,
+          messages: messagesData.dataList
+        }));
+        await markConversationAsRead(conversation.id);
+      } catch (error) {
+        console.error("获取消息时出错:", error);
+      }
+    },
+    [messagesPage]
+  );
+
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      if (messagingState.selectedConversation && user) {
+        const otherUserId =
+          messagingState.selectedConversation.participants.find(
+            (id) => id !== user.id
+          );
+        if (!otherUserId) {
+          console.error("无法找到接收者ID");
+          return;
+        }
+
+        try {
+          const sentMessage = await sendMessage({
+            senderId: user.id,
+            receiverId: otherUserId,
+            content: content
+          });
+          setMessagingState((prev) => ({
+            ...prev,
+            messages: [...prev.messages, sentMessage],
+            conversations: prev.conversations.map((conv) =>
+              conv.id === prev.selectedConversation?.id
+                ? { ...conv, lastMessage: sentMessage }
+                : conv
+            )
+          }));
+        } catch (error) {
+          console.error("发送消息时出错:", error);
+        }
+      }
+    },
+    [messagingState.selectedConversation, user]
+  );
+
+  const getOtherUser = useCallback(
+    (conversation: Conversation): UserInfo | null => {
+      const otherUserId = conversation.participants.find(
+        (id) => id !== user?.id
+      );
+      return otherUserId ? otherUsers[otherUserId] || null : null;
+    },
+    [user, otherUsers]
+  );
+
+  const handleClearUnread = useCallback(async (conversationId: number) => {
+    try {
+      await markConversationAsRead(conversationId);
+      setMessagingState((prev) => ({
+        ...prev,
+        conversations: prev.conversations.map((conv) =>
+          conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv
+        )
+      }));
+    } catch (error) {
+      console.error("标记对话为已读时出错:", error);
     }
   }, []);
 
-  const handleSelectConversation = (conversation: Conversation) => {
-    setIsViewingSystemMessages(false);
-    setMessagingState((prev) => ({
-      ...prev,
-      selectedConversation: conversation,
-    }));
-
-    if (useMockData) {
-      // 使用模拟数据
-      setMessagingState((prev) => ({
-        ...prev,
-        messages: mockMessages.filter(
-          (msg) =>
-            conversation.participants.includes(msg.senderId) &&
-            conversation.participants.includes(msg.receiverId)
-        ),
-      }));
-    } else {
-      // 原有的动态数据获取逻辑
-      // fetchMessages(conversation.id).then(messages => setMessagingState(prev => ({ ...prev, messages })));
-    }
-  };
-
-  const handleSendMessage = (content: string) => {
-    if (messagingState.selectedConversation) {
-      const newMessage: Message = {
-        id: Date.now(), // 使用时间戳作为临时ID
-        senderId: currentUser.id,
-        receiverId:
-          messagingState.selectedConversation.participants.find(
-            (id) => id !== currentUser.id
-          ) || 0,
-        content: content,
-        createdAt: new Date().toISOString(),
-      };
-      if (useMockData) {
-        // 使用模拟数据
-        setMessagingState((prev) => ({
-          ...prev,
-          messages: [...prev.messages, newMessage],
-          conversations: prev.conversations.map((conv) =>
-            conv.id === prev.selectedConversation?.id
-              ? { ...conv, lastMessage: newMessage, unreadCount: 0 }
-              : conv
-          ),
-        }));
-      } else {
-        // 原有的发送消息逻辑
-        // sendMessage({ senderId: currentUser.id, receiverId: messagingState.selectedConversation.participants[0], content })
-        //   .then(newMessage => setMessagingState(prev => ({ ...prev, messages: [...prev.messages, newMessage] })));
-      }
-    }
-  };
-  const getOtherUser = (conversation: Conversation): UserInfo => {
-    const otherUserId = conversation.participants.find(
-      (id) => id !== currentUser.id
-    );
-    const otherUser = mockUsers.find((user) => user.id === otherUserId);
-    if (!otherUser) {
-      throw new Error("Invalid conversation: other user not found");
-    }
-    return otherUser;
-  };
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-
-  const handleClearUnread = (conversationId: number) => {
-    setConversations((prevConversations) =>
-      prevConversations.map((conv) =>
-        conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv
-      )
-    );
-  };
-
-  const handleViewSystemMessages = () => {
+  const handleViewSystemMessages = useCallback(() => {
     setIsViewingSystemMessages(true);
     setMessagingState((prev) => ({
       ...prev,
       selectedConversation: null,
-      messages: [],
+      messages: []
     }));
-  };
+  }, []);
+
+  if (!user) {
+    return <div>加载中...</div>;
+  }
 
   return (
     <div className="w-full h-screen bg-orange-400">
       <Navbar />
-      <div className="flex gap-5 justify-center  mt-3">
+      <div className="flex gap-5 justify-center mt-3">
         <ConversationList
           conversations={messagingState.conversations}
           onSelectConversation={handleSelectConversation}
-          currentUser={currentUser}
+          currentUser={user}
           getOtherUser={getOtherUser}
           onClearUnread={handleClearUnread}
           onViewSystemMessages={handleViewSystemMessages}
         />
-        <div className="bg-white shadow w-3/5 ">
+        <div className="bg-white shadow w-3/5">
           <h2 className="text-gray-500 font-light px-5 py-3 border-b border-gray-100">
             {isViewingSystemMessages
               ? "系统消息"
               : messagingState.selectedConversation
-              ? getOtherUser(messagingState.selectedConversation).name
+              ? getOtherUser(messagingState.selectedConversation)
+                  ?.displayName || "未知用户"
               : "选择一个对话"}
           </h2>
-          <div className="bg-gray-200 ">
+          <div className="bg-gray-200">
             <MessageList
               messages={messagingState.messages}
-              currentUser={currentUser}
+              currentUser={user}
               systemNotifications={messagingState.systemNotifications}
               isViewingSystemMessages={isViewingSystemMessages}
             />
-
             {isViewingSystemMessages ? (
-              <div className="h-[124px] bg-white"></div> // 占位 div，高度与 MessageInput 组件相同
+              <div className="h-[124px] bg-white"></div>
             ) : (
               <MessageInput onSendMessage={handleSendMessage} />
             )}

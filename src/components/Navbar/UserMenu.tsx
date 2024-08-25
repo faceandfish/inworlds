@@ -3,10 +3,10 @@ import { PiNotePencilLight } from "react-icons/pi";
 import { GoBell } from "react-icons/go";
 import Link from "next/link";
 import Image from "next/image";
-import ProfilesMenu from "../ProfilesMenu";
+import ProfilesMenu from "../UserMenu";
 import { useEffect, useRef, useState } from "react";
 import { UserInfo } from "@/app/lib/definitions";
-import UserAvatar from "../UserAvatar";
+import { getAvatarUrl } from "@/app/lib/imageUrl";
 
 const UserMenu = ({ user }: { user: UserInfo }) => {
   const [profileMenu, setProfileMenu] = useState(false);
@@ -31,7 +31,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
 
   return (
     <div className="flex  justify-center items-center gap-10 relative">
-      <Link href="/write" className=" group/write">
+      <Link href="/writing" className=" group/write">
         <PiNotePencilLight className="text-4xl " />
         <div className="absolute left-0 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/write:visible group-hover/write:opacity-100 transition-opacity duration-300">
           立即開始創作
@@ -45,7 +45,15 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
       </Link>
       {/* 个人头像 */}
       <div className="group/profiles " ref={menuRef}>
-        <UserAvatar user={user} onClick={handleAvatarClick} />
+        <Image
+          src={getAvatarUrl(user.avatarUrl)}
+          alt={user.displayName!}
+          width={200}
+          height={200}
+          onClick={handleAvatarClick}
+          className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all duration-200"
+        />
+
         {profileMenu && <ProfilesMenu />}
       </div>
     </div>

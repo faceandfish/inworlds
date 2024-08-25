@@ -1,31 +1,53 @@
-// components/BookContent.tsx
-
 "use client";
 
 import React, { useState } from "react";
 import { ChapterList, ContentTabs } from "@/components/Book";
 import CommentItem from "@/components/CommentItem";
-import { BookInfo, CommentInfo, ChapterInfo } from "@/app/lib/definitions";
+import {
+  BookInfo,
+  CommentInfo,
+  ChapterInfo,
+  PaginatedData
+} from "@/app/lib/definitions";
+import { likeComment, replyToComment } from "@/app/lib/action";
 
 interface BookContentProps {
   book: BookInfo;
   comments: CommentInfo[];
   chapters: ChapterInfo[];
+  chaptersPagination: PaginatedData<ChapterInfo>;
+  commentsPagination: PaginatedData<CommentInfo>;
 }
 
-export function BookContent({ book, comments, chapters }: BookContentProps) {
+export function BookContent({
+  book,
+  comments,
+  chapters
+}: // chaptersPagination,
+// commentsPagination
+BookContentProps) {
   const [activeTab, setActiveTab] = useState<"comments" | "chapters">(
     "comments"
   );
 
-  const handleLike = (id: number) => {
-    console.log(`Like comment ${id}`);
-    // 实现点赞逻辑
+  const handleLike = async (id: number) => {
+    try {
+      await likeComment(id);
+      // 这里可以添加状态更新逻辑
+      console.log(`Liked comment ${id}`);
+    } catch (error) {
+      console.error(`Error liking comment ${id}:`, error);
+    }
   };
 
-  const handleReply = (id: number) => {
-    console.log(`Reply to comment ${id}`);
-    // 实现回复逻辑
+  const handleReply = async (id: number, content: string) => {
+    try {
+      await replyToComment(id, content);
+      // 这里可以添加状态更新逻辑
+      console.log(`Replied to comment ${id}`);
+    } catch (error) {
+      console.error(`Error replying to comment ${id}:`, error);
+    }
   };
 
   return (

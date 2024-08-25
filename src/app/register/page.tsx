@@ -9,10 +9,10 @@ import { register } from "../lib/action";
 const Register = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<RegisterCredentials>({
-    loginAct: "",
+    username: "",
     email: "",
-    loginPwd: "",
-    reLoginPwd: "",
+    password: "",
+    rePassword: ""
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,7 +21,7 @@ const Register = () => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
-      [id]: value,
+      [id]: value
     }));
   };
 
@@ -31,7 +31,7 @@ const Register = () => {
     setIsLoading(true);
 
     // Basic validation
-    if (formData.loginPwd !== formData.reLoginPwd) {
+    if (formData.password !== formData.rePassword) {
       setError("Passwords do not match");
       setIsLoading(false);
       return;
@@ -72,16 +72,16 @@ const Register = () => {
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="loginAct"
+              htmlFor="username"
             >
               Username
             </label>
             <input
               className="shadow appearance-none border rounded w-96 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="loginAct"
+              id="username"
               type="text"
               placeholder="Enter your username"
-              value={formData.loginAct}
+              value={formData.username}
               onChange={handleChange}
               required
             />
@@ -112,10 +112,10 @@ const Register = () => {
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="loginPwd"
+              id="password"
               type="password"
               placeholder="Enter your password"
-              value={formData.loginPwd}
+              value={formData.password}
               onChange={handleChange}
               required
             />
@@ -123,16 +123,16 @@ const Register = () => {
           <div className="mb-4">
             <label
               className="block text-gray-700 text-sm font-bold mb-2"
-              htmlFor="reLoginPwd"
+              htmlFor="rePassword"
             >
               Confirm Password
             </label>
             <input
               className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              id="reLoginPwd"
+              id="rePassword"
               type="password"
               placeholder="Confirm your password"
-              value={formData.reLoginPwd}
+              value={formData.rePassword}
               onChange={handleChange}
               required
             />

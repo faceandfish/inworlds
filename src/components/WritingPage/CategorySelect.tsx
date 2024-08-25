@@ -25,7 +25,7 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
   ];
 
   return (
-    <div className="space-y-5 pt-10">
+    <div className="space-y-5 ">
       <label
         htmlFor="book-category"
         className="block text-2xl font-medium text-gray-700 mb-1"

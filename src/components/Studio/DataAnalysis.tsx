@@ -1,73 +1,88 @@
-import { AnalyticsData, BookInfo } from "@/app/lib/definitions";
 import React, { useState, useEffect } from "react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from "recharts";
-import { Card, CardContent, CardHeader } from "../Card";
+  BookInfo,
+  AnalyticsData,
+  ApiResponse,
+  PaginatedData
+} from "@/app/lib/definitions";
 
-// 模拟书籍数据
-const booksData: Partial<BookInfo>[] = [
-  {
-    id: 1,
-    title: "书籍1",
-    category: "female-story",
-    createdAt: "2023-01-15",
-    wordCount: 50000
-  },
-  {
-    id: 2,
-    title: "书籍2",
-    category: "male-story",
-    createdAt: "2023-03-22",
-    wordCount: 75000
-  },
-  {
-    id: 3,
-    title: "书籍3",
-    category: "literature-story",
-    createdAt: "2023-05-10",
-    wordCount: 100000
-  }
-];
-
-const generateAnalyticsData = (bookId: number): AnalyticsData => ({
-  bookId: bookId,
-  views: Math.floor(Math.random() * 10000),
-  viewsLast24h: Math.floor(Math.random() * 1000),
-  likes: Math.floor(Math.random() * 1000),
-  comments: Math.floor(Math.random() * 500),
-  totalIncome: Math.floor(Math.random() * 50000),
-  incomeLast24h: Math.floor(Math.random() * 500)
-});
+import { useUserInfo } from "../useUserInfo";
+import { fetchBooksList, fetchSingleBookAnalytics } from "@/app/lib/action";
 
 const DataAnalysis: React.FC = () => {
-  const [selectedBookId, setSelectedBookId] = useState<number>(
-    booksData[0].id!
-  );
+  const { user } = useUserInfo();
+  const [books, setBooks] = useState<BookInfo[]>([]);
+  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
-    setAnalyticsData(generateAnalyticsData(selectedBookId));
+    if (user && user.id) {
+      loadBooks();
+    }
+  }, [user, currentPage]);
+
+  const loadBooks = async () => {
+    if (!user || !user.id) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchBooksList(
+        user.id,
+        currentPage,
+        5,
+        "published"
+      );
+      setBooks(response.data.dataList);
+      setTotalPages(response.data.totalPage);
+      if (response.data.dataList.length > 0 && !selectedBookId) {
+        setSelectedBookId(response.data.dataList[0].id);
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "加载书籍列表时发生错误");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (selectedBookId) {
+      loadAnalytics(selectedBookId);
+    }
   }, [selectedBookId]);
+
+  const loadAnalytics = async (bookId: number) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetchSingleBookAnalytics(bookId);
+      setAnalyticsData(response.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "加载分析数据时发生错误");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleBookSelect = (bookId: number) => {
     setSelectedBookId(bookId);
   };
 
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  if (loading) return <div>加载中...</div>;
+  if (error) return <div>错误: {error}</div>;
+
   return (
-    <div className="  min-h-screen">
-      <div className="bg-white  px-6 py-4">
+    <div className="min-h-screen">
+      <div className="bg-white px-6 py-4">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">内容详情</h2>
         <ul className="divide-y divide-gray-200">
           <li className="grid grid-cols-5 gap-4 py-2 px-3 bg-gray-50 text-xs font-medium text-gray-500 uppercase">
@@ -77,7 +92,7 @@ const DataAnalysis: React.FC = () => {
             <span>字数</span>
             <span>状态</span>
           </li>
-          {booksData.map((book) => (
+          {books.map((book) => (
             <li
               key={book.id}
               className={`grid grid-cols-5 gap-4 py-3 px-3 cursor-pointer transition-colors duration-150 ${
@@ -85,7 +100,7 @@ const DataAnalysis: React.FC = () => {
                   ? "bg-neutral-50"
                   : "hover:bg-neutral-50"
               }`}
-              onClick={() => book.id && handleBookSelect(book.id)}
+              onClick={() => handleBookSelect(book.id)}
             >
               <span className="truncate">{book.title}</span>
               <span>{book.createdAt}</span>
@@ -101,13 +116,27 @@ const DataAnalysis: React.FC = () => {
             </li>
           ))}
         </ul>
+        <div className="mt-4">
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+            <button
+              key={page}
+              onClick={() => handlePageChange(page)}
+              className={`mx-1 px-3 py-1 rounded ${
+                currentPage === page
+                  ? "bg-orange-500 text-white"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
+        </div>
       </div>
 
       {analyticsData && (
         <div className="bg-white border-t border-t-gray-100 p-6">
           <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            详细数据 -{" "}
-            {booksData.find((book) => book.id === selectedBookId)?.title}
+            详细数据 - {books.find((book) => book.id === selectedBookId)?.title}
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
             <div className="bg-orange-100 rounded-lg p-4">
@@ -118,7 +147,6 @@ const DataAnalysis: React.FC = () => {
                 {analyticsData.views}
               </p>
             </div>
-
             <div className="bg-orange-100 rounded-lg p-4">
               <label className="block text-sm font-medium text-orange-800 mb-1">
                 总点赞数
@@ -127,7 +155,6 @@ const DataAnalysis: React.FC = () => {
                 {analyticsData.likes}
               </p>
             </div>
-
             <div className="bg-orange-100 rounded-lg p-4">
               <label className="block text-sm font-medium text-orange-800 mb-1">
                 24小时浏览量
@@ -136,7 +163,6 @@ const DataAnalysis: React.FC = () => {
                 {analyticsData.viewsLast24h}
               </p>
             </div>
-
             <div className="bg-orange-100 rounded-lg p-4">
               <label className="block text-sm font-medium text-orange-800 mb-1">
                 总收入 (元)
@@ -153,7 +179,6 @@ const DataAnalysis: React.FC = () => {
                 {analyticsData.comments}
               </p>
             </div>
-
             <div className="bg-orange-100 rounded-lg p-4">
               <label className="block text-sm font-medium text-orange-800 mb-1">
                 24小时收入 (元)

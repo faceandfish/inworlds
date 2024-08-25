@@ -56,36 +56,18 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
     }
   };
 
-  const handleSaveDraft = async () => {
-    try {
-      await onSaveDraft();
-      toast.success("草稿已保存");
-    } catch (error) {
-      console.error("保存草稿失败:", error);
-      toast.error("保存草稿失败，请重试");
-    }
-  };
-
-  const handlePublish = async () => {
-    try {
-      await onPublish();
-      toast.success("文章已发布");
-    } catch (error) {
-      console.error("发布文章失败:", error);
-      toast.error("发布文章失败，请重试");
-    }
-  };
-
   return (
-    <div className="w-64 h-screen  flex-shrink-0">
-      <div className="w-64 min-h-screen p-6  flex flex-col items-center fixed left-0 top-0 pt-16 ">
-        <h2 className="text-2xl font-bold text-orange-500 mb-6">开始创作吧</h2>
-        <ul className="space-y-4 mb-8">
+    <div className="w-64  flex-shrink-0">
+      <div className="w-64 min-h-screen   flex flex-col items-center fixed left-0 top-0 pt-16 ">
+        <h2 className="text-2xl font-bold bg-orange-400 w-full text-center py-5 text-white mb-6">
+          开始创作吧
+        </h2>
+        <ul className="space-y-4 mb-8 ">
           {sidebarOptions.map((option) => (
             <li key={option.id}>
               <button
                 onClick={() => handleOptionClick(option.id)}
-                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 text-gray-600 hover:text-white hover:bg-orange-400"
+                className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 text-neutral-600 hover:text-white hover:bg-orange-400"
               >
                 <option.icon className="h-6 w-6" />
                 <span className="font-medium">{option.title}</span>
@@ -93,28 +75,19 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
             </li>
           ))}
         </ul>
-        <div className="border-t border-gray-200 pt-10 w-full">
-          <div className="space-y-3">
+        <div className="border-t border-gray-200 pt-6 w-full">
+          <div className="space-y-3 px-10">
             <button
-              onClick={handleSaveDraft}
-              className={`w-full font-semibold py-2 px-4 rounded shadow transition duration-200 ${
-                publishStatus === "draft"
-                  ? "bg-white hover:bg-gray-100 text-gray-800 border border-gray-400"
-                  : "bg-gray-400 hover:bg-gray-500 text-white"
-              }`}
+              onClick={onSaveDraft}
+              className="w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded shadow transition duration-200 border border-gray-400"
             >
-              {publishStatus === "draft" ? "保存草稿" : "已保存草稿箱"}
+              保存草稿
             </button>
             <button
-              onClick={handlePublish}
-              className={`w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold py-2 px-4 rounded shadow transition duration-200 ${
-                publishStatus === "published"
-                  ? "opacity-50 cursor-not-allowed"
-                  : ""
-              }`}
-              disabled={publishStatus === "published"}
+              onClick={onPublish}
+              className="w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold py-2 px-4 rounded shadow transition duration-200 "
             >
-              {publishStatus === "published" ? "发布文章" : "已发布"}
+              发布文章
             </button>
           </div>
         </div>
