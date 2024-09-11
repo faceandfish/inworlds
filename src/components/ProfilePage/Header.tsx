@@ -8,6 +8,7 @@ import { fetchUserInfo, getUserById } from "@/app/lib/action";
 import { useUserInfo } from "../useUserInfo";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
+import FollowButton from "./FollowButton";
 
 const Header: React.FC = () => {
   const [user, setUser] = useState<PublicUserInfo | null>(null);
@@ -58,7 +59,7 @@ const Header: React.FC = () => {
         <div className="relative h-48 bg-gradient-to-r from-orange-200 to-purple-200">
           <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2 ">
             <Image
-              src={getAvatarUrl(user.avatarUrl)}
+              src={getAvatarUrl(user.avatarUrl!)}
               alt={user.displayName!}
               width={200}
               height={200}

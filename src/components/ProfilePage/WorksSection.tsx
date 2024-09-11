@@ -14,12 +14,9 @@ export default function WorksSection() {
   const [error, setError] = useState<string | null>(null);
   const params = useParams();
   const userId = params.id as string;
-  console.log("Current userId:", userId);
 
   useEffect(() => {
-    console.log("进来了");
     const loadBooks = async () => {
-      console.log("进来了loadbooks");
       try {
         const response = await fetchPublicBooksList(userId);
         console.log(response);

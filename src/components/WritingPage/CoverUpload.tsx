@@ -5,7 +5,7 @@ import { BookInfo, FileUploadData } from "@/app/lib/definitions"; // 假设这�
 interface CoverUploadProps {
   coverImage: FileUploadData["coverImage"];
   coverImageUrl: BookInfo["coverImageUrl"];
-  onCoverChange: (file: File | null, url: string | null) => void;
+  onCoverChange: (file: File, url: string) => void;
 }
 
 const CoverUpload: React.FC<CoverUploadProps> = ({

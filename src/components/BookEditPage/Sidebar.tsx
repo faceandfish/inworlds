@@ -1,4 +1,7 @@
+"use client";
 import React from "react";
+import { useRouter } from "next/navigation";
+import { useUserInfo } from "../useUserInfo";
 
 interface NavItem {
   id: string;
@@ -19,6 +22,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   onStartWriting,
   className = ""
 }) => {
+  const { user } = useUserInfo();
+  const router = useRouter();
+
   const navItems: NavItem[] = [
     {
       id: "details",
@@ -33,11 +39,19 @@ const Sidebar: React.FC<SidebarProps> = ({
     { id: "cover", label: "书籍封面", action: () => setActiveSection("cover") },
     {
       id: "chapters",
-      label: "章节目录",
+      label: "章节列表",
       action: () => setActiveSection("chapters")
     },
-    { id: "new-chapter", label: "添加新章节", action: onStartWriting }
+    {
+      id: "newChapter",
+      label: "添加新章节",
+      action: () => setActiveSection("newChapter")
+    }
   ];
+
+  const handleBackToStudio = () => {
+    router.push(`/studio/${user?.id}`);
+  };
 
   return (
     <nav className={`w-64 px-8 bg-neutral-50 ${className}`}>
@@ -50,27 +64,33 @@ const Sidebar: React.FC<SidebarProps> = ({
             key={item.id}
             onClick={item.action}
             className={`
-        ${item.id === "new-chapter" ? "flex justify-center" : ""}
-      `}
+              ${item.id === "new-chapter" ? "flex justify-center" : ""}
+            `}
           >
             <p
               className={`
-          text-center p-2 cursor-pointer transition-colors duration-200
-          ${
-            item.id === "new-chapter"
-              ? "inline-block px-6 rounded-full bg-orange-400 text-white hover:bg-orange-500"
-              : "w-full " +
-                (activeSection === item.id
-                  ? "bg-orange-400 text-white"
-                  : "hover:bg-orange-100 text-neutral-600")
-          }
-        `}
+                text-center p-2 cursor-pointer transition-colors duration-200
+                ${
+                  item.id === "new-chapter"
+                    ? "inline-block px-6 rounded-full bg-orange-400 text-white hover:bg-orange-500"
+                    : "w-full " +
+                      (activeSection === item.id
+                        ? "bg-orange-400 text-white"
+                        : "hover:bg-orange-100 text-neutral-600")
+                }
+              `}
             >
               {item.label}
             </p>
           </li>
         ))}
       </ul>
+      <div
+        onClick={handleBackToStudio}
+        className="text-center mx-8 mt-8 py-2 hover:bg-neutral-300 text-neutral-600 bg-neutral-200 rounded-full cursor-pointer"
+      >
+        返回工作室
+      </div>
     </nav>
   );
 };

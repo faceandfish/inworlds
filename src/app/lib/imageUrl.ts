@@ -3,7 +3,7 @@
 const IMAGE_BASE_URL = "http://8.142.44.107:9000/book-bucket/";
 const AVATAR_BASE_URL = "http://8.142.44.107:9000/avatar-bucket/";
 
-export function getImageUrl(path: string | null | undefined): string {
+export function getImageUrl(path: string): string {
   if (!path) return getFallbackImageUrl();
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
@@ -11,7 +11,7 @@ export function getImageUrl(path: string | null | undefined): string {
   return `${IMAGE_BASE_URL}${path}`;
 }
 
-export function getAvatarUrl(path: string | null | undefined): string {
+export function getAvatarUrl(path: string): string {
   if (!path) return getFallbackImageUrl();
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;

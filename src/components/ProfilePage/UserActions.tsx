@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { followUser, unfollowUser, checkFollowStatus } from "@/app/lib/action";
+import FollowButton from "./FollowButton";
 
 interface UserActionsProps {
   isCurrentUser: boolean;
@@ -29,20 +30,8 @@ export default function UserActions({
     }
   }, [userId, isCurrentUser]);
 
-  const handleFollowToggle = async () => {
-    setIsLoading(true);
-    try {
-      if (isFollowing) {
-        await unfollowUser(userId);
-      } else {
-        await followUser(userId);
-      }
-      setIsFollowing(!isFollowing);
-    } catch (error) {
-      console.error("Failed to toggle follow status:", error);
-    } finally {
-      setIsLoading(false);
-    }
+  const handleFollowStatusChange = (newStatus: boolean) => {
+    setIsFollowing(newStatus);
   };
 
   return (
@@ -62,14 +51,11 @@ export default function UserActions({
         </>
       ) : (
         <>
-          <button
-            onClick={handleFollowToggle}
-            disabled={isLoading}
-            className="ml-4 px-4 py-2 rounded-md text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out"
-          >
-            {isLoading ? "处理中..." : isFollowing ? "取消关注" : "关注"}
-          </button>
-          <button className="ml-4 px-4 py-2 rounded-md text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out">
+          <FollowButton
+            userId={userId}
+            onFollowStatusChange={handleFollowStatusChange}
+          />
+          <button className="ml-4 px-5 py-2 rounded  text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out">
             打赏
           </button>
         </>

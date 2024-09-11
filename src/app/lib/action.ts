@@ -7,8 +7,6 @@ import {
   ApiResponse,
   BookInfo,
   PaginatedData,
-  SearchRequest,
-  SearchResponse,
   CreatorUserInfo,
   ChapterInfo,
   CommentInfo,
@@ -17,7 +15,8 @@ import {
   SystemNotification,
   Message,
   FileUploadData,
-  PublicUserInfo
+  PublicUserInfo,
+  SearchResult
 } from "./definitions";
 import { getToken, removeToken, setToken } from "./token";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -503,11 +502,11 @@ export const getChapterList = async (
 // 获取章节内容
 export const getChapterContent = async (
   bookId: number,
-  chapterId: number
+  chapterNumber: number
 ): Promise<ApiResponse<ChapterInfo>> => {
   try {
     const response = await api.get<ApiResponse<ChapterInfo>>(
-      `http://8.142.44.107:8088/inworlds/api/book/${bookId}/chapter/${chapterId}`
+      `http://8.142.44.107:8088/inworlds/api/book/${bookId}/chapter/${chapterNumber}`
     );
 
     if (response.data.code !== 200) {
@@ -552,7 +551,7 @@ export const likeComment = async (
 ): Promise<ApiResponse<void>> => {
   try {
     const response = await api.post<ApiResponse<void>>(
-      `${BASE_URL}/comment/${commentId}/like`
+      `/comment/${commentId}/like`
     );
     return response.data;
   } catch (error) {
@@ -561,21 +560,40 @@ export const likeComment = async (
   }
 };
 
-const BASE_URL = "http://8.142.44.107:8088/inworlds/api";
-
-// 回复评论
-export const replyToComment = async (
-  commentId: number,
-  content: string
+// 回复评论或添加评论
+export const addCommentOrReply = async (
+  bookId: number,
+  content: string,
+  parentCommentId?: number
 ): Promise<ApiResponse<CommentInfo>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const url = parentCommentId
+      ? `/comment/${parentCommentId}/reply`
+      : `/book/${bookId}/comment`;
+
     const response = await api.post<ApiResponse<CommentInfo>>(
-      `${BASE_URL}/comment/${commentId}/reply`,
-      { content }
+      url,
+      { content },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
     );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to add comment or reply");
+    }
+
     return response.data;
   } catch (error) {
-    console.error("回复评论失败:", error);
+    console.error("Error adding comment or reply:", error);
     throw error;
   }
 };
@@ -586,7 +604,7 @@ export const deleteComment = async (
 ): Promise<ApiResponse<void>> => {
   try {
     const response = await api.delete<ApiResponse<void>>(
-      `${BASE_URL}/comment/${commentId}`
+      `/comment/${commentId}`
     );
     return response.data;
   } catch (error) {
@@ -596,14 +614,20 @@ export const deleteComment = async (
 };
 
 // 拉黑用户
-export const blockUser = async (userId: number): Promise<ApiResponse<void>> => {
+export const blockUserInBook = async (
+  userId: number,
+  bookId: number
+): Promise<ApiResponse<void>> => {
   try {
     const response = await api.post<ApiResponse<void>>(
-      `${BASE_URL}/user/${userId}/block`
+      `/book/${bookId}/user/${userId}/block`
     );
     return response.data;
   } catch (error) {
-    console.error("拉黑用户失败:", error);
+    console.error(
+      `拉黑用户失败 (用户ID: ${userId}, 书籍ID: ${bookId}):`,
+      error
+    );
     throw error;
   }
 };
@@ -667,74 +691,61 @@ export const fetchHomepageBooks = async (
 };
 
 //message:
-// 获取对话列表
-export const fetchConversations = async (
-  page: number = 1,
-  pageSize: number = 20
-): Promise<PaginatedData<Conversation>> => {
-  const response = await api.get<ApiResponse<PaginatedData<Conversation>>>(
-    "/conversations",
-    {
-      params: { page, pageSize },
-      headers: { Authorization: `Bearer ${getToken()}` }
-    }
-  );
-  return response.data.data;
-};
+// // 获取对话列表
+// export const fetchConversations = async (
+//   page: number = 1,
+//   pageSize: number = 20
+// ): Promise<PaginatedData<Conversation>> => {
+//   const response = await api.get<ApiResponse<PaginatedData<Conversation>>>(
+//     "/conversations",
+//     {
+//       params: { page, pageSize },
+//       headers: { Authorization: `Bearer ${getToken()}` }
+//     }
+//   );
+//   return response.data.data;
+// };
 
-// 获取特定对话的消息
-export const fetchMessages = async (
-  conversationId: number,
-  page: number = 1,
-  pageSize: number = 20
-): Promise<PaginatedData<Message>> => {
-  const response = await api.get<ApiResponse<PaginatedData<Message>>>(
-    `/conversations/${conversationId}/messages`,
-    {
-      params: { page, pageSize },
-      headers: { Authorization: `Bearer ${getToken()}` }
-    }
-  );
-  return response.data.data;
-};
+// // 获取特定对话的消息
+// export const fetchMessages = async (
+//   conversationId: number,
+//   page: number = 1,
+//   pageSize: number = 20
+// ): Promise<PaginatedData<Message>> => {
+//   const response = await api.get<ApiResponse<PaginatedData<Message>>>(
+//     `/conversations/${conversationId}/messages`,
+//     {
+//       params: { page, pageSize },
+//       headers: { Authorization: `Bearer ${getToken()}` }
+//     }
+//   );
+//   return response.data.data;
+// };
 
-// 发送新消息
-export const sendMessage = async (message: {
-  senderId: number;
-  receiverId: number;
-  content: string;
-}): Promise<Message> => {
-  const response = await api.post<ApiResponse<Message>>("/messages", message, {
-    headers: { Authorization: `Bearer ${getToken()}` }
-  });
-  return response.data.data;
-};
+// // 发送新消息
+// export const sendMessage = async (message: {
+//   senderId: number;
+//   receiverId: number;
+//   content: string;
+// }): Promise<Message> => {
+//   const response = await api.post<ApiResponse<Message>>("/messages", message, {
+//     headers: { Authorization: `Bearer ${getToken()}` }
+//   });
+//   return response.data.data;
+// };
 
-// 获取系统通知
-export const fetchSystemNotifications = async (
-  page: number = 1,
-  pageSize: number = 20
-): Promise<PaginatedData<SystemNotification>> => {
-  const response = await api.get<
-    ApiResponse<PaginatedData<SystemNotification>>
-  >("/system-notifications", {
-    params: { page, pageSize }
-  });
-  return response.data.data;
-};
+// // 获取当前用户信息
+// export const getCurrentUser = async (): Promise<UserInfo> => {
+//   const response = await api.get<ApiResponse<UserInfo>>("/user/principal");
+//   return response.data.data;
+// };
 
-// 获取当前用户信息
-export const getCurrentUser = async (): Promise<UserInfo> => {
-  const response = await api.get<ApiResponse<UserInfo>>("/user/principal");
-  return response.data.data;
-};
-
-// 标记对话为已读
-export const markConversationAsRead = async (
-  conversationId: number
-): Promise<void> => {
-  await api.put<ApiResponse<void>>(`/conversations/${conversationId}/read`);
-};
+// // 标记对话为已读
+// export const markConversationAsRead = async (
+//   conversationId: number
+// ): Promise<void> => {
+//   await api.put<ApiResponse<void>>(`/conversations/${conversationId}/read`);
+// };
 
 // 获取其他用户的信息
 export const getUserById = async (userId: number): Promise<PublicUserInfo> => {
@@ -752,6 +763,72 @@ export const getUserById = async (userId: number): Promise<PublicUserInfo> => {
   }
 };
 
+// 获取系统通知
+export const fetchSystemNotifications = async (
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<PaginatedData<SystemNotification>> => {
+  const token = getToken();
+  if (!token) {
+    throw new Error("No authentication token available");
+  }
+
+  try {
+    const response = await api.get<
+      ApiResponse<PaginatedData<SystemNotification>>
+    >(`/system/notifications?currentPage=${currentPage}&pageSize=${pageSize}`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.data.code !== 200) {
+      throw new Error(
+        response.data.msg || "Failed to fetch system notifications"
+      );
+    }
+
+    return response.data.data;
+  } catch (error) {
+    console.error("Error fetching system notifications:", error);
+    throw error;
+  }
+};
+
+// ... (existing code)
+
+// Fetch followed authors
+export const fetchFollowedAuthors = async (
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<ApiResponse<PaginatedData<PublicUserInfo>>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.get<ApiResponse<PaginatedData<PublicUserInfo>>>(
+      `/user/following?currentPage=${currentPage}&pageSize=${pageSize}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to fetch followed authors");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching followed authors:", error);
+    throw error;
+  }
+};
+
+//关注
 export const followUser = async (
   userId: number
 ): Promise<ApiResponse<void>> => {
@@ -827,7 +904,7 @@ export const checkFollowStatus = async (userId: number): Promise<boolean> => {
   }
 };
 
-// 用userid来获取公开用户信息
+// 获取公开用户信息
 export const fetchUserInfo = async (
   userId: string
 ): Promise<ApiResponse<PublicUserInfo>> => {
@@ -853,6 +930,12 @@ export const updateBookDetails = async (
   updateData: Partial<BookInfo>
 ): Promise<ApiResponse<BookInfo>> => {
   try {
+    console.log(
+      "Updating book details. BookId:",
+      bookId,
+      "UpdateData:",
+      updateData
+    );
     const token = getToken();
     if (!token) {
       throw new Error("Token 不可用，请重新登录");
@@ -867,7 +950,7 @@ export const updateBookDetails = async (
         }
       }
     );
-
+    console.log("API response:", response.data);
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "更新书籍信息失败");
     }
@@ -969,6 +1052,7 @@ export const addNewChapter = async (
       }
     );
 
+    console.log("[addNewChapter] Response received:", response);
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "Failed to add new chapter");
     }
@@ -976,6 +1060,154 @@ export const addNewChapter = async (
     return response.data;
   } catch (error) {
     console.error("Error adding new chapter:", error);
+    throw error;
+  }
+};
+
+//收藏书籍
+// 在 action.ts 文件中添加以下函数
+
+export const favoriteBook = async (
+  bookId: number
+): Promise<ApiResponse<void>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token 不可用，请重新登录");
+    }
+
+    const response = await api.post<ApiResponse<void>>(
+      `/book/${bookId}/favorite`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "收藏书籍失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("收藏书籍时出错:", error);
+    throw error;
+  }
+};
+
+// 取消收藏书籍
+export const unfavoriteBook = async (
+  bookId: number
+): Promise<ApiResponse<void>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token 不可用，请重新登录");
+    }
+
+    const response = await api.post<ApiResponse<void>>(
+      `/book/${bookId}/unfavorite`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "取消收藏书籍失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("取消收藏书籍时出错:", error);
+    throw error;
+  }
+};
+
+// 获取用户收藏列表
+export const getUserFavorites = async (
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token 不可用，请重新登录");
+    }
+
+    const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(
+      `/user/favorites?currentPage=${currentPage}&pageSize=${pageSize}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取收藏列表失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取收藏列表时出错:", error);
+    throw error;
+  }
+};
+
+export const checkBookFavoriteStatus = async (
+  bookId: number
+): Promise<ApiResponse<boolean>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token 不可用，请重新登录");
+    }
+
+    console.log("Checking favorite status for book:", bookId);
+
+    const response = await api.get<ApiResponse<boolean>>(
+      `/book/${bookId}/favorite-status`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    console.log("Raw API response:", response);
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取书籍收藏状态失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取书籍收藏状态时出错:", error);
+    throw error;
+  }
+};
+
+// 搜索
+export const searchBooks = async (
+  query: string
+): Promise<ApiResponse<SearchResult>> => {
+  try {
+    const response = await api.get<ApiResponse<SearchResult>>(`/search`, {
+      params: { query }
+    });
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "找不到相关内容");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("搜索书籍时出错:", error);
     throw error;
   }
 };

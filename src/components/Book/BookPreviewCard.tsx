@@ -11,7 +11,6 @@ interface ClipProps {
 
 export const BookPreviewCard = React.memo(
   ({ book, width = "w-80", height = "h-48" }: ClipProps) => {
-    console.log("Book ID:", book.id);
     return (
       <Link href={`/book/${book.id.toString()}`}>
         <div className={`flex ${width} ${height} flex-1 hover:bg-neutral-50`}>
@@ -39,7 +38,7 @@ export const BookPreviewCard = React.memo(
             <div>
               <p className="text-sm text-gray-500">{book.authorName}</p>
               <p className="text-sm text-orange-500">
-                {book.followersCount}人在追
+                {book.favoritesCount}人在追
               </p>
             </div>
           </div>

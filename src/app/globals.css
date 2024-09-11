@@ -42,15 +42,3 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:hover::before {
   background-color: rgba(0, 0, 0, 0.3);
 }
-
-.Toastify__toast-container {
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%);
-  width: auto !important;
-}
-
-.Toastify__toast {
-  min-width: 200px;
-  text-align: center;
-}

@@ -46,7 +46,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
       {/* 个人头像 */}
       <div className="group/profiles " ref={menuRef}>
         <Image
-          src={getAvatarUrl(user.avatarUrl)}
+          src={getAvatarUrl(user.avatarUrl || "")}
           alt={user.displayName!}
           width={200}
           height={200}

@@ -1,73 +1,119 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-
 import { ChapterInfo, BookInfo } from "@/app/lib/definitions";
 import ContentEditor from "../WritingPage/ContentEditor";
+import Alert from "../Alert";
+import {
+  getBookDetails,
+  getChapterContent,
+  updateChapter
+} from "@/app/lib/action";
+import ChapterEditSkeleton from "../Skeleton/ChapterEditSkeleton";
 
 const ChapterEditPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
-  const bookId = params.bookId as string;
-  const chapterId = params.chapterId as string;
+  const bookId = Number(params.bookId as string);
+  const chapterId = Number(params.chapterId as string);
 
-  // 硬编码的书籍数据
-  const book: BookInfo = {
-    id: 1,
-    title: "我的第一本小说",
-    description: "这是一个关于冒险和友谊的故事。",
-    authorName: "张三",
-    authorId: 1,
-    authorAvatarUrl: "/path/to/avatar.jpg",
-    category: "children-story",
-    ageRating: "allAges",
-    coverImageUrl: "/path/to/cover.jpg",
-    wordCount: 50000,
-    lastSaved: "2023-08-23T12:00:00Z",
-    createdAt: "2023-08-01T10:00:00Z",
-    latestChapterNumber: 10,
-    latestChapterTitle: "最新章节标题",
-    followersCount: 100,
-    commentsCount: 50,
-    status: "ongoing",
-    publishStatus: "published"
+  const [book, setBook] = useState<BookInfo | null>(null);
+  const [chapter, setChapter] = useState<ChapterInfo | null>(null);
+  const [localChapter, setLocalChapter] = useState<ChapterInfo | null>(null);
+
+  const [error, setError] = useState<string | null>(null);
+  const [alert, setAlert] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [bookResponse, chapterResponse] = await Promise.all([
+          getBookDetails(bookId),
+          getChapterContent(bookId, chapterId)
+        ]);
+
+        if (bookResponse.code === 200 && bookResponse.data) {
+          setBook(bookResponse.data);
+        } else {
+          throw new Error(bookResponse.msg || "获取书籍信息失败");
+        }
+
+        if (chapterResponse.code === 200 && chapterResponse.data) {
+          setChapter(chapterResponse.data);
+          setLocalChapter(chapterResponse.data);
+        } else {
+          throw new Error(chapterResponse.msg || "获取章节内容失败");
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "发生未知错误");
+      }
+    };
+
+    fetchData();
+  }, [bookId, chapterId]);
+
+  const handleContentChange = (updatedFields: Partial<ChapterInfo>) => {
+    if (localChapter) {
+      setLocalChapter({ ...localChapter, ...updatedFields });
+    }
   };
 
-  // 硬编码的章节数据
-  const [chapter, setChapter] = useState<ChapterInfo>({
-    id: 21,
-    bookId: 1,
-    chapterNumber: 1,
-    title: "启程",
-    content: "<p>在遥远的未来，人类已经开始了星际探索的伟大冒险...</p>",
-    createdAt: "2023-06-01T00:00:00Z",
-    lastModified: "2023-06-02T10:00:00Z",
-    wordCount: 3000,
-    authorNote: "希望读者能喜欢这个故事"
-  });
+  const saveChapterChanges = async (publishStatus?: "draft" | "published") => {
+    if (!localChapter) return;
 
-  const handleChapterUpdate = (updatedChapter: ChapterInfo) => {
-    setChapter(updatedChapter);
-    // 在实际应用中，这里会调用 API 来保存更新
-    console.log("Chapter updated:", updatedChapter);
+    try {
+      const updatedChapter = publishStatus
+        ? { ...localChapter, publishStatus }
+        : localChapter;
+
+      const response = await updateChapter(bookId, chapterId, updatedChapter);
+      if (response.code === 200) {
+        setChapter(response.data);
+        setLocalChapter(response.data);
+        setAlert({ message: "章节更新成功", type: "success" });
+
+        if (publishStatus === "published") {
+          // 设置一个短暂的延迟，以确保用户能看到成功消息
+          setTimeout(() => {
+            router.push(`/writing/${bookId}?section=chapters`);
+          }, 1500); // 1.5秒后跳转
+        }
+      } else {
+        throw new Error(response.msg || "更新章节失败");
+      }
+    } catch (err) {
+      console.error("更新章节时出错:", err);
+      setAlert({
+        message: err instanceof Error ? err.message : "更新章节时发生未知错误",
+        type: "error"
+      });
+    }
   };
 
   const handleReturn = () => {
-    // 在本地存储中设置一个标志
-    localStorage.setItem("activeSection", "chapters");
-    router.push(`/writing/${bookId}`);
+    router.push(`/writing/${bookId}?section=chapters`);
   };
 
+  const handleSaveDraft = () => saveChapterChanges("draft");
+  const handlePublishChapter = () => saveChapterChanges("published");
+
+  if (error)
+    return <div className="text-center py-10 text-red-500">{error}</div>;
+  if (!book || !localChapter) return null;
   return (
-    <div className="container mx-auto bg-white   px-20 ">
-      <div className=" py-6 px-10">
+    <div className="container mx-auto bg-white px-20 py-20">
+      <h1 className="text-2xl text-neutral-600 font-bold mb-4">{book.title}</h1>
+      <div className="py-6">
         <ContentEditor
-          chapter={chapter}
-          onChapterUpdate={handleChapterUpdate}
+          chapter={localChapter}
+          onContentChange={handleContentChange}
         />
       </div>
 
-      <div className="my-10 flex justify-center gap-10">
+      <div className="my-10 flex justify-between items-center">
         <button
           onClick={handleReturn}
           className="bg-neutral-400 hover:bg-neutral-500 text-white font-bold py-2 px-4 rounded transition duration-300"
@@ -76,19 +122,27 @@ const ChapterEditPage: React.FC = () => {
         </button>
         <div>
           <button
-            onClick={() => console.log("Save draft")}
+            onClick={handleSaveDraft}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4 transition duration-300"
           >
             保存草稿
           </button>
           <button
-            onClick={() => console.log("Publish chapter")}
+            onClick={handlePublishChapter}
             className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded transition duration-300"
           >
             发布章节
           </button>
         </div>
       </div>
+
+      {alert && (
+        <Alert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
     </div>
   );
 };

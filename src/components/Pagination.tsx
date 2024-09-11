@@ -19,7 +19,7 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex items-center justify-center space-x-4 my-14">
+    <div className="flex items-center justify-center space-x-4 my-5">
       <button
         onClick={() => handlePageChange(currentPage - 1)}
         disabled={currentPage <= 1}

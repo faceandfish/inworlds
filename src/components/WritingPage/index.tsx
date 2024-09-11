@@ -7,7 +7,7 @@ import {
   CreatorUserInfo,
   FileUploadData
 } from "@/app/lib/definitions";
-import Navbar from "@/components/Navbar";
+
 import WritingSidebar from "@/components/WritingPage/WritingSidebar";
 import BookIntro from "@/components/WritingPage/BookIntro";
 import CoverUpload from "@/components/WritingPage/CoverUpload";
@@ -42,7 +42,7 @@ const WritingPage: React.FC = () => {
   });
 
   const [fileData, setFileData] = useState<FileUploadData>({
-    coverImage: null
+    coverImage: undefined
   });
 
   // 表单错误状态
@@ -311,8 +311,8 @@ const WritingPage: React.FC = () => {
               </div>
               <div id="cover">
                 <CoverUpload
-                  coverImage={fileData.coverImage || null}
-                  coverImageUrl={bookData.coverImageUrl || null}
+                  coverImage={fileData.coverImage || undefined}
+                  coverImageUrl={bookData.coverImageUrl!}
                   onCoverChange={(file, url) => {
                     setFileData((prev) => ({ ...prev, coverImage: file }));
                     setBookData((prev) => ({ ...prev, coverImageUrl: url }));
@@ -341,14 +341,14 @@ const WritingPage: React.FC = () => {
               <div id="content">
                 <ContentEditor
                   chapter={
-                    bookData.chapters?.[0] ?? {
+                    bookData.chapters?.[0] ??
+                    ({
                       bookId: bookData.id!,
                       title: "",
                       content: ""
-                    }
+                    } as ChapterInfo)
                   }
-                  onChapterUpdate={handleChapterUpdate}
-                  error={errors.content}
+                  onContentChange={handleChapterUpdate}
                 />
               </div>
               <div id="authornote">

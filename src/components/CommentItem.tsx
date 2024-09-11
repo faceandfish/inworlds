@@ -1,31 +1,39 @@
-"use client";
 import React, { useState } from "react";
-import { CommentInfo } from "../app/lib/definitions";
 import { FiThumbsUp, FiMessageSquare, FiTrash2, FiSlash } from "react-icons/fi";
-import { toast } from "react-toastify";
+import { getAvatarUrl } from "@/app/lib/imageUrl";
+import Image from "next/image";
+import Alert from "./Alert";
+import { CommentInfo } from "../app/lib/definitions";
 
-interface CommentItemProps extends CommentInfo {
-  onLike?: (id: number) => void;
-  onReply?: (id: number, content: string) => void;
-  onDelete?: (id: number) => void;
-  onBlock?: (userId: number) => void;
+interface CommentActions {
+  onLike: (commentId: number) => Promise<void>;
+  onReply: (commentId: number, content: string) => Promise<void>;
+  onDelete?: (commentId: number) => Promise<void>;
+  onBlock?: (userId: number) => Promise<void>;
+}
+
+interface CommentItemProps {
+  comment: CommentInfo;
+  actions: CommentActions;
+  showDeleteButton?: boolean;
+  showBlockButton?: boolean;
+  isTopLevel?: boolean;
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({
-  id,
-  userId,
-  content,
-  replyCount,
-  username,
-  createdAt,
-  likes,
-  onLike,
-  onReply,
-  onDelete,
-  onBlock
+  comment,
+  actions,
+  showDeleteButton = false,
+  showBlockButton = false,
+  isTopLevel = true
 }) => {
   const [replyContent, setReplyContent] = useState("");
-  const [isReplying, setIsReplying] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertConfirmAction, setAlertConfirmAction] = useState<() => void>(
+    () => {}
+  );
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -35,83 +43,92 @@ const CommentItem: React.FC<CommentItemProps> = ({
     )}/${String(date.getDate()).padStart(2, "0")}`;
   };
 
-  const handleReplyClick = () => {
-    setIsReplying(true);
+  const handleReplyToggle = () => {
+    setShowReplies(!showReplies);
   };
 
   const handleReplySubmit = async () => {
-    if (onReply) {
-      try {
-        await onReply(id, replyContent);
-        toast.success("回复成功！");
-        setReplyContent("");
-        setIsReplying(false);
-      } catch (error) {
-        toast.error("回复失败，请稍后重试");
-      }
+    try {
+      await actions.onReply(comment.id, replyContent);
+      setReplyContent("");
+    } catch (error) {
+      console.error("回复失败", error);
     }
   };
+
   const handleLike = async () => {
-    if (onLike) {
-      try {
-        await onLike(id);
-        toast.success("点赞成功！");
-      } catch (error) {
-        toast.error("点赞失败，请稍后重试");
-      }
+    try {
+      await actions.onLike(comment.id);
+    } catch (error) {
+      console.error("点赞失败", error);
     }
   };
 
-  const handleDelete = async () => {
-    if (onDelete) {
-      try {
-        await onDelete(id);
-        toast.success("评论已删除！");
-      } catch (error) {
-        toast.error("删除失败，请稍后重试");
+  const handleDelete = () => {
+    setAlertMessage("你确定要删除这条评论吗？此操作无法撤销。");
+    setAlertConfirmAction(() => async () => {
+      if (actions.onDelete) {
+        try {
+          await actions.onDelete(comment.id);
+        } catch (error) {
+          console.error("删除失败", error);
+        }
       }
-    }
+      setShowAlert(false);
+    });
+    setShowAlert(true);
   };
 
-  const handleBlock = async () => {
-    if (onBlock) {
-      try {
-        await onBlock(userId);
-        toast.success("用户已被拉黑！");
-      } catch (error) {
-        toast.error("拉黑用户失败，请稍后重试");
+  const handleBlock = () => {
+    setAlertMessage("你确定要拉黑这个用户吗？此操作可能会影响用户体验。");
+    setAlertConfirmAction(() => async () => {
+      if (actions.onBlock) {
+        try {
+          await actions.onBlock(comment.userId);
+        } catch (error) {
+          console.error("拉黑用户失败", error);
+        }
       }
-    }
+      setShowAlert(false);
+    });
+    setShowAlert(true);
   };
 
   return (
     <div className="flex justify-start py-5 gap-2">
-      <div className="w-10 h-10 rounded-full bg-red-300"></div>
-      <div className="flex flex-col justify-between">
-        <div>
-          <p className="text-sm text-gray-400">
-            {username} {formatDate(createdAt)}
-          </p>
+      <Image
+        src={getAvatarUrl(comment.avatarUrl)}
+        alt={comment.username}
+        width={200}
+        height={200}
+        className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all duration-200"
+      />
+      <div className="flex flex-col justify-between flex-grow">
+        <div className="text-neutral-400 space-x-5">
+          <span>{comment.username}</span>
+          <span className="text-sm">{formatDate(comment.createdAt)}</span>
         </div>
-        <p className="py-5">{content}</p>
+        <p className="py-2 mb-3 pr-10">{comment.content}</p>
         <div className="flex space-x-10 text-sm">
-          {onReply && (
-            <button
-              onClick={handleReplyClick}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <FiMessageSquare className="mr-1 text-xl" /> {replyCount}
-            </button>
+          {isTopLevel && (
+            <div className="flex space-x-10 text-sm">
+              <button
+                onClick={handleReplyToggle}
+                className="text-gray-500 hover:text-gray-700  flex items-center"
+              >
+                <FiMessageSquare className="mr-1 text-xl" />{" "}
+                {comment.replyCount}
+              </button>
+              <button
+                onClick={handleLike}
+                className="text-gray-500 hover:text-red-500 flex items-center"
+              >
+                <FiThumbsUp className="mr-1 text-xl" /> {comment.likes}
+              </button>
+            </div>
           )}
-          {onLike && (
-            <button
-              onClick={handleLike}
-              className="text-gray-500 hover:text-red-500 flex items-center"
-            >
-              <FiThumbsUp className="mr-1 text-xl" /> {likes}
-            </button>
-          )}
-          {onDelete && (
+
+          {showDeleteButton && (
             <button
               onClick={handleDelete}
               className="hover:text-gray-700 text-gray-500"
@@ -119,7 +136,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
               <FiTrash2 className="text-xl mr-1" />
             </button>
           )}
-          {onBlock && (
+          {showBlockButton && (
             <button
               onClick={handleBlock}
               className="text-gray-500 hover:text-gray-700"
@@ -128,23 +145,49 @@ const CommentItem: React.FC<CommentItemProps> = ({
             </button>
           )}
         </div>
-        {isReplying && (
-          <div className="mt-2">
+        {isTopLevel && showReplies && (
+          <div className="mt-2 flex flex-col">
             <textarea
               value={replyContent}
               onChange={(e) => setReplyContent(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-1/2 p-2 border focus:outline-none rounded"
               placeholder="输入你的回复..."
             />
             <button
               onClick={handleReplySubmit}
-              className="mt-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              className="mt-2 px-4 py-2 w-24 bg-neutral-400 text-white rounded hover:bg-neutral-500"
             >
               提交回复
             </button>
+            {comment.replies && comment.replies.length > 0 && (
+              <div className="mt-4 ml-8">
+                {comment.replies.map((reply) => (
+                  <CommentItem
+                    key={reply.id}
+                    comment={reply}
+                    actions={actions}
+                    showDeleteButton={showDeleteButton}
+                    showBlockButton={showBlockButton}
+                    isTopLevel={false}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
+      {showAlert && (
+        <Alert
+          message={alertMessage}
+          type="error"
+          onClose={() => setShowAlert(false)}
+          customButton={{
+            text: "确认",
+            onClick: alertConfirmAction
+          }}
+          autoClose={false}
+        />
+      )}
     </div>
   );
 };

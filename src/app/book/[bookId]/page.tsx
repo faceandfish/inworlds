@@ -1,6 +1,5 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import Navbar from "@/components/Navbar";
 import { BookHeader, BookDescription, BookContent } from "@/components/Book";
 import {
   getBookDetails,
@@ -8,6 +7,7 @@ import {
   getBookComments
 } from "@/app/lib/action";
 import { CreatorUserInfo, UserInfo } from "@/app/lib/definitions";
+import CommentSection from "@/components/Book/CommentSection";
 
 interface BookPageProps {
   params: {
@@ -17,17 +17,10 @@ interface BookPageProps {
 
 async function getBookData(bookId: number) {
   try {
-    const [bookResponse, chaptersResponse, commentsResponse] =
-      await Promise.all([
-        getBookDetails(bookId),
-        getChapterList(bookId, 1, 20),
-        getBookComments(bookId, 1, 20)
-      ]);
+    const bookResponse = await getBookDetails(bookId);
 
     return {
-      book: bookResponse.data,
-      chapters: chaptersResponse.data,
-      comments: commentsResponse.data
+      book: bookResponse.data
     };
   } catch (error) {
     console.error("Error fetching book data:", error);
@@ -42,24 +35,17 @@ export default async function BookPage({ params }: BookPageProps) {
   }
 
   try {
-    const { book, chapters, comments } = await getBookData(bookId);
-    if (!book || !chapters || !comments) {
+    const { book } = await getBookData(bookId);
+    if (!book) {
       notFound();
     }
 
     return (
       <>
-        <Navbar />
         <div className="w-5/6 mx-auto">
           <BookHeader book={book} />
           <BookDescription book={book} />
-          <BookContent
-            book={book}
-            chapters={chapters.dataList}
-            comments={comments.dataList}
-            chaptersPagination={chapters}
-            commentsPagination={comments}
-          />
+          <BookContent book={book} />
         </div>
       </>
     );

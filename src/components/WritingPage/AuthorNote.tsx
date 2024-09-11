@@ -18,7 +18,7 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
   };
 
   return (
-    <div className="w-full h-screen">
+    <div className="w-full ">
       <label
         htmlFor="authorNote"
         className="block text-2xl font-medium text-gray-700 mb-6"
@@ -29,7 +29,7 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
         <textarea
           id="authorNote"
           name="authorNote"
-          rows={16}
+          rows={8}
           className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-orange-500"
           placeholder="请在这里写下您想对读者说的话..."
           value={authorNote}

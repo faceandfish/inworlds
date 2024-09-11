@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { BookInfo } from "@/app/lib/definitions";
 import BookIntro from "../WritingPage/BookIntro";
+import Alert from "../Alert";
 
 interface BookDetailsProps {
   book: BookInfo;
   onSave: (
     updatedBook: Partial<Pick<BookInfo, "title" | "description">>
-  ) => void;
+  ) => Promise<boolean>;
 }
 
 const BookDetails: React.FC<BookDetailsProps> = ({ book, onSave }) => {
@@ -16,6 +17,10 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, onSave }) => {
     title: book.title,
     description: book.description
   });
+  const [alert, setAlert] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const handleBookChange = (
     updates: Partial<Pick<BookInfo, "title" | "description">>
@@ -23,9 +28,18 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, onSave }) => {
     setEditedBook((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(editedBook);
+    try {
+      const success = await onSave(editedBook);
+      if (success) {
+        setAlert({ message: "书籍详情更新成功", type: "success" });
+      } else {
+        setAlert({ message: "更新书籍详情失败", type: "error" });
+      }
+    } catch (error) {
+      setAlert({ message: "更新书籍详情时出错", type: "error" });
+    }
   };
 
   return (
@@ -46,6 +60,13 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, onSave }) => {
           保存修改
         </button>
       </form>
+      {alert && (
+        <Alert
+          message={alert.message}
+          type={alert.type}
+          onClose={() => setAlert(null)}
+        />
+      )}
     </>
   );
 };

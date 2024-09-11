@@ -1,157 +1,216 @@
-import React, { useState, useEffect } from "react";
-import { CommentInfo, BookInfo, UserInfo } from "@/app/lib/definitions";
+"use client";
+import React, { useState, useEffect, useMemo } from "react";
+import { CommentInfo, BookInfo } from "@/app/lib/definitions";
 import {
-  blockUser,
+  blockUserInBook,
   deleteComment,
   fetchBooksList,
   getBookComments,
-  getUserInfo,
   likeComment,
-  replyToComment
+  addCommentOrReply
 } from "@/app/lib/action";
 import CommentItem from "../CommentItem";
+import { useUserInfo } from "../useUserInfo";
+import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
+import Alert from "../Alert";
+import Pagination from "../Pagination";
+import { getImageUrl } from "@/app/lib/imageUrl";
+import Image from "next/image";
+import CommentsSkeleton from "./Skeleton/CommentsSkeleton";
+
+const ITEMS_PER_PAGE = 10;
+
+interface CommentsData {
+  comments: CommentInfo[];
+  books: BookInfo[];
+}
 
 const Comments: React.FC = () => {
-  const [comments, setComments] = useState<CommentInfo[]>([]);
-  const [books, setBooks] = useState<BookInfo[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useUserInfo();
+  const [currentPage, setCurrentPage] = useState(1);
+  const [commentsData, setCommentsData] = useState<CommentsData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [user, setUser] = useState<UserInfo | null>(null);
+  const [alertInfo, setAlertInfo] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
+
+  // 注释：获取所有评论数据
+  const fetchComments = async (userId: number) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const booksResponse = await fetchBooksList(userId, 1, 1000, "published");
+      const allBooks = booksResponse.data.dataList;
+      const allComments: CommentInfo[] = [];
+
+      for (const book of allBooks) {
+        const commentsResponse = await getBookComments(book.id, 1, 1000); // 获取所有评论
+        allComments.push(...commentsResponse.data.dataList);
+      }
+
+      setCommentsData({
+        comments: allComments,
+        books: allBooks
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load comments");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
+    if (user?.id) {
+      fetchComments(user.id);
+    }
+  }, [user]);
 
-        // 获取用户信息
-        const userResponse = await getUserInfo();
-        if (userResponse.code !== 200 || !userResponse.data) {
-          throw new Error("获取用户信息失败");
-        }
-        setUser(userResponse.data);
+  // 分页评论
+  const paginatedComments = useMemo(() => {
+    if (!commentsData) return [];
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return commentsData.comments.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [commentsData, currentPage]);
 
-        // 获取所有书籍
-        const booksResponse = await fetchBooksList(
-          userResponse.data.id,
-          1,
-          20,
-          "published"
-        );
-        const booksWithComments = booksResponse.data.dataList.filter(
-          (book) => book.commentsCount > 0
-        );
-        setBooks(booksWithComments);
+  // 总页数
+  const totalPages = useMemo(() => {
+    if (!commentsData) return 0;
+    return Math.ceil(commentsData.comments.length / ITEMS_PER_PAGE);
+  }, [commentsData]);
 
-        // 获取所有书籍的评论
-        const allComments: CommentInfo[] = [];
-        for (const book of booksResponse.data.dataList) {
-          const commentsResponse = await getBookComments(book.id, 1, 20);
-          allComments.push(...commentsResponse.data.dataList);
-        }
-        setComments(allComments);
-
-        setLoading(false);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "获取数据失败");
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleLike = async (id: number) => {
+  // 注释：处理点赞操作
+  const handleLike = async (commentId: number) => {
+    if (!user?.id) return;
     try {
-      await likeComment(id);
-      setComments((prevComments) =>
-        prevComments.map((comment) =>
-          comment.id === id
-            ? { ...comment, likes: (comment.likes || 0) + 1 }
-            : comment
-        )
-      );
-      console.log(`Liked comment ${id}`);
-    } catch (err) {
-      console.error(`Error liking comment ${id}:`, err);
+      await likeComment(commentId);
+      setAlertInfo({ message: "点赞成功！", type: "success" });
+      fetchComments(user.id);
+    } catch (error) {
+      setAlertInfo({ message: "点赞失败，请稍后重试", type: "error" });
     }
   };
 
-  const handleReply = async (id: number, content: string) => {
+  // 注释：处理回复操作
+  const handleReply = async (commentId: number, content: string) => {
+    if (!user?.id || !commentsData) return;
     try {
-      const response = await replyToComment(id, content);
-      setComments((prevComments) => [...prevComments, response.data]);
-      console.log(`Replied to comment ${id}`);
-    } catch (err) {
-      console.error(`Error replying to comment ${id}:`, err);
+      const bookId = commentsData.comments.find(
+        (c) => c.id === commentId
+      )?.bookId;
+      if (!bookId) throw new Error("Book ID not found");
+      await addCommentOrReply(bookId, content, commentId);
+      setAlertInfo({ message: "回复成功！", type: "success" });
+      fetchComments(user.id);
+    } catch (error) {
+      setAlertInfo({ message: "回复失败，请稍后重试", type: "error" });
     }
   };
 
-  const handleDelete = async (id: number) => {
+  // 注释：处理删除操作
+  const handleDelete = async (commentId: number) => {
+    if (!user?.id) return;
     try {
-      await deleteComment(id);
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment.id !== id)
-      );
-      console.log(`Deleted comment ${id}`);
-    } catch (err) {
-      console.error(`Error deleting comment ${id}:`, err);
+      await deleteComment(commentId);
+      setAlertInfo({ message: "评论已删除！", type: "success" });
+      fetchComments(user.id);
+    } catch (error) {
+      setAlertInfo({ message: "删除失败，请稍后重试", type: "error" });
     }
   };
 
+  // 注释：处理拉黑用户操作
   const handleBlock = async (userId: number) => {
+    if (!user?.id || !commentsData) return;
     try {
-      await blockUser(userId);
-      setComments((prevComments) =>
-        prevComments.filter((comment) => comment.userId !== userId)
-      );
-      console.log(`Blocked user ${userId}`);
-    } catch (err) {
-      console.error(`Error blocking user ${userId}:`, err);
+      const bookId = commentsData.books[0]?.id;
+      if (!bookId) throw new Error("No books available");
+      await blockUserInBook(userId, bookId);
+      setAlertInfo({ message: "用户已被拉黑！", type: "success" });
+      fetchComments(user.id);
+    } catch (error) {
+      setAlertInfo({ message: "拉黑用户失败，请稍后重试", type: "error" });
     }
   };
-  if (loading) {
-    return <div className="text-center py-4">加载中...</div>;
+
+  // 注释：处理页码变化
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+  };
+
+  if (isLoading) {
+    return <CommentsSkeleton />;
   }
 
   if (error) {
-    return <div className="text-center py-4 text-red-500">{error}</div>;
+    return (
+      <Alert message={error} type="error" onClose={() => setError(null)} />
+    );
   }
 
-  if (!comments || comments.length === 0) {
-    return <div className="text-center py-4">暂无评论</div>;
+  if (!commentsData) {
+    return <div>No comments available.</div>;
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto px-10">
       <h1 className="text-2xl font-bold pb-6 border-b">评论管理</h1>
-
-      <ul className="divide-y divide-gray-200">
-        {comments.map((comment) => {
-          const book = books.find((b) => b.id === comment.bookId);
+      <ul className="divide-y divide-gray-200 ">
+        {paginatedComments.map((comment: CommentInfo) => {
+          const book = commentsData.books.find(
+            (b: BookInfo) => b.id === comment.bookId
+          );
           return (
-            <li key={comment.id} className="flex py-5">
-              {/* 左侧：评论内容 */}
+            <li key={comment.id} className="flex ">
               <div className="w-2/3">
                 <CommentItem
-                  {...comment}
-                  onLike={handleLike}
-                  onReply={handleReply}
-                  onDelete={handleDelete}
-                  onBlock={handleBlock}
+                  comment={comment}
+                  actions={{
+                    onLike: handleLike,
+                    onReply: handleReply,
+                    onDelete: handleDelete,
+                    onBlock: handleBlock
+                  }}
+                  showDeleteButton={true}
+                  showBlockButton={true}
                 />
               </div>
-
-              {/* 右侧：相关书籍信息 */}
               {book && (
-                <div className="w-1/3">
-                  <div className="w-16 h-20 bg-gray-100"></div>
-                  <p className="text-sm font-semibold mt-2">{book.title}</p>
+                <div className="w-1/3 flex items-center gap-10">
+                  <Image
+                    src={getImageUrl(book.coverImageUrl)}
+                    width={400}
+                    height={600}
+                    alt={`${book.title} cover`}
+                    className="w-16 h-20 object-cover"
+                    onError={(e) => {
+                      console.error(`图片加载失败: ${book.coverImageUrl}`);
+                    }}
+                  />
+                  <p className="text-sm line-clamp-1 font-semibold mt-2">
+                    {book.title}
+                  </p>
                 </div>
               )}
             </li>
           );
         })}
       </ul>
+      <div className="my-20">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
+      {alertInfo && (
+        <Alert
+          message={alertInfo.message}
+          type={alertInfo.type}
+          onClose={() => setAlertInfo(null)}
+        />
+      )}
     </div>
   );
 };

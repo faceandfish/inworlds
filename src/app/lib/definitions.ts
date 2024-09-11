@@ -1,7 +1,7 @@
 // 文件上传接口
 export interface FileUploadData {
-  coverImage?: File | null;
-  avatarImage?: File | null;
+  coverImage?: File;
+  avatarImage?: File;
 }
 
 // 可公开的用户信息
@@ -25,7 +25,7 @@ interface BaseUserInfo {
   username: string;
   displayName?: string;
   email: string;
-  avatarUrl?: string | null;
+  avatarUrl: string | null;
   introduction?: string;
   createdAt: string;
   phone?: string; // 可选字段，因为可能不是所有用户都有手机号
@@ -126,15 +126,17 @@ export interface ImageUploadResponse {
 
 // 章节信息
 export interface ChapterInfo {
-  id?: number;
+  id: number;
   bookId: number; // 添加这个字段来关联到特定的书
   chapterNumber?: number; // 添加章节序号
   title: string;
   content: string;
-  createdAt?: string;
-  lastModified?: string;
+  createdAt: string;
+  lastModified: string;
   wordCount?: number;
   authorNote?: string;
+  publishStatus: "draft" | "published" | "scheduled"; // 新增：章节的发布状态
+  publishDate?: string; //"scheduled"定时发布时间确定
 }
 
 // 书籍信息
@@ -146,6 +148,7 @@ export interface BookInfo {
   authorIntroduction?: string;
   authorId: number; // 添加作者ID
   authorAvatarUrl: string;
+  authorFollowersCount: number;
 
   category:
     | "female-story"
@@ -154,7 +157,7 @@ export interface BookInfo {
     | "literature-story"
     | "personal-story";
   ageRating: "under18" | "adult" | "allAges";
-  coverImageUrl: string | null;
+  coverImageUrl: string;
 
   wordCount?: number;
   lastSaved?: string;
@@ -162,8 +165,8 @@ export interface BookInfo {
   latestChapterNumber: number; //最新章节的编号
   latestChapterTitle: string; //最新章节的标题
 
-  tags?: string[]; // 可选的标签
-  followersCount: number; //收藏本书的人数
+  tags?: string; // 可选的标签
+  favoritesCount: number; //收藏本书的人数
   commentsCount: number; //新增评论数总数
   chapters?: ChapterInfo[];
 
@@ -182,6 +185,8 @@ export interface CommentInfo {
   bookId: number;
   parentCommentId?: number; // 用于回复功能
   userId: number; // 评论者ID
+  avatarUrl: string;
+  replies?: CommentInfo[]; // 直接回复的数组
 }
 
 // 收入数据
@@ -278,20 +283,11 @@ export interface SendMessageRequest {
 }
 
 // 搜索请求接口
-export interface SearchRequest {
-  query: string;
-  type: "book" | "article" | "user";
-  filters?: {
-    category?: string;
-    ageRating?: string;
-    dateRange?: { start: string; end: string };
-  };
-  page: number;
-  pageSize: number;
-}
 
-// 搜索响应接口
-export interface SearchResponse<T> extends ApiResponse<PaginatedData<T>> {}
+export interface SearchResult {
+  books: BookInfo[];
+  users: PublicUserInfo[];
+}
 
 // 打赏接口
 export interface SponsorInfo {

@@ -1,214 +1,216 @@
 "use client";
-
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import {
-  MessagingState,
-  Conversation,
-  Message,
-  UserInfo,
-  SystemNotification,
-  PaginatedData
+  getUserFavorites,
+  fetchFollowedAuthors,
+  fetchSystemNotifications
+} from "@/app/lib/action";
+import {
+  BookInfo,
+  PublicUserInfo,
+  SystemNotification
 } from "@/app/lib/definitions";
-import Navbar from "@/components/Navbar";
-import ConversationList from "@/components/Messages/ConversationList";
-import MessageList from "@/components/Messages/MessageList";
-import MessageInput from "@/components/Messages/MessageInput";
-import {
-  fetchConversations,
-  fetchMessages,
-  fetchSystemNotifications,
-  markConversationAsRead,
-  sendMessage,
-  getUserById
-} from "../lib/action";
-import { useUserInfo } from "@/components/useUserInfo";
+import { getImageUrl, getAvatarUrl } from "@/app/lib/imageUrl";
+import Link from "next/link";
+import { BookPreviewCard } from "@/components/Book/BookPreviewCard";
+import { UserPreviewCard } from "@/components/ProfilePage/UserPreviewCard";
 
-const MessagingPage: React.FC = () => {
-  const { user } = useUserInfo();
-  const [messagingState, setMessagingState] = useState<MessagingState>({
-    conversations: [],
-    selectedConversation: null,
-    messages: [],
-    systemNotifications: []
-  });
-  const [isViewingSystemMessages, setIsViewingSystemMessages] = useState(true);
-  const [conversationsPage, setConversationsPage] = useState(1);
-  const [messagesPage, setMessagesPage] = useState(1);
-  const [notificationsPage, setNotificationsPage] = useState(1);
-  const [otherUsers, setOtherUsers] = useState<Record<number, UserInfo>>({});
+const Page = () => {
+  // 收藏书籍状态
+  const [favoriteBooks, setFavoriteBooks] = useState<BookInfo[]>([]);
+  const [currentBookPage, setCurrentBookPage] = useState(1);
+  const [totalBookPages, setTotalBookPages] = useState(1);
+
+  // 关注作者状态
+  const [followedAuthors, setFollowedAuthors] = useState<PublicUserInfo[]>([]);
+  const [currentAuthorPage, setCurrentAuthorPage] = useState(1);
+  const [totalAuthorPages, setTotalAuthorPages] = useState(1);
+
+  const [systemNotifications, setSystemNotifications] = useState<
+    SystemNotification[]
+  >([]);
+  const [currentNotificationPage, setCurrentNotificationPage] = useState(1);
+  const [totalNotificationPages, setTotalNotificationPages] = useState(1);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const initializeData = async () => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
       try {
-        const [conversationsData, notificationsData] = await Promise.all([
-          fetchConversations(conversationsPage),
-          fetchSystemNotifications(notificationsPage)
-        ]);
+        // 获取收藏的书籍
+        const booksResponse = await getUserFavorites(currentBookPage, 20);
+        if (booksResponse.data && booksResponse.data.dataList) {
+          setFavoriteBooks(booksResponse.data.dataList);
+          setTotalBookPages(booksResponse.data.totalPage);
+        }
 
-        setMessagingState((prev) => ({
-          ...prev,
-          conversations: conversationsData.dataList,
-          systemNotifications: notificationsData.dataList
-        }));
-
-        // 获取所有对话中其他用户的信息
-        const otherUserIds = new Set(
-          conversationsData.dataList.flatMap((conv) =>
-            conv.participants.filter((id) => id !== user?.id)
-          )
+        // 获取关注的作者
+        const authorsResponse = await fetchFollowedAuthors(
+          currentAuthorPage,
+          20
         );
+        if (authorsResponse.data && authorsResponse.data.dataList) {
+          setFollowedAuthors(authorsResponse.data.dataList);
+          setTotalAuthorPages(authorsResponse.data.totalPage);
+        }
 
-        const userInfoPromises = Array.from(otherUserIds).map(getUserById);
-        const userInfos = await Promise.all(userInfoPromises);
-
-        setOtherUsers(
-          userInfos.reduce((acc, userInfo) => {
-            acc[userInfo.id] = userInfo;
-            return acc;
-          }, {} as Record<number, UserInfo>)
+        // 获取系统通知
+        const notificationsResponse = await fetchSystemNotifications(
+          currentNotificationPage,
+          20
         );
+        setSystemNotifications(notificationsResponse.dataList);
+        setTotalNotificationPages(notificationsResponse.totalPage);
       } catch (error) {
-        console.error("初始化数据时出错:", error);
+        console.error("Error fetching data:", error);
+        setError("An error occurred while fetching data.");
+      } finally {
+        setIsLoading(false);
       }
     };
 
-    if (user) {
-      initializeData();
-    }
-  }, [conversationsPage, notificationsPage, user]);
+    fetchData();
+  }, [currentBookPage, currentAuthorPage]);
 
-  const handleSelectConversation = useCallback(
-    async (conversation: Conversation) => {
-      setIsViewingSystemMessages(false);
-      setMessagingState((prev) => ({
-        ...prev,
-        selectedConversation: conversation
-      }));
+  if (isLoading) {
+    return <div className="text-center p-4">Loading...</div>;
+  }
 
-      try {
-        const messagesData = await fetchMessages(conversation.id, messagesPage);
-        setMessagingState((prev) => ({
-          ...prev,
-          messages: messagesData.dataList
-        }));
-        await markConversationAsRead(conversation.id);
-      } catch (error) {
-        console.error("获取消息时出错:", error);
-      }
-    },
-    [messagesPage]
-  );
-
-  const handleSendMessage = useCallback(
-    async (content: string) => {
-      if (messagingState.selectedConversation && user) {
-        const otherUserId =
-          messagingState.selectedConversation.participants.find(
-            (id) => id !== user.id
-          );
-        if (!otherUserId) {
-          console.error("无法找到接收者ID");
-          return;
-        }
-
-        try {
-          const sentMessage = await sendMessage({
-            senderId: user.id,
-            receiverId: otherUserId,
-            content: content
-          });
-          setMessagingState((prev) => ({
-            ...prev,
-            messages: [...prev.messages, sentMessage],
-            conversations: prev.conversations.map((conv) =>
-              conv.id === prev.selectedConversation?.id
-                ? { ...conv, lastMessage: sentMessage }
-                : conv
-            )
-          }));
-        } catch (error) {
-          console.error("发送消息时出错:", error);
-        }
-      }
-    },
-    [messagingState.selectedConversation, user]
-  );
-
-  const getOtherUser = useCallback(
-    (conversation: Conversation): UserInfo | null => {
-      const otherUserId = conversation.participants.find(
-        (id) => id !== user?.id
-      );
-      return otherUserId ? otherUsers[otherUserId] || null : null;
-    },
-    [user, otherUsers]
-  );
-
-  const handleClearUnread = useCallback(async (conversationId: number) => {
-    try {
-      await markConversationAsRead(conversationId);
-      setMessagingState((prev) => ({
-        ...prev,
-        conversations: prev.conversations.map((conv) =>
-          conv.id === conversationId ? { ...conv, unreadCount: 0 } : conv
-        )
-      }));
-    } catch (error) {
-      console.error("标记对话为已读时出错:", error);
-    }
-  }, []);
-
-  const handleViewSystemMessages = useCallback(() => {
-    setIsViewingSystemMessages(true);
-    setMessagingState((prev) => ({
-      ...prev,
-      selectedConversation: null,
-      messages: []
-    }));
-  }, []);
-
-  if (!user) {
-    return <div>加载中...</div>;
+  if (error) {
+    return <div className="text-red-500 p-4">{error}</div>;
   }
 
   return (
-    <div className="w-full h-screen bg-orange-400">
-      <Navbar />
-      <div className="flex gap-5 justify-center mt-3">
-        <ConversationList
-          conversations={messagingState.conversations}
-          onSelectConversation={handleSelectConversation}
-          currentUser={user}
-          getOtherUser={getOtherUser}
-          onClearUnread={handleClearUnread}
-          onViewSystemMessages={handleViewSystemMessages}
-        />
-        <div className="bg-white shadow w-3/5">
-          <h2 className="text-gray-500 font-light px-5 py-3 border-b border-gray-100">
-            {isViewingSystemMessages
-              ? "系统消息"
-              : messagingState.selectedConversation
-              ? getOtherUser(messagingState.selectedConversation)
-                  ?.displayName || "未知用户"
-              : "选择一个对话"}
-          </h2>
-          <div className="bg-gray-200">
-            <MessageList
-              messages={messagingState.messages}
-              currentUser={user}
-              systemNotifications={messagingState.systemNotifications}
-              isViewingSystemMessages={isViewingSystemMessages}
-            />
-            {isViewingSystemMessages ? (
-              <div className="h-[124px] bg-white"></div>
-            ) : (
-              <MessageInput onSendMessage={handleSendMessage} />
-            )}
-          </div>
+    <div className="container mx-auto p-4">
+      {/* 系统通知 */}
+      <section className="mb-8">
+        <h1 className="text-2xl font-bold mb-4">系统通知</h1>
+        <div className="space-y-4">
+          {systemNotifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`p-4 rounded-lg ${
+                notification.isRead ? "bg-gray-100" : "bg-blue-100"
+              }`}
+            >
+              <p
+                className={`${
+                  notification.isRead ? "text-gray-700" : "text-blue-700"
+                }`}
+              >
+                {notification.content}
+              </p>
+              <p className="text-sm text-gray-500 mt-2">
+                {new Date(notification.createdAt).toLocaleString()}
+              </p>
+            </div>
+          ))}
         </div>
-      </div>
+        {totalNotificationPages > 1 && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() =>
+                setCurrentNotificationPage((prev) => Math.max(prev - 1, 1))
+              }
+              disabled={currentNotificationPage === 1}
+              className="px-4 py-2 mr-2 bg-gray-200 rounded disabled:opacity-50"
+            >
+              上一页
+            </button>
+            <span className="px-4 py-2">
+              {currentNotificationPage} / {totalNotificationPages}
+            </span>
+            <button
+              onClick={() =>
+                setCurrentNotificationPage((prev) =>
+                  Math.min(prev + 1, totalNotificationPages)
+                )
+              }
+              disabled={currentNotificationPage === totalNotificationPages}
+              className="px-4 py-2 ml-2 bg-gray-200 rounded disabled:opacity-50"
+            >
+              下一页
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* 收藏的书籍 */}
+      <section className="mb-8">
+        <h1 className="text-2xl font-bold mb-4">我的收藏</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {favoriteBooks.map((book) => (
+            <BookPreviewCard key={book.id} book={book} width="w-full" />
+          ))}
+        </div>
+        {totalBookPages > 1 && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() =>
+                setCurrentBookPage((prev) => Math.max(prev - 1, 1))
+              }
+              disabled={currentBookPage === 1}
+              className="px-4 py-2 mr-2 bg-gray-200 rounded disabled:opacity-50"
+            >
+              上一页
+            </button>
+            <span className="px-4 py-2">
+              {currentBookPage} / {totalBookPages}
+            </span>
+            <button
+              onClick={() =>
+                setCurrentBookPage((prev) => Math.min(prev + 1, totalBookPages))
+              }
+              disabled={currentBookPage === totalBookPages}
+              className="px-4 py-2 ml-2 bg-gray-200 rounded disabled:opacity-50"
+            >
+              下一页
+            </button>
+          </div>
+        )}
+      </section>
+
+      {/* 关注的作者 */}
+      <section>
+        <h1 className="text-2xl font-bold mb-4">关注的用户</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {followedAuthors.map((user) => (
+            <UserPreviewCard key={user.id} user={user} />
+          ))}
+        </div>
+        {totalAuthorPages > 1 && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={() =>
+                setCurrentAuthorPage((prev) => Math.max(prev - 1, 1))
+              }
+              disabled={currentAuthorPage === 1}
+              className="px-4 py-2 mr-2 bg-gray-200 rounded disabled:opacity-50"
+            >
+              上一页
+            </button>
+            <span className="px-4 py-2">
+              {currentAuthorPage} / {totalAuthorPages}
+            </span>
+            <button
+              onClick={() =>
+                setCurrentAuthorPage((prev) =>
+                  Math.min(prev + 1, totalAuthorPages)
+                )
+              }
+              disabled={currentAuthorPage === totalAuthorPages}
+              className="px-4 py-2 ml-2 bg-gray-200 rounded disabled:opacity-50"
+            >
+              下一页
+            </button>
+          </div>
+        )}
+      </section>
     </div>
   );
 };
 
-export default MessagingPage;
+export default Page;

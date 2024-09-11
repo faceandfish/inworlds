@@ -1,91 +1,112 @@
 "use client";
-import { useEffect, useState } from "react";
-import { BookInfo, ChapterInfo, FileUploadData } from "@/app/lib/definitions";
-import { useParams, useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import {
+  BookInfo,
+  ChapterInfo,
+  FileUploadData,
+  PaginatedData
+} from "@/app/lib/definitions";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Sidebar from "./Sidebar";
 import BookDetails from "./BookDetails";
 import ChapterList from "./ChapterList";
 import Pagination from "../Pagination";
 import CoverUpload from "../WritingPage/CoverUpload";
-import BookStatusSelector from "../WritingPage/BookStatusSelector";
-import CategorySelect from "../WritingPage/CategorySelect";
-import ContentEditor from "../WritingPage/ContentEditor";
+import StatusAndCategoryUpdate from "./StatusAndCategoryUpdate";
 import NewChapter from "./NewChapter";
-
-const mockBook: BookInfo = {
-  id: 1,
-  title: "我的第一本小说",
-  description: "这是一个关于冒险和友谊的故事。",
-  authorName: "张三",
-  authorId: 1,
-  authorAvatarUrl: "/path/to/avatar.jpg",
-  category: "children-story",
-  ageRating: "allAges",
-  coverImageUrl: "/path/to/cover.jpg",
-  wordCount: 50000,
-  lastSaved: "2023-08-23T12:00:00Z",
-  createdAt: "2023-08-01T10:00:00Z",
-  latestChapterNumber: 10,
-  latestChapterTitle: "最新章节标题",
-  followersCount: 100,
-  commentsCount: 50,
-  status: "ongoing",
-  publishStatus: "published"
-};
-
-const mockChapters: ChapterInfo[] = Array.from({ length: 30 }, (_, i) => ({
-  id: i + 1,
-  bookId: 1,
-  chapterNumber: i + 1,
-  title: `第${i + 1}章：章节标题`,
-  content: "章节内容...",
-  createdAt: "2023-08-01T10:00:00Z",
-  lastModified: "2023-08-23T12:00:00Z",
-  wordCount: 2000
-}));
+import {
+  getBookDetails,
+  getChapterList,
+  updateBookDetails,
+  updateBookCover,
+  addNewChapter,
+  updateChapter
+} from "@/app/lib/action";
+import { getImageUrl } from "@/app/lib/imageUrl";
+import ExistingCoverUpload from "./ExistingCoverUpload";
 
 const BookEditPage: React.FC = () => {
   const params = useParams();
-  const bookId = params.bookId as string;
+  const bookId = Number(params.bookId as string);
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
   const [book, setBook] = useState<BookInfo | null>(null);
   const [chapters, setChapters] = useState<ChapterInfo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-
-  const [tempStatus, setTempStatus] = useState<BookInfo["status"]>(
-    book?.status ?? "ongoing"
-  );
-  const [tempCategory, setTempCategory] = useState<BookInfo["category"]>(
-    book?.category ?? "female-story"
-  );
-
-  const [coverImage, setCoverImage] =
-    useState<FileUploadData["coverImage"]>(null);
+  const [coverImage, setCoverImage] = useState<FileUploadData["coverImage"]>();
   const [coverImageUrl, setCoverImageUrl] =
-    useState<BookInfo["coverImageUrl"]>(null);
-
-  const [activeSection, setActiveSection] = useState(() => {
-    const storedSection = localStorage.getItem("activeSection");
-    if (storedSection) {
-      localStorage.removeItem("activeSection"); // 使用后立即清除
-      return storedSection;
-    }
-    return "details"; // 默认值
-  });
+    useState<BookInfo["coverImageUrl"]>();
+  const [activeSection, setActiveSection] = useState("details");
 
   useEffect(() => {
-    if (bookId) {
-      // Replace with actual API calls
-      setBook(mockBook);
+    const fetchBookData = async () => {
+      try {
+        const bookResponse = await getBookDetails(bookId);
+        if (bookResponse.code === 200 && bookResponse.data) {
+          setBook(bookResponse.data);
+          if (bookResponse.data.coverImageUrl) {
+            const fullCoverImageUrl = getImageUrl(
+              bookResponse.data.coverImageUrl
+            );
+            setCoverImageUrl(fullCoverImageUrl);
+          } else {
+            console.warn("书籍没有封面图片 URL");
+            // 这里可以设置一个默认的封面图片 URL 或者其他适当的处理
+          }
+        } else {
+          console.error("获取书籍详情失败:", bookResponse.msg);
+        }
 
-      const pageSize = 10;
-      const start = (currentPage - 1) * pageSize;
-      const end = start + pageSize;
-      setChapters(mockChapters.slice(start, end));
-      setTotalPages(Math.ceil(mockChapters.length / pageSize));
+        const chapterResponse = await getChapterList(bookId, currentPage);
+        if (chapterResponse.code === 200 && chapterResponse.data) {
+          setChapters(chapterResponse.data.dataList);
+          setTotalPages(chapterResponse.data.totalPage);
+        } else {
+          console.error("获取章节列表失败:", chapterResponse.msg);
+        }
+
+        // 在数据加载完成后处理 URL 参数
+        const section = searchParams.get("section");
+        if (section === "chapters") {
+          setActiveSection("chapters");
+          // 移除 URL 参数，但不改变路由
+          router.replace(`/writing/${bookId}`);
+        }
+      } catch (error) {
+        console.error("获取书籍数据时出错:", error);
+      }
+    };
+
+    if (bookId) {
+      fetchBookData();
     }
   }, [bookId, currentPage]);
+
+  const handleBookDetailsUpdate = async (
+    updatedBook: Partial<Pick<BookInfo, "title" | "description">>
+  ) => {
+    if (book) {
+      try {
+        console.log("Updating book details with:", updatedBook);
+        const response = await updateBookDetails(book.id, updatedBook);
+        console.log("Update response:", response);
+
+        if (response.code === 200) {
+          setBook(response.data);
+          return true;
+        } else {
+          console.error("更新书籍详情失败:", response.msg);
+          return false;
+        }
+      } catch (error) {
+        console.error("更新书籍详情时出错:", error);
+        return false;
+      }
+    }
+    return false;
+  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -96,49 +117,147 @@ const BookEditPage: React.FC = () => {
     url: BookInfo["coverImageUrl"]
   ) => {
     setCoverImage(file);
-    setCoverImageUrl(url);
+    // Don't update coverImageUrl here, only preview it
   };
 
-  const handleSave = () => {
-    console.log("Saving book details...");
-    // Implement the save logic here
+  const handleCoverUpload = async (): Promise<boolean> => {
+    if (coverImage && book) {
+      try {
+        const response = await updateBookCover(book.id, coverImage);
+        if (response.code === 200) {
+          const fullCoverImageUrl = getImageUrl(response.data);
+          setCoverImageUrl(fullCoverImageUrl);
+          return true;
+        } else {
+          console.error("更新书籍封面失败:", response.msg);
+          return false;
+        }
+      } catch (error) {
+        console.error("更新书籍封面时出错:", error);
+        return false;
+      }
+    } else {
+      console.error("请先选择一个新的封面图片");
+      return false;
+    }
   };
-
-  const [isWriting, setIsWriting] = useState(false);
 
   const handleStartWriting = () => {
-    setIsWriting(true);
     setActiveSection("newChapter");
   };
 
-  const handleSaveNewChapter = (newChapter: ChapterInfo) => {
-    // 这里应该调用API来保存新章节
-    console.log("Saving new chapter:", newChapter);
-
-    // 保存成功后，更新chapters数组和book对象
-    setChapters((prevChapters) => [...prevChapters, newChapter]);
-    setBook((prevBook) => {
-      if (prevBook) {
-        return {
-          ...prevBook,
-          latestChapterNumber: newChapter.chapterNumber ?? 0,
-          latestChapterTitle: newChapter.title
-        };
+  const handleSaveNewChapter = async (
+    newChapter: Partial<ChapterInfo>
+  ): Promise<{ success: boolean; data?: ChapterInfo }> => {
+    try {
+      if (!newChapter.title || !newChapter.content) {
+        return { success: false };
       }
-      return prevBook;
-    });
+      const chapterToSave: Omit<
+        ChapterInfo,
+        | "id"
+        | "bookId"
+        | "createdAt"
+        | "lastModified"
+        | "chapterNumber"
+        | "wordCount"
+      > = {
+        title: newChapter.title,
+        content: newChapter.content,
+        publishStatus: newChapter.publishStatus || "draft"
+      };
 
-    // 停止写作模式
-    handleStopWriting();
+      const response = await addNewChapter(bookId, chapterToSave);
+      console.log("新增章节", response);
 
-    // 切换activeSection到"chapters"
-    setActiveSection("chapters");
+      if (response.code === 200) {
+        setChapters((prevChapters) => [...prevChapters, response.data]);
+        setBook((prevBook) => {
+          if (prevBook) {
+            return {
+              ...prevBook,
+              latestChapterNumber: response.data.chapterNumber ?? 0,
+              latestChapterTitle: response.data.title
+            };
+          }
+          return prevBook;
+        });
+
+        return { success: true, data: response.data };
+      } else {
+        console.error("保存新章节失败:", response.msg);
+        return { success: false };
+      }
+    } catch (error) {
+      console.error("保存新章节时出错:", error);
+      return { success: false };
+    }
   };
 
-  // 确保handleStopWriting函数正确定义
-  const handleStopWriting = () => {
-    setIsWriting(false);
+  const handleStatusAndCategoryUpdate = async (
+    updates: Partial<Pick<BookInfo, "status" | "category">>
+  ) => {
+    if (book) {
+      try {
+        const response = await updateBookDetails(book.id, updates);
+        if (response.code === 200) {
+          setBook(response.data);
+          return true;
+        } else {
+          console.error("更新书籍状态和分类失败:", response.msg);
+          return false;
+        }
+      } catch (error) {
+        console.error("更新书籍状态和分类时出错:", error);
+        return false;
+      }
+    }
+    return false;
   };
+
+  const handleUpdateChapter = async (
+    chapterId: number,
+    updates: Partial<ChapterInfo>
+  ): Promise<boolean> => {
+    try {
+      const response = await updateChapter(bookId, chapterId, updates);
+      if (response.code === 200) {
+        setChapters(
+          chapters.map((chapter) =>
+            chapter.id === chapterId
+              ? { ...chapter, ...response.data }
+              : chapter
+          )
+        );
+
+        // 如果更新影响了书籍的最新章节信息，也更新书籍状态
+        if (updates.publishStatus === "published" && book) {
+          const updatedChapter = chapters.find((c) => c.id === chapterId);
+          if (
+            updatedChapter &&
+            (!book.latestChapterNumber ||
+              updatedChapter.chapterNumber! > book.latestChapterNumber)
+          ) {
+            setBook({
+              ...book,
+              latestChapterNumber: updatedChapter.chapterNumber ?? 0,
+              latestChapterTitle: updatedChapter.title
+            });
+          }
+        }
+
+        console.log("章节更新成功");
+        return true;
+      } else {
+        console.error("更新章节失败:", response.msg);
+        return false;
+      }
+    } catch (error) {
+      console.error("更新章节时出错:", error);
+      return false;
+    }
+  };
+
   if (!book) {
     return <div>加载中...</div>;
   }
@@ -149,62 +268,37 @@ const BookEditPage: React.FC = () => {
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         onStartWriting={handleStartWriting}
-        className={`w-64 h-full fixed left-0 top-16 transition-all duration-300 ${
-          isWriting ? "w-0 opacity-0" : "w-64 opacity-100"
-        }`}
+        className=" h-full fixed left-0 top-16 transition-all duration-300 w-64 opacity-100"
       />
-      <div
-        className={`flex-1 overflow-auto bg-white h-screen  p-8 transition-all duration-300 ${
-          isWriting ? "ml-0" : "ml-64"
-        }`}
-      >
+      <div className="flex-1 overflow-auto bg-white h-screen p-8 transition-all duration-300 ml-64">
         {activeSection === "details" && (
-          <BookDetails book={book} onSave={handleSave} />
+          <BookDetails book={book} onSave={handleBookDetailsUpdate} />
         )}
         {activeSection === "status" && (
-          <div className="space-y-10">
-            <BookStatusSelector
-              status={tempStatus}
-              onStatusChange={(newStatus) => setTempStatus(newStatus)}
-            />
-            <CategorySelect
-              value={tempCategory}
-              onChange={(newCategory) => setTempCategory(newCategory)}
-            />
-            <button
-              onClick={() => {
-                setBook((prevBook) => ({
-                  ...prevBook!,
-                  status: tempStatus,
-                  category: tempCategory
-                }));
-                // TODO: 在这里添加 API 调用来保存更改
-                console.log("保存状态和分类更改");
-              }}
-              className="mt-4 bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              保存更改
-            </button>
-          </div>
+          <StatusAndCategoryUpdate
+            book={book}
+            onUpdate={handleStatusAndCategoryUpdate}
+          />
         )}
         {activeSection === "cover" && (
           <div className="flex flex-col items-center space-y-10">
-            <CoverUpload
-              coverImage={coverImage}
-              coverImageUrl={coverImageUrl}
-              onCoverChange={handleCoverChange}
+            <ExistingCoverUpload
+              currentCoverUrl={coverImageUrl || ""}
+              onCoverChange={(file, previewUrl) => {
+                setCoverImage(file);
+                setCoverImageUrl(previewUrl);
+              }}
+              onSubmit={handleCoverUpload}
             />
-            <button
-              type="submit"
-              className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-            >
-              提交封面
-            </button>
           </div>
         )}
         {activeSection === "chapters" && (
           <>
-            <ChapterList chapters={chapters} book={book} />
+            <ChapterList
+              chapters={chapters}
+              book={book}
+              onUpdateChapter={handleUpdateChapter}
+            />
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -217,7 +311,6 @@ const BookEditPage: React.FC = () => {
             book={book}
             bookId={bookId}
             onSave={handleSaveNewChapter}
-            onCancel={handleStopWriting}
           />
         )}
       </div>

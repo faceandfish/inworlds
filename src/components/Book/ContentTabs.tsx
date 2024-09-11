@@ -1,3 +1,4 @@
+import { BookInfo } from "@/app/lib/definitions";
 import React from "react";
 
 type TabType = "comments" | "chapters";
@@ -5,11 +6,13 @@ type TabType = "comments" | "chapters";
 interface ContentTabsProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
+  book: BookInfo;
 }
 
 export const ContentTabs: React.FC<ContentTabsProps> = ({
   activeTab,
   setActiveTab,
+  book
 }) => (
   <div className="flex  border-b">
     <div
@@ -20,7 +23,10 @@ export const ContentTabs: React.FC<ContentTabsProps> = ({
       }`}
       onClick={() => setActiveTab("comments")}
     >
-      評論
+      评论
+      <span className="ml-2 text-neutral-400 text-xs">
+        {book.commentsCount}
+      </span>
     </div>
     <div
       className={`cursor-pointer px-4 py-2 ${
@@ -30,7 +36,10 @@ export const ContentTabs: React.FC<ContentTabsProps> = ({
       }`}
       onClick={() => setActiveTab("chapters")}
     >
-      章節目錄
+      章节目录
+      <span className="ml-2 text-neutral-400 text-xs">
+        {book.latestChapterNumber}
+      </span>
     </div>
   </div>
 );

@@ -1,75 +1,69 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ChapterList, ContentTabs } from "@/components/Book";
-import CommentItem from "@/components/CommentItem";
-import {
-  BookInfo,
-  CommentInfo,
-  ChapterInfo,
-  PaginatedData
-} from "@/app/lib/definitions";
-import { likeComment, replyToComment } from "@/app/lib/action";
+import CommentSection from "@/components/Book/CommentSection";
+import { BookInfo, ChapterInfo, PaginatedData } from "@/app/lib/definitions";
+import Pagination from "../Pagination";
+import { getChapterList } from "@/app/lib/action";
 
 interface BookContentProps {
   book: BookInfo;
-  comments: CommentInfo[];
-  chapters: ChapterInfo[];
-  chaptersPagination: PaginatedData<ChapterInfo>;
-  commentsPagination: PaginatedData<CommentInfo>;
 }
 
-export function BookContent({
-  book,
-  comments,
-  chapters
-}: // chaptersPagination,
-// commentsPagination
-BookContentProps) {
+export function BookContent({ book }: BookContentProps) {
   const [activeTab, setActiveTab] = useState<"comments" | "chapters">(
     "comments"
   );
+  const [currentPage, setCurrentPage] = useState(1);
+  const [chapters, setChapters] = useState<ChapterInfo[]>([]);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLike = async (id: number) => {
+  const fetchChapters = async (page: number) => {
+    setIsLoading(true);
     try {
-      await likeComment(id);
-      // 这里可以添加状态更新逻辑
-      console.log(`Liked comment ${id}`);
+      const response = await getChapterList(book.id, page, 21);
+      setChapters(response.data.dataList);
+      setTotalPages(response.data.totalPage);
     } catch (error) {
-      console.error(`Error liking comment ${id}:`, error);
+      console.error("Error fetching chapters:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleReply = async (id: number, content: string) => {
-    try {
-      await replyToComment(id, content);
-      // 这里可以添加状态更新逻辑
-      console.log(`Replied to comment ${id}`);
-    } catch (error) {
-      console.error(`Error replying to comment ${id}:`, error);
-    }
+  useEffect(() => {
+    fetchChapters(currentPage);
+  }, [currentPage, book.id]);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
-    <div className="mt-10 h-screen">
-      <ContentTabs activeTab={activeTab} setActiveTab={setActiveTab} />
-      <div className="">
-        {activeTab === "comments" && (
-          <div className="divide-y">
-            {comments.map((comment) => (
-              <CommentItem
-                key={comment.id}
-                {...comment}
-                onLike={handleLike}
-                onReply={handleReply}
-              />
-            ))}
-          </div>
-        )}
-        {activeTab === "chapters" && (
-          <ChapterList chapters={chapters} book={book} />
-        )}
-      </div>
+    <div className="mt-10 min-h-screen">
+      <ContentTabs
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        book={book}
+      />
+
+      {activeTab === "comments" && <CommentSection bookId={book.id} />}
+      {activeTab === "chapters" && (
+        <>
+          <ChapterList
+            chapters={chapters}
+            book={book}
+            className="mt-5 pb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 "
+          />
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </>
+      )}
     </div>
   );
 }
