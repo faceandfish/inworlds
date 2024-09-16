@@ -1,31 +1,19 @@
 import NextAuth from "next-auth";
-import Google from "next-auth/providers/google";
-import Credentials from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@auth/prisma-adapter";
-import { PrismaClient } from "@prisma/client";
+import GoogleProvider from "next-auth/providers/google";
 
-const prisma = new PrismaClient();
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  providers: [
+    GoogleProvider({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET
+    })
+  ],
+  secret: process.env.NEXTAUTH_SECRET,
 
-export const { handlers, signIn, signOut, auth } = NextAuth({
-  adapter: PrismaAdapter(prisma),
-  providers: [Google],
   callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-      }
-      return token;
-    },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-      }
+      // 可以在这里自定义 session
       return session;
-    },
-  },
-  pages: { signIn: "/login" },
-  session: {
-    strategy: "jwt",
-  },
+    }
+  }
 });

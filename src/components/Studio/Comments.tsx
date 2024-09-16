@@ -10,13 +10,14 @@ import {
   addCommentOrReply
 } from "@/app/lib/action";
 import CommentItem from "../CommentItem";
-import { useUserInfo } from "../useUserInfo";
+
 import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
 import Alert from "../Alert";
 import Pagination from "../Pagination";
 import { getImageUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import CommentsSkeleton from "./Skeleton/CommentsSkeleton";
+import { useUser } from "../UserContextProvider";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -26,7 +27,7 @@ interface CommentsData {
 }
 
 const Comments: React.FC = () => {
-  const { user } = useUserInfo();
+  const { user } = useUser();
   const [currentPage, setCurrentPage] = useState(1);
   const [commentsData, setCommentsData] = useState<CommentsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);

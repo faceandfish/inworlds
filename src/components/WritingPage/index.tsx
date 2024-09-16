@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import {
   BookInfo,
   ChapterInfo,
-  CreatorUserInfo,
-  FileUploadData
+  FileUploadData,
+  UserInfo
 } from "@/app/lib/definitions";
 
 import WritingSidebar from "@/components/WritingPage/WritingSidebar";
@@ -19,14 +19,15 @@ import AuthorNote from "@/components/WritingPage/AuthorNote";
 import { publishBook, updateUserType, uploadBookDraft } from "@/app/lib/action";
 import { toast } from "react-toastify";
 import { NewUserView } from "./NewUserView";
-import { useUserInfo } from "../useUserInfo";
+
 import BookStatusSelector from "./BookStatusSelector";
 import { getToken } from "@/app/lib/token";
+import { useUser } from "../UserContextProvider";
 
 const WritingPage: React.FC = () => {
   const router = useRouter();
   // 使用自定义钩子获取用户信息
-  const { user, loading, error, updateUser } = useUserInfo();
+  const { user, loading, error, updateUser } = useUser();
 
   // 书籍数据状态
   const [bookData, setBookData] = useState<Partial<BookInfo>>({
@@ -162,6 +163,8 @@ const WritingPage: React.FC = () => {
           | "followersCount"
           | "commentsCount"
           | "authorAvatarUrl"
+          | "favoritesCount"
+          | "authorFollowersCount"
         > = {
           title: bookData.title,
           description: bookData.description || "",
@@ -244,7 +247,7 @@ const WritingPage: React.FC = () => {
 
       // 更新本地用户状态
       if (response.data.userType === "creator") {
-        const updatedUser: CreatorUserInfo = {
+        const updatedUser: UserInfo = {
           ...user,
           userType: "creator",
           articlesCount: 0,

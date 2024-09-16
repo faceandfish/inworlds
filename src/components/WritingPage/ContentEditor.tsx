@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import ReactQuill from "react-quill";
 import { ChapterInfo } from "@/app/lib/definitions";
 import "react-quill/dist/quill.snow.css";
+import dynamic from "next/dynamic";
 
 interface ContentEditorProps {
   chapter: ChapterInfo;
@@ -16,6 +17,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
   const [content, setContent] = useState(chapter.content || "");
   const [title, setTitle] = useState(chapter.title || "");
   const [wordCount, setWordCount] = useState(0);
+  const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
   const modules = {
     toolbar: [

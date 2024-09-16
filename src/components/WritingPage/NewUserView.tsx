@@ -4,13 +4,13 @@ import {
   UsersIcon,
   CurrencyDollarIcon
 } from "@heroicons/react/24/outline";
-import { UserInfo, CreatorUserInfo } from "@/app/lib/definitions";
+import { UserInfo } from "@/app/lib/definitions";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 interface NewUserViewProps {
   user: UserInfo;
-  onUserTypeChange: (newUserInfo: CreatorUserInfo) => Promise<void>;
+  onUserTypeChange: (newUserInfo: UserInfo) => Promise<void>;
 }
 
 export const NewUserView: React.FC<NewUserViewProps> = ({
@@ -24,7 +24,7 @@ export const NewUserView: React.FC<NewUserViewProps> = ({
     }
 
     try {
-      const newCreatorInfo: CreatorUserInfo = {
+      const newCreatorInfo: UserInfo = {
         ...user,
         userType: "creator",
         articlesCount: 0,

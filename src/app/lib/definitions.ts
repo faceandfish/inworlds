@@ -20,21 +20,25 @@ export interface PublicUserInfo {
 }
 
 // 基础用户信息
-interface BaseUserInfo {
+export interface UserInfo {
   id: number;
   username: string;
   displayName?: string;
   email: string;
+  emailVerified: Date | null;
   avatarUrl: string | null;
   introduction?: string;
   createdAt: string;
-  phone?: string; // 可选字段，因为可能不是所有用户都有手机号
-  language?: string; // 可选字段，可以有默认值
-  gender?: "male" | "female" | "other"; // 性别
-  birthDate?: string; // 出生日期，格式为 ISO 8601 字符串，如 "1990-01-01"
+  phone?: string;
+  language?: string;
+  gender?: "male" | "female" | "other";
+  birthDate?: string;
   followersCount: number;
   followingCount: number;
   favoritesCount: number;
+  userType: "regular" | "creator";
+  articlesCount?: number; // 只有当 userType 为 'creator' 时才有意义
+  booksCount?: number; // 只有当 userType 为 'creator' 时才有意义
 }
 
 // 用于创建新用户的接口
@@ -69,20 +73,6 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
 }
-
-// 普通用户信息
-export interface RegularUserInfo extends BaseUserInfo {
-  userType: "regular";
-}
-
-// 创作者用户信息
-export interface CreatorUserInfo extends BaseUserInfo {
-  userType: "creator";
-  articlesCount: number;
-}
-
-// 统一的用户信息类型
-export type UserInfo = RegularUserInfo | CreatorUserInfo;
 
 // 用户关系信息
 export interface UserRelationInfo {
@@ -148,7 +138,7 @@ export interface BookInfo {
   authorIntroduction?: string;
   authorId: number; // 添加作者ID
   authorAvatarUrl: string;
-  authorFollowersCount: number;
+  authorFollowersCount?: number;
 
   category:
     | "female-story"
@@ -166,7 +156,7 @@ export interface BookInfo {
   latestChapterTitle: string; //最新章节的标题
 
   tags?: string; // 可选的标签
-  favoritesCount: number; //收藏本书的人数
+  favoritesCount?: number; //收藏本书的人数
   commentsCount: number; //新增评论数总数
   chapters?: ChapterInfo[];
 

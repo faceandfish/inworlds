@@ -5,16 +5,17 @@ import { PublicUserInfo, ApiResponse } from "@/app/lib/definitions";
 import UserActions from "./UserActions";
 import Link from "next/link";
 import { fetchUserInfo, getUserById } from "@/app/lib/action";
-import { useUserInfo } from "../useUserInfo";
+
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import FollowButton from "./FollowButton";
+import { useUser } from "../UserContextProvider";
 
 const Header: React.FC = () => {
   const [user, setUser] = useState<PublicUserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { user: currentUser } = useUserInfo();
+  const { user: currentUser } = useUser();
 
   const params = useParams();
   const userId = params.id as string;

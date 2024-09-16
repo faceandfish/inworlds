@@ -1,16 +1,17 @@
 "use client";
 import React, { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import { AiOutlineLogout } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { logout } from "@/app/lib/action";
-import UserInfo, { useUserInfo } from "../useUserInfo";
 import { removeToken } from "@/app/lib/token";
+import { useUser } from "../UserContextProvider";
 
 const LogoutButton = () => {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { user, refetch } = useUserInfo(); // 使用你的 UserInfo 函数
+  const { logoutUser } = useUser();
 
   const handleLogout = useCallback(async () => {
     console.log("handleLogout called");
@@ -22,12 +23,13 @@ const LogoutButton = () => {
 
     setIsLoading(true);
     try {
-      const result = await logout(); // 调用后端的登出 API
-      console.log("登出结果:", result.msg);
-      // 重新获取用户信息，这应该会将用户状态设置为 null
-      await refetch();
+      // 首先调用 NextAuth 的 signOut 函数
+      await signOut({ redirect: false });
 
-      // 重定向到首页或登录页
+      // 然后调用后端的登出 API
+      await logoutUser();
+
+      // 重定向到登录页
       router.push("/login");
     } catch (error) {
       console.error("登出过程中发生错误:", error);
@@ -35,7 +37,7 @@ const LogoutButton = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [router, refetch]);
+  }, [router, logoutUser]);
 
   return (
     <button

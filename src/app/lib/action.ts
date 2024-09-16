@@ -7,7 +7,6 @@ import {
   ApiResponse,
   BookInfo,
   PaginatedData,
-  CreatorUserInfo,
   ChapterInfo,
   CommentInfo,
   AnalyticsData,
@@ -43,12 +42,13 @@ export const removeAuthToken = () => {
 
 // 登录函数
 export const login = async (
-  credentials: LoginRequest
+  username: string,
+  password: string
 ): Promise<ApiResponse<string>> => {
   try {
     const formData = new FormData();
-    formData.append("username", credentials.username);
-    formData.append("password", credentials.password);
+    formData.append("username", username);
+    formData.append("password", password);
 
     const response: AxiosResponse<ApiResponse<string>> = await api.post(
       "http://8.142.44.107:8088/inworlds/api/login",
@@ -65,11 +65,39 @@ export const login = async (
   }
 };
 
-// 获取用户信息
-let originToken: string = "";
+export const handleGoogleLogin = async (
+  email: string,
+  name: string,
+  picture: string
+): Promise<ApiResponse<string>> => {
+  try {
+    const response: AxiosResponse<ApiResponse<string>> = await api.post(
+      "/login/google",
+      {
+        email,
+        name,
+        picture
+      },
+      {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Google 登录失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Google 登录处理出错:", error);
+    throw error;
+  }
+};
 
 export const getUserInfo = async (
-  token: string = originToken
+  token: string
 ): Promise<ApiResponse<UserInfo>> => {
   try {
     const response: AxiosResponse<ApiResponse<UserInfo>> = await api.get(
@@ -97,7 +125,7 @@ export const getUserInfo = async (
 };
 
 export async function logout(): Promise<{ code: number; msg: string }> {
-  const token = getToken() as string;
+  const token = getToken();
   if (!token) {
     console.error("在localStorage中未找到token");
     throw new Error("未找到证token");
@@ -120,23 +148,19 @@ export async function logout(): Promise<{ code: number; msg: string }> {
     const result = response.data;
     console.log("API结果:", result);
 
-    if (result.code === 200) {
-      removeToken();
-      originToken = "";
-    } else {
-      console.warn("注销API返回非200状态码:", result.code, result.msg);
-    }
+    removeToken();
 
     return result;
   } catch (error) {
-    console.error("注销过程中出错:", error);
-    throw error;
+    removeToken();
+
+    return { code: 500, msg: "Logout failed, but local session cleared" };
   }
 }
 
 export async function register(
   credentials: CreateUserRequest
-): Promise<ApiResponse<UserInfo>> {
+): Promise<ApiResponse<string>> {
   try {
     const formData = new FormData();
     formData.append("username", credentials.username);
@@ -144,7 +168,7 @@ export async function register(
     formData.append("rePassword", credentials.rePassword);
     formData.append("email", credentials.email);
 
-    const response = await api.post<ApiResponse<UserInfo>>(
+    const response: AxiosResponse<ApiResponse<string>> = await api.post(
       "http://8.142.44.107:8088/inworlds/api/register",
       formData,
       {
@@ -298,9 +322,9 @@ export const uploadBookDraft = async (
 export const updateUserType = async (
   userId: UserInfo["id"], // 使用 UserInfo['id'] 来确保类型一致性
   token: string
-): Promise<ApiResponse<CreatorUserInfo>> => {
+): Promise<ApiResponse<UserInfo>> => {
   try {
-    const response = await api.put<ApiResponse<CreatorUserInfo>>(
+    const response = await api.put<ApiResponse<UserInfo>>(
       `http://8.142.44.107:8088/inworlds/api/user/${userId}/type`,
       { userType: "creator" },
       {

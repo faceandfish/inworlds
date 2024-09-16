@@ -6,7 +6,7 @@ import {
   getChapterList,
   getBookComments
 } from "@/app/lib/action";
-import { CreatorUserInfo, UserInfo } from "@/app/lib/definitions";
+import { UserInfo } from "@/app/lib/definitions";
 import CommentSection from "@/components/Book/CommentSection";
 
 interface BookPageProps {

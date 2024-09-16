@@ -1,18 +1,13 @@
 "use client";
 
-import {
-  UserInfo,
-  ApiResponse,
-  CreatorUserInfo,
-  FileUploadData,
-  RegularUserInfo
-} from "@/app/lib/definitions";
+import { UserInfo, ApiResponse, FileUploadData } from "@/app/lib/definitions";
 
 import { useState, useEffect, useCallback } from "react";
-import { uploadAvatar } from "@/app/lib/action";
+import { getUserInfo, logout, uploadAvatar } from "@/app/lib/action";
+import { getToken, removeToken } from "@/app/lib/token";
 
 export function useUserInfo() {
-  const [user, setUser] = useState<UserInfo | CreatorUserInfo | null>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,19 +15,20 @@ export function useUserInfo() {
     try {
       setLoading(true);
       setError(null);
-      const response: Response = await fetch("/api/userinfo", {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-      });
-      const json = (await response.json()) as ApiResponse<
-        UserInfo | CreatorUserInfo
-      >;
-      if (json.code === 200) {
-        setUser(json.data);
+      const token = getToken();
+      if (!token) {
+        throw new Error("No authentication token available");
+      }
+      const response = await getUserInfo(token);
+      if (response.code === 200 && response.data) {
+        setUser(response.data);
+        console.log("user的内容拿到了：", response.data);
       } else {
-        setError(json.msg || "Failed to fetch user info");
+        setError(response.msg || "Failed to fetch user info");
       }
     } catch (err) {
       setError("An error occurred while fetching user info");
+      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -47,9 +43,9 @@ export function useUserInfo() {
       if (!prevUser) return null;
       const updatedUser = { ...prevUser, ...updatedData };
       if (updatedUser.userType === "creator") {
-        return updatedUser as CreatorUserInfo;
+        return updatedUser as UserInfo;
       } else {
-        return updatedUser as RegularUserInfo;
+        return updatedUser as UserInfo;
       }
     });
   }, []);
@@ -81,12 +77,24 @@ export function useUserInfo() {
     }
   }, []);
 
+  const logoutUser = useCallback(async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error("Logout error:", error);
+    } finally {
+      removeToken();
+      setUser(null);
+    }
+  }, []);
+
   return {
     user,
     loading,
     error,
     refetch: fetchUserInfo,
     updateUser,
-    updateAvatar
+    updateAvatar,
+    logoutUser
   };
 }

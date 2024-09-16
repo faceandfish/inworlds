@@ -1,16 +1,16 @@
 "use client";
 import React, { useState, useCallback, Suspense } from "react";
 import Sidebar from "./Sidebar";
-import { useUserInfo } from "../useUserInfo";
 import Alert from "../Alert";
 import { useRouter } from "next/navigation";
 import ContentWrapper from "./ContentWrapper";
 import SidebarSkeleton from "./Skeleton/SidebarSkeleton";
 import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
+import { useUser } from "../UserContextProvider";
 
 const Studio: React.FC = () => {
   const [activeSection, setActiveSection] = useState("works");
-  const { user, loading: userLoading } = useUserInfo();
+  const { user, loading: userLoading } = useUser();
   const router = useRouter();
 
   const handleSectionChange = useCallback((section: string) => {

@@ -1,15 +1,15 @@
 import React, { useState, useEffect, useTransition } from "react";
 import { BookInfo, AnalyticsData } from "@/app/lib/definitions";
-import { useUserInfo } from "../useUserInfo";
 import { fetchBooksList, fetchSingleBookAnalytics } from "@/app/lib/action";
 import Pagination from "../Pagination";
 import Link from "next/link";
 import DataAnalysisSkeleton from "./Skeleton/DataAnalysisSkeleton";
+import { useUser } from "../UserContextProvider";
 
 const ITEMS_PER_PAGE = 5;
 
 const DataAnalysis: React.FC = () => {
-  const { user } = useUserInfo();
+  const { user } = useUser();
   const [books, setBooks] = useState<BookInfo[]>([]);
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(

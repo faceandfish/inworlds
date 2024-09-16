@@ -8,7 +8,7 @@ import React, {
 } from "react";
 import { useRouter } from "next/navigation";
 import { BookInfo } from "@/app/lib/definitions";
-import { useUserInfo } from "../useUserInfo";
+
 import {
   deleteBook,
   fetchBooksList,
@@ -18,6 +18,7 @@ import Pagination from "../Pagination";
 import Link from "next/link";
 import Alert from "../Alert";
 import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
+import { useUser } from "../UserContextProvider";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -27,7 +28,7 @@ const tabNames = ["已发布内容", "正在连载中", "已完结", "草稿箱"
 
 const WorkContent: React.FC = () => {
   const router = useRouter();
-  const { user } = useUserInfo();
+  const { user } = useUser();
   const [allBooks, setAllBooks] = useState<BookInfo[]>([]);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>(tabs[0]);
   const [currentPage, setCurrentPage] = useState(1);

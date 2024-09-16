@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import { BookInfo, PaginatedData, SponsorInfo } from "@/app/lib/definitions";
 
-import { useUserInfo } from "../useUserInfo";
 import { BookPreviewCard } from "../Book/BookPreviewCard";
 import { SponsorList } from "./SponsorList";
 import { useParams } from "next/navigation";

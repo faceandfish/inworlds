@@ -7,6 +7,7 @@ import ProfilesMenu from "../UserMenu";
 import { useEffect, useRef, useState } from "react";
 import { UserInfo } from "@/app/lib/definitions";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
+import LogoutButton from "../UserMenu/Logout";
 
 const UserMenu = ({ user }: { user: UserInfo }) => {
   const [profileMenu, setProfileMenu] = useState(false);
@@ -43,6 +44,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
           新消息
         </div>
       </Link>
+
       {/* 个人头像 */}
       <div className="group/profiles " ref={menuRef}>
         <Image

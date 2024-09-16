@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import { useUserInfo } from "../useUserInfo";
+import { useUser } from "../UserContextProvider";
 
 interface NavItem {
   id: string;
@@ -22,7 +22,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onStartWriting,
   className = ""
 }) => {
-  const { user } = useUserInfo();
+  const { user } = useUser();
   const router = useRouter();
 
   const navItems: NavItem[] = [

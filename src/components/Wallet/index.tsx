@@ -15,14 +15,15 @@ import {
   mockDonationHistory,
   mockBalance
 } from "./mockData";
-import { useUserInfo } from "../useUserInfo";
+import { useUser } from "../UserContextProvider";
+
 
 const Wallet: React.FC = () => {
   const [balance, setBalance] = useState(mockBalance);
   const [purchaseHistory, setPurchaseHistory] =
     useState<PurchaseHistory[]>(mockPurchaseHistory);
   const [donationHistory] = useState<DonationHistory[]>(mockDonationHistory);
-  const { user } = useUserInfo();
+  const { user } = useUser();
 
   const handlePurchase = (option: PurchaseOption) => {
     setBalance(balance + option.coins);

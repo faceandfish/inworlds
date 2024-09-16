@@ -13,12 +13,13 @@ import {
   FileUploadData
 } from "@/app/lib/definitions";
 import { updateProfile, uploadAvatar, changePassword } from "@/app/lib/action";
-import { useUserInfo } from "../useUserInfo";
+
 import { toast } from "react-toastify";
+import { useUser } from "../UserContextProvider";
 
 const UserSettingsPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("profile");
-  const { user, updateUser } = useUserInfo();
+  const { user, updateUser } = useUser();
 
   const handleProfileSave = async (updatedData: UpdateUserRequest) => {
     try {

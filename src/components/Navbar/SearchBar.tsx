@@ -1,3 +1,4 @@
+"use client";
 import React, { useState } from "react";
 import { IoIosSearch } from "react-icons/io";
 import { useRouter } from "next/navigation";
