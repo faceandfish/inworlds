@@ -1,9 +1,11 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
-import ReactQuill from "react-quill";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { ChapterInfo } from "@/app/lib/definitions";
 import "react-quill/dist/quill.snow.css";
 import dynamic from "next/dynamic";
+import { useTranslation } from "../useTranslation";
+
+const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
 
 interface ContentEditorProps {
   chapter: ChapterInfo;
@@ -17,22 +19,25 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
   const [content, setContent] = useState(chapter.content || "");
   const [title, setTitle] = useState(chapter.title || "");
   const [wordCount, setWordCount] = useState(0);
-  const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+  const { t } = useTranslation("book");
 
-  const modules = {
-    toolbar: [
-      [{ header: [1, 2, false] }],
-      ["bold", "italic", "underline", "strike", "blockquote"],
-      [
-        { list: "ordered" },
-        { list: "bullet" },
-        { indent: "-1" },
-        { indent: "+1" }
-      ],
-      ["link", "image"],
-      ["clean"]
-    ]
-  };
+  const modules = useMemo(
+    () => ({
+      toolbar: [
+        [{ header: [1, 2, false] }],
+        ["bold", "italic", "underline", "strike", "blockquote"],
+        [
+          { list: "ordered" },
+          { list: "bullet" },
+          { indent: "-1" },
+          { indent: "+1" }
+        ],
+        ["link", "image"],
+        ["clean"]
+      ]
+    }),
+    []
+  );
 
   const formats = [
     "header",
@@ -48,11 +53,14 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
     "image"
   ];
 
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTitle = e.target.value;
-    setTitle(newTitle);
-    onContentChange({ title: newTitle });
-  };
+  const handleTitleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newTitle = e.target.value;
+      setTitle(newTitle);
+      onContentChange({ title: newTitle });
+    },
+    [onContentChange]
+  );
 
   const handleContentChange = useCallback(
     (newContent: string) => {
@@ -63,12 +71,15 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
   );
 
   const getWordCount = useCallback((text: string): number => {
-    const strippedText = text.replace(/<[^>]*>/g, "");
-    return strippedText.trim().split(/\s+/).length;
+    const strippedText = text.replace(/<[^>]*>/g, "").trim();
+    return strippedText ? strippedText.split(/\s+/).length : 0;
   }, []);
 
   useEffect(() => {
-    setWordCount(getWordCount(content));
+    const timeoutId = setTimeout(() => {
+      setWordCount(getWordCount(content));
+    }, 300);
+    return () => clearTimeout(timeoutId);
   }, [content, getWordCount]);
 
   useEffect(() => {
@@ -79,7 +90,9 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
   return (
     <div className="w-full h-screen">
       <h1 className="text-2xl font-medium text-neutral-700 mb-6">
-        {chapter.chapterNumber ? `第 ${chapter.chapterNumber} 章` : "新章节"}
+        {chapter.chapterNumber
+          ? `${t("contentEditor.chapter")} ${chapter.chapterNumber}`
+          : t("contentEditor.firstChapter")}
       </h1>
 
       <div className="mb-6">
@@ -87,7 +100,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
           htmlFor="chapter-title"
           className="block text-sm font-medium text-neutral-600 mb-2"
         >
-          章节标题
+          {t("contentEditor.chapterTitle")}
         </label>
         <input
           type="text"
@@ -95,14 +108,18 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
           value={title}
           onChange={handleTitleChange}
           className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-          placeholder="输入章节标题"
+          placeholder={t("contentEditor.titlePlaceholder")}
         />
       </div>
 
       <div className="mb-10">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-neutral-600">章节内容</span>
-          <span className="text-sm text-neutral-400">字数：{wordCount}</span>
+          <span className="text-sm font-medium text-neutral-600">
+            {t("contentEditor.chapterContent")}
+          </span>
+          <span className="text-sm text-neutral-400">
+            {t("contentEditor.wordCount")} {wordCount}
+          </span>
         </div>
 
         <ReactQuill

@@ -1,5 +1,6 @@
 import React from "react";
 import { BookInfo } from "@/app/lib/definitions"; // 假设这是你的 definitions 文件的路径
+import { useTranslation } from "../useTranslation";
 
 interface CategorySelectProps {
   value: BookInfo["category"];
@@ -15,13 +16,14 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     onChange(e.target.value as BookInfo["category"]);
   };
+  const { t } = useTranslation("book");
 
   const categories = [
-    { value: "female-story", label: "女性故事" },
-    { value: "male-story", label: "男性故事" },
-    { value: "children-story", label: "儿童故事" },
-    { value: "personal-story", label: "个人专栏" },
-    { value: "literature-story", label: "文学作品" }
+    { value: "female-story", label: t("categorySelect.femaleStory") },
+    { value: "male-story", label: t("categorySelect.maleStory") },
+    { value: "children-story", label: t("categorySelect.childrenStory") },
+    { value: "personal-story", label: t("categorySelect.personalColumn") },
+    { value: "literature-story", label: t("categorySelect.literaryWork") }
   ];
 
   return (
@@ -30,10 +32,10 @@ const CategorySelect: React.FC<CategorySelectProps> = ({
         htmlFor="book-category"
         className="block text-2xl font-medium text-gray-700 mb-1"
       >
-        作品分类
+        {t("categorySelect.title")}
       </label>
       <p className="text-sm bg-yellow-50 border-l-4 border-yellow-400  p-2  text-yellow-700">
-        提示：请根据您作品的主要风格和目标读者群体选择最合适的分类。
+        {t("categorySelect.tip")}
       </p>
       <select
         id="book-category"

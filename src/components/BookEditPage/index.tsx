@@ -153,7 +153,7 @@ const BookEditPage: React.FC = () => {
       if (!newChapter.title || !newChapter.content) {
         return { success: false };
       }
-      const chapterToSave: Omit<
+      type ChapterToSave = Omit<
         ChapterInfo,
         | "id"
         | "bookId"
@@ -161,14 +161,20 @@ const BookEditPage: React.FC = () => {
         | "lastModified"
         | "chapterNumber"
         | "wordCount"
-      > = {
+        | "income24h"
+        | "totalIncome"
+        | "donationIncome"
+      >;
+
+      const chapterToSave: ChapterToSave = {
         title: newChapter.title,
         content: newChapter.content,
-        publishStatus: newChapter.publishStatus || "draft"
+        publishStatus: newChapter.publishStatus || "draft",
+        isPaid: newChapter.isPaid ?? false,
+        price: newChapter.price ?? 0
       };
 
       const response = await addNewChapter(bookId, chapterToSave);
-      console.log("新增章节", response);
 
       if (response.code === 200) {
         setChapters((prevChapters) => [...prevChapters, response.data]);
@@ -185,7 +191,6 @@ const BookEditPage: React.FC = () => {
 
         return { success: true, data: response.data };
       } else {
-        console.error("保存新章节失败:", response.msg);
         return { success: false };
       }
     } catch (error) {
@@ -204,11 +209,9 @@ const BookEditPage: React.FC = () => {
           setBook(response.data);
           return true;
         } else {
-          console.error("更新书籍状态和分类失败:", response.msg);
           return false;
         }
       } catch (error) {
-        console.error("更新书籍状态和分类时出错:", error);
         return false;
       }
     }

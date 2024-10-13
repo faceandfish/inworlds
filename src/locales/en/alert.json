@@ -1,0 +1,10 @@
+{
+  "success": "Success",
+  "error": "Error",
+  "close": "Close",
+  "pagination": {
+    "pageInfo": "Page {current} of {total}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page"
+  }
+}

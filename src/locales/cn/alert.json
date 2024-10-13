@@ -1,0 +1,10 @@
+{
+  "success": "Success",
+  "error": "Error",
+  "close": "Close",
+  "pagination": {
+    "pageInfo": "第 {current} 页 / 共 {total} 页",
+    "previousPage": "上一页",
+    "nextPage": "下一页"
+  }
+}

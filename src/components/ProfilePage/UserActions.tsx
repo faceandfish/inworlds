@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { followUser, unfollowUser, checkFollowStatus } from "@/app/lib/action";
+import { checkFollowStatus } from "@/app/lib/action";
 import FollowButton from "./FollowButton";
+import TipButton from "../TipButton";
+import { useTranslation } from "../useTranslation";
 
 interface UserActionsProps {
   isCurrentUser: boolean;
@@ -12,8 +14,8 @@ export default function UserActions({
   isCurrentUser,
   userId
 }: UserActionsProps) {
+  const { t } = useTranslation("profile");
   const [isFollowing, setIsFollowing] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     const fetchFollowStatus = async () => {
@@ -40,12 +42,12 @@ export default function UserActions({
         <>
           <Link href={`/user/${userId}/setting`}>
             <button className="ml-4 px-4 py-2 rounded-md text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out">
-              修改资料
+              {t("userActions.editProfile")}
             </button>
           </Link>
           <Link href={`/studio/${userId}`}>
             <button className="ml-4 px-4 py-2 rounded-md text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out">
-              管理作品
+              {t("userActions.manageWorks")}
             </button>
           </Link>
         </>
@@ -55,9 +57,7 @@ export default function UserActions({
             userId={userId}
             onFollowStatusChange={handleFollowStatusChange}
           />
-          <button className="ml-4 px-5 py-2 rounded  text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out">
-            打赏
-          </button>
+          <TipButton authorId={userId} className="ml-4" />
         </>
       )}
     </div>

@@ -1,0 +1,117 @@
+{
+  "followButton": {
+    "follow": "Follow",
+    "unfollow": "Unfollow",
+    "processing": "Processing...",
+    "loginRequired": "Please log in to follow",
+    "followSuccess": "Followed successfully!",
+    "unfollowSuccess": "Unfollowed successfully",
+    "operationFailed": "Operation failed, please try again later",
+    "login": "Log in"
+  },
+  "header": {
+    "invalidUserId": "Invalid user ID",
+    "fetchUserError": "Failed to fetch user information",
+    "noIntroduction": "This user is lazy and hasn't filled in a personal introduction yet.",
+    "works": "Works",
+    "followers": "Followers",
+    "following": "Following"
+  },
+  "sponsorList": {
+    "title": "Sponsor List",
+    "loading": "Loading sponsors...",
+    "error": "Error: ",
+    "noSponsors": "No sponsors found"
+  },
+  "userActions": {
+    "editProfile": "Edit Profile",
+    "manageWorks": "Manage Works",
+    "donate": "Donate"
+  },
+
+  "worksSection": {
+    "error": "Error:",
+    "noBooksFound": "No books found",
+    "ongoingSeries": "Hot Ongoing Series",
+    "completedWorks": "Completed Works"
+  },
+  "accountSettings": {
+    "title": "Account Settings",
+    "username": "Username",
+    "email": "Email",
+    "phone": "Phone Number",
+    "language": "Language Preference",
+    "gender": "Gender",
+    "birthDate": "Date of Birth",
+    "male": "Male",
+    "female": "Female",
+    "other": "Other",
+    "saveChanges": "Save Changes"
+  },
+  "languages": {
+    "en": "English",
+    "cn": "简体中文",
+    "tw": "繁體中文",
+    "ja": "日本語"
+  },
+  "avatarUpload": {
+    "title": "Avatar Management",
+    "uploadNew": "Upload a new avatar or change your current one.",
+    "bestSize": "Square images are recommended, with an ideal size of 200x200 pixels.",
+    "uploading": "Uploading...",
+    "saveNewAvatar": "Save New Avatar",
+    "uploadSuccess": "Avatar uploaded successfully!",
+    "uploadFailed": "Avatar upload failed:",
+    "unknownError": "Unknown error"
+  },
+
+  "userSettings": {
+    "editProfileTitle": "Edit Personal Information",
+    "loading": "Loading...",
+    "profileUpdateSuccess": "Profile updated successfully!",
+    "profileUpdateFail": "Failed to update profile. Please try again later.",
+    "avatarUpdateSuccess": "Avatar updated successfully!",
+    "passwordChangeSuccess": "Password changed successfully!",
+    "passwordChangeFail": "Failed to change password. Please try again later.",
+    "networkError": "Password change failed. Please check your network connection and try again later."
+  },
+  "notificationSettings": {
+    "title": "Notification Settings",
+    "notificationMethods": "Notification Methods",
+    "pushNotifications": "Push Notifications",
+    "emailNotifications": "Email Notifications",
+    "smsNotifications": "SMS Notifications",
+    "notificationTypes": "Notification Types",
+    "newMessageNotification": "New Message Notification",
+    "newFollowerNotification": "New Follower Notification",
+    "systemUpdateNotification": "System Update Notification",
+    "favoriteBookUpdateNotification": "Favorite Book Update Notification",
+    "followedAuthorUpdateNotification": "Followed Author Update Notification",
+    "saveNotificationSettings": "Save Notification Settings"
+  },
+  "profileSettings": {
+    "title": "Personal Profile",
+    "nickname": "Nick Name",
+    "introduction": "Personal Introduction",
+    "saveChanges": "Save Changes"
+  },
+  "securitySettings": {
+    "title": "Security Settings",
+    "currentPassword": "Current Password",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "enterCurrentPassword": "Enter current password",
+    "enterNewPassword": "Enter new password",
+    "reenterNewPassword": "Re-enter new password",
+    "updateSecuritySettings": "Update Security Settings",
+    "fillAllFields": "Please fill in all password fields",
+    "passwordMismatch": "New password and confirmation do not match"
+  },
+  "sidebar": {
+    "personalProfile": "Personal Profile",
+    "avatarManagement": "Avatar Management",
+    "accountSettings": "Account Settings",
+    "securitySettings": "Security Settings",
+    "notificationSettings": "Notification Settings"
+  }
+}

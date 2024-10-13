@@ -9,6 +9,7 @@ import { MdAttachMoney } from "react-icons/md";
 import Image from "next/image";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { UserInfo } from "@/app/lib/definitions";
+import { useTranslation } from "../useTranslation";
 
 interface SidebarProps {
   activeSection: string;
@@ -21,16 +22,29 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSectionChange,
   user
 }) => {
+  const { t } = useTranslation("studio");
   const navItems = [
-    { id: "works", label: "作品内容", icon: HiOutlineDocumentText },
-    { id: "analysis", label: "数据分析", icon: HiOutlineChartBarSquare },
+    {
+      id: "works",
+      label: t("studio.sidebar.works"),
+      icon: HiOutlineDocumentText
+    },
+    {
+      id: "analysis",
+      label: t("studio.sidebar.analysis"),
+      icon: HiOutlineChartBarSquare
+    },
     {
       id: "comments",
-      label: "评论",
+      label: t("studio.sidebar.comments"),
       icon: HiOutlineChatBubbleBottomCenterText
     },
-    { id: "copyright", label: "版权", icon: AiOutlineCopyrightCircle },
-    { id: "income", label: "收入", icon: MdAttachMoney }
+    {
+      id: "copyright",
+      label: t("studio.sidebar.copyright"),
+      icon: AiOutlineCopyrightCircle
+    },
+    { id: "income", label: t("studio.sidebar.income"), icon: MdAttachMoney }
   ];
 
   return (
@@ -38,7 +52,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <div className="mb-5 flex gap-5 flex-col items-center">
         <Image
           src={getAvatarUrl(user.avatarUrl || "")}
-          alt={user.username || "用户头像"}
+          alt={user.username || "User Avatar"}
           width={200}
           height={200}
           className="rounded-full object-cover w-24 h-24"

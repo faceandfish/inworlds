@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "../useTranslation";
 
 interface AuthorNoteProps {
   authorNote: string;
@@ -12,7 +13,7 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
   error
 }) => {
   const maxLength = 1000;
-
+  const { t } = useTranslation("book");
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     onAuthorNoteChange(e.target.value);
   };
@@ -23,7 +24,7 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
         htmlFor="authorNote"
         className="block text-2xl font-medium text-gray-700 mb-6"
       >
-        作者留言
+        {t("authorNote.title")}
       </label>
       <div className="relative">
         <textarea
@@ -31,13 +32,13 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
           name="authorNote"
           rows={8}
           className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-orange-500"
-          placeholder="请在这里写下您想对读者说的话..."
+          placeholder={t("authorNote.placeholder")}
           value={authorNote}
           onChange={handleNoteChange}
           maxLength={maxLength}
         ></textarea>
         <p className="absolute bottom-2 right-3  text-sm text-gray-500 mt-2">
-          {authorNote.length}/{maxLength} 字符
+          {authorNote.length}/{maxLength} {t("authorNote.characterCount")}
         </p>
       </div>
     </div>

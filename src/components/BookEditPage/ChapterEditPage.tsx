@@ -9,13 +9,14 @@ import {
   getChapterContent,
   updateChapter
 } from "@/app/lib/action";
-import ChapterEditSkeleton from "../Skeleton/ChapterEditSkeleton";
+import { useTranslation } from "../useTranslation";
 
 const ChapterEditPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const bookId = Number(params.bookId as string);
   const chapterId = Number(params.chapterId as string);
+  const { t } = useTranslation("bookedit");
 
   const [book, setBook] = useState<BookInfo | null>(null);
   const [chapter, setChapter] = useState<ChapterInfo | null>(null);
@@ -73,7 +74,7 @@ const ChapterEditPage: React.FC = () => {
       if (response.code === 200) {
         setChapter(response.data);
         setLocalChapter(response.data);
-        setAlert({ message: "章节更新成功", type: "success" });
+        setAlert({ message: t("chapterEdit.updateFail"), type: "success" });
 
         if (publishStatus === "published") {
           // 设置一个短暂的延迟，以确保用户能看到成功消息
@@ -82,12 +83,12 @@ const ChapterEditPage: React.FC = () => {
           }, 1500); // 1.5秒后跳转
         }
       } else {
-        throw new Error(response.msg || "更新章节失败");
+        throw new Error(response.msg || t("chapterEdit.updateFail"));
       }
     } catch (err) {
-      console.error("更新章节时出错:", err);
       setAlert({
-        message: err instanceof Error ? err.message : "更新章节时发生未知错误",
+        message:
+          err instanceof Error ? err.message : t("chapterEdit.updateError"),
         type: "error"
       });
     }
@@ -118,20 +119,20 @@ const ChapterEditPage: React.FC = () => {
           onClick={handleReturn}
           className="bg-neutral-400 hover:bg-neutral-500 text-white font-bold py-2 px-4 rounded transition duration-300"
         >
-          返回章节列表
+          {t("chapterList.returnToChapterList")}
         </button>
         <div>
           <button
             onClick={handleSaveDraft}
             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-4 transition duration-300"
           >
-            保存草稿
+            {t("chapterEdit.saveAsDraft")}
           </button>
           <button
             onClick={handlePublishChapter}
             className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded transition duration-300"
           >
-            发布章节
+            {t("chapterEdit.publish")}
           </button>
         </div>
       </div>

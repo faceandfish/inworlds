@@ -1,0 +1,113 @@
+{
+  "followButton": {
+    "follow": "关注",
+    "unfollow": "取消关注",
+    "processing": "处理中...",
+    "loginRequired": "请登录后关注",
+    "followSuccess": "关注成功！",
+    "unfollowSuccess": "取消关注成功",
+    "operationFailed": "操作失败，请稍后重试",
+    "login": "登录"
+  },
+  "header": {
+    "invalidUserId": "无效的用户ID",
+    "fetchUserError": "获取用户信息失败",
+    "noIntroduction": "这个用户很懒，还没有填写个人介绍。",
+    "works": "作品",
+    "followers": "粉丝",
+    "following": "关注"
+  },
+  "sponsorList": {
+    "title": "赞助者名单",
+    "donationTime": "赞助时间"
+  },
+  "userActions": {
+    "editProfile": "编辑资料",
+    "manageWorks": "管理作品",
+    "donate": "赞助"
+  },
+  "worksSection": {
+    "error": "错误：",
+    "noBooksFound": "未找到书籍",
+    "ongoingSeries": "热门连载作品",
+    "completedWorks": "已完结作品"
+  },
+  "accountSettings": {
+    "title": "账户设置",
+    "username": "用户名",
+    "email": "电子邮箱",
+    "phone": "手机号码",
+    "language": "语言偏好",
+    "gender": "性别",
+    "birthDate": "出生日期",
+    "male": "男",
+    "female": "女",
+    "other": "其他",
+    "saveChanges": "保存更改"
+  },
+  "languages": {
+    "en": "English",
+    "cn": "简体中文",
+    "tw": "繁體中文",
+    "ja": "日本語"
+  },
+  "avatarUpload": {
+    "title": "头像管理",
+    "uploadNew": "上传新头像或更改当前头像。",
+    "bestSize": "建议使用正方形图片，理想尺寸为200x200像素。",
+    "uploading": "上传中...",
+    "saveNewAvatar": "保存新头像",
+    "uploadSuccess": "头像上传成功！",
+    "uploadFailed": "头像上传失败：",
+    "unknownError": "未知错误"
+  },
+  "userSettings": {
+    "editProfileTitle": "编辑个人信息",
+    "loading": "加载中...",
+    "profileUpdateSuccess": "个人资料更新成功！",
+    "profileUpdateFail": "个人资料更新失败。请稍后重试。",
+    "avatarUpdateSuccess": "头像更新成功！",
+    "passwordChangeSuccess": "密码修改成功！",
+    "passwordChangeFail": "密码修改失败。请稍后重试。",
+    "networkError": "密码修改失败。请检查网络连接并稍后重试。"
+  },
+  "notificationSettings": {
+    "title": "通知设置",
+    "notificationMethods": "通知方式",
+    "pushNotifications": "推送通知",
+    "emailNotifications": "邮件通知",
+    "smsNotifications": "短信通知",
+    "notificationTypes": "通知类型",
+    "newMessageNotification": "新消息通知",
+    "newFollowerNotification": "新粉丝通知",
+    "systemUpdateNotification": "系统更新通知",
+    "favoriteBookUpdateNotification": "收藏书籍更新通知",
+    "followedAuthorUpdateNotification": "关注作者更新通知",
+    "saveNotificationSettings": "保存通知设置"
+  },
+  "profileSettings": {
+    "title": "个人资料",
+    "nickname": "昵称",
+    "introduction": "个人介绍",
+    "saveChanges": "保存更改"
+  },
+  "securitySettings": {
+    "title": "安全设置",
+    "currentPassword": "当前密码",
+    "newPassword": "新密码",
+    "confirmNewPassword": "确认新密码",
+    "enterCurrentPassword": "输入当前密码",
+    "enterNewPassword": "输入新密码",
+    "reenterNewPassword": "再次输入新密码",
+    "updateSecuritySettings": "更新安全设置",
+    "fillAllFields": "请填写所有密码字段",
+    "passwordMismatch": "新密码和确认密码不匹配"
+  },
+  "sidebar": {
+    "personalProfile": "个人资料",
+    "avatarManagement": "头像管理",
+    "accountSettings": "账户设置",
+    "securitySettings": "安全设置",
+    "notificationSettings": "通知设置"
+  }
+}

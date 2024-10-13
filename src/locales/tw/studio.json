@@ -1,0 +1,123 @@
+{
+  "comments": {
+    "title": "評論管理",
+    "noCommentsAvailable": "暫無評論。",
+    "likeSuccess": "點讚成功！",
+    "likeFail": "點讚失敗，請稍後重試",
+    "replySuccess": "回覆成功！",
+    "replyFail": "回覆失敗，請稍後重試",
+    "deleteSuccess": "評論已刪除！",
+    "deleteFail": "刪除失敗，請稍後重試",
+    "blockSuccess": "用戶已被屏蔽！",
+    "blockFail": "屏蔽用戶失敗，請稍後重試"
+  },
+  "mobileStudio": {
+    "title": "創作者工作室",
+    "message": "為了給您提供最佳的創作體驗，我們建議您使用桌面設備訪問創作者工作室。在更大的螢幕上，您可以更方便地管理您的作品、查看數據分析和處理版權事宜。",
+    "suggestion": "請在電腦或平板設備上訪問本頁面，以獲得完整的創作者工作室功能。"
+  },
+  "copyright": {
+    "title": "InWorlds版權聲明",
+    "lastUpdated": "最後更新：2024年9月26日",
+    "rights": "© 2024 InWorlds。保留所有權利。",
+    "contact": "聯繫我們：sundayoffice.jp@gmail.com",
+    "sections": {
+      "originalWorks": "1. 原創作品聲明",
+      "authorResponsibility": "2. 作者責任聲明",
+      "nonCommercialUse": "3. 非商業使用聲明",
+      "platformRights": "4. 平台權利與責任",
+      "copyrightComplaints": "5. 版權投訴處理",
+      "userAgreement": "6. 用戶協議",
+      "applicableLaw": "7. 適用法律"
+    },
+    "contactEmail": "版權糾紛聯繫郵箱：sundayoffice.jp@gmail.com",
+    "content": {
+      "originalWorks": "InWorlds平台鼓勵作家創作原創作品。在本平台上發布的所有原創作品版權均歸屬於作者個人。",
+      "copyrightComplaints": "作者對其在InWorlds平台上發布的內容負有責任。如涉及任何抄襲、侵權或其他不當行為，相關法律責任由作者承擔。InWorlds平台將在合理範圍內協助處理相關問題。",
+      "nonCommercialUse": "在InWorlds平台上發布的作品主要用於非商業目的。如作者希望將作品用於商業用途，建議事先與平台溝通，以確保符合相關規定和雙方利益。",
+      "platformRights": "對於可能違反本聲明的作品，InWorlds將首先與作者溝通，尋求共同解決方案。只有在溝通無效且確認存在明顯違規的情況下，平台可能會採取必要的措施，如暫時下架或刪除相關內容。我們承諾在採取任何行動前，會充分考慮並尊重作者的權益。",
+      "complaintHandling": "如您認為平台上的某作品侵犯了您的版權，請及時與我們聯繫。我們將認真對待每一份投訴，並根據提供的信息進行調查和適當處理。",
+      "userAgreement": "我們誠摯邀請您在使用InWorlds平台前，仔細閱讀本免責聲明。如您對任何條款有疑問或顧慮，歡迎隨時與我們聯繫討論。我們重視與用戶的良好溝通，並致力於為所有用戶提供公平、透明的創作環境。",
+      "applicableLaw": "本免責聲明適用於InWorlds運營所在地的法律。如產生任何爭議，我們將本著相互理解、友好協商的原則，通過對話尋求解決方案。若協商未果，將根據運營地相關法律法規處理。"
+    }
+  },
+  "dataAnalysis": {
+    "title": "內容詳情",
+    "columns": {
+      "title": "標題",
+      "type": "類型",
+      "wordCount": "字數",
+      "creationTime": "創建時間"
+    },
+    "detailedData": "詳細數據",
+    "analyticsItems": {
+      "views": "總瀏覽量",
+      "viewsLast24h": "過去24小時瀏覽量",
+      "likes": "總點讚數",
+      "totalIncome": "總收入",
+      "comments": "總評論數",
+      "incomeLast24h": "過去24小時收入"
+    }
+  },
+  "income": {
+    "title": "收入詳情",
+    "monthlyIncome": "月總收入",
+    "currency": "墨幣",
+    "columns": {
+      "title": "標題",
+      "type": "類型",
+      "income24h": "24小時收入",
+      "donationIncome": "打賞收入",
+      "totalIncome": "總收入",
+      "creationTime": "創建時間"
+    }
+  },
+  "studio": {
+    "userLoadingError": "無法加載用戶信息。請重新登錄或稍後再試。",
+    "loginButton": "返回登錄頁面",
+    "sidebar": {
+      "works": "作品",
+      "analysis": "數據分析",
+      "comments": "評論",
+      "copyright": "版權",
+      "income": "收入"
+    },
+    "workContent": {
+      "tabs": {
+        "published": "已發布內容",
+        "ongoing": "連載中",
+        "completed": "已完結",
+        "draft": "草稿"
+      },
+      "columns": {
+        "title": "標題",
+        "status": "狀態",
+        "lastUpdated": "最後更新",
+        "actions": "操作"
+      },
+      "status": {
+        "ongoing": "連載中",
+        "completed": "已完結",
+        "draft": "草稿"
+      },
+      "actions": {
+        "edit": "編輯",
+        "unpublish": "取消發布",
+        "publish": "發布",
+        "delete": "刪除"
+      },
+      "confirmations": {
+        "unpublish": "確定要取消發布這個作品嗎？",
+        "publish": "確定要公開發布這個作品嗎？",
+        "delete": "確定要刪除這個作品嗎？"
+      },
+      "newWork": "新作品",
+      "errors": {
+        "fetchFailed": "獲取作品列表失敗",
+        "unpublishFailed": "取消發布作品失敗",
+        "publishFailed": "發布作品失敗",
+        "deleteFailed": "刪除作品失敗"
+      }
+    }
+  }
+}

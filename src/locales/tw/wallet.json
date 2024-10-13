@@ -1,0 +1,58 @@
+{
+  "wallet": {
+    "title": "購買墨幣",
+    "balance": {
+      "current": "當前餘額：",
+      "currency": "墨幣"
+    },
+    "noRecords": "暫無記錄",
+    "donationTip": {
+      "title": "打賞提示",
+      "content": "您的打賞直接支持作者創作更多優質內容。感謝您的支持！"
+    },
+    "historyTable": {
+      "purchaseTitle": "墨幣購買歷史",
+      "donationTitle": "打賞歷史",
+      "columns": {
+        "date": "日期",
+        "purchaseCoins": "購買墨幣",
+        "donationCoins": "捐贈墨幣",
+        "amountPaid": "支付金額",
+        "author": "作者",
+        "work": "作品"
+      }
+    },
+    "purchasedChapters": {
+      "title": "已購買的章節",
+      "bookTitle": "書名",
+      "chapterTitle": "章節名",
+      "purchaseDate": "購買日期",
+      "cost": "花費",
+      "coins": "墨幣"
+    },
+    "purchaseOptions": {
+      "coins": "墨幣",
+      "buy": "購買",
+      "processing": "處理中..."
+    },
+    "alerts": {
+      "orderCreating": "請稍候，正在創建訂單...",
+      "orderCreationFailed": "創建訂單失敗，請重試。",
+      "orderCreationError": "創建訂單時發生錯誤，請重試。",
+      "paymentConfirmation": "您確定要購買 {coins} 墨幣，價格為 {price} 美元嗎？",
+      "paymentWindowOpened": "支付窗口已打開。請在新窗口中完成支付，然後點擊「確認支付」按鈕。",
+      "paymentProcessing": "正在確認支付，請稍候...",
+      "purchaseSuccess": "購買成功！",
+      "purchaseFailed": "購買失敗，請重試。",
+      "paymentError": "處理支付時發生錯誤，請重試。"
+    },
+    "buttons": {
+      "proceedToPayment": "繼續支付",
+      "confirmPayment": "確認支付"
+    },
+    "errors": {
+      "balanceFetchFailed": "獲取用戶餘額失敗：",
+      "balanceFetchError": "獲取用戶餘額時發生錯誤："
+    }
+  }
+}

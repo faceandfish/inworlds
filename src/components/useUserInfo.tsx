@@ -22,7 +22,6 @@ export function useUserInfo() {
       const response = await getUserInfo(token);
       if (response.code === 200 && response.data) {
         setUser(response.data);
-        console.log("user的内容拿到了：", response.data);
       } else {
         setError(response.msg || "Failed to fetch user info");
       }

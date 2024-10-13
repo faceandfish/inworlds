@@ -4,6 +4,7 @@ import { BookInfo, ChapterInfo } from "@/app/lib/definitions";
 import ContentEditor from "../WritingPage/ContentEditor";
 import Alert from "../Alert";
 import { useRouter } from "next/navigation";
+import { useTranslation } from "../useTranslation";
 
 interface NewChapterProps {
   book: BookInfo | null;
@@ -14,6 +15,7 @@ interface NewChapterProps {
 }
 
 const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
+  const { t } = useTranslation("bookedit");
   const [newChapter, setNewChapter] = useState<Partial<ChapterInfo>>({
     bookId,
     chapterNumber: book!.latestChapterNumber + 1,
@@ -61,8 +63,7 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
 
   const saveChapterChanges = async (publishStatus: "draft" | "published") => {
     if (!newChapter.title || !newChapter.content) {
-      console.log("Chapter title or content is empty");
-      setAlertState(true, "章节标题和内容不能为空", "error");
+      setAlertState(true, t("newChapter.emptyChapterError"), "error");
       return;
     }
 
@@ -73,23 +74,22 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
       lastModified: new Date().toISOString(),
       wordCount: newChapter.content?.length || 0
     };
-    console.log("Chapter to save:", chapterToSave);
 
     try {
       const result = await onSave(chapterToSave);
-      console.log("Save result:", result);
 
       if (result.success) {
         const message =
-          publishStatus === "draft" ? "章节已保存为草稿" : "新章节发布成功";
+          publishStatus === "draft"
+            ? t("newChapter.chapterSavedAsDraft")
+            : t("newChapter.newChapterPublishSuccess");
         setAlertState(true, message, "success");
         resetChapterContent();
       } else {
-        setAlertState(true, "保存章节失败", "error");
+        setAlertState(true, t("newChapter.chapterSaveFail"), "error");
       }
     } catch (error) {
-      console.error("Error saving chapter:", error);
-      setAlertState(true, "保存章节时发生错误", "error");
+      setAlertState(true, t("newChapter.chapterSaveError"), "error");
     }
   };
 
@@ -107,13 +107,13 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
           onClick={handlePublishChapter}
           className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
-          发布新章节
+          {t("newChapter.publishNewChapter")}
         </button>
         <button
           onClick={handleSaveDraft}
           className="bg-neutral-400 hover:bg-neutral-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
-          保存草稿箱
+          {t("newChapter.saveToDraft")}
         </button>
       </div>
       {showAlert &&

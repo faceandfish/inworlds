@@ -1,5 +1,6 @@
 import React from "react";
 import { BookInfo } from "@/app/lib/definitions";
+import { useTranslation } from "../useTranslation";
 
 interface BookStatusSelectorProps {
   status: BookInfo["status"];
@@ -9,14 +10,16 @@ interface BookStatusSelectorProps {
 
 const BookStatusSelector: React.FC<BookStatusSelectorProps> = ({
   status,
-  onStatusChange,
-  error
+  onStatusChange
 }) => {
+  const { t } = useTranslation("book");
   return (
     <div className="flex flex-col space-y-6 ">
-      <label className="text-2xl font-medium text-gray-700">作品状态</label>
+      <label className="text-2xl font-medium text-gray-700">
+        {t("bookStatus.title")}
+      </label>
       <p className="text-sm bg-yellow-50 border-l-4 border-yellow-400  p-2  text-yellow-700">
-        提示：连载中，表示作品正在创作过程中，可以持续更新；已完结，表示作品已经完成，不再更新内容。
+        {t("bookStatus.tip")}
       </p>
       <div className="flex space-x-4">
         <label className="inline-flex items-center">
@@ -28,7 +31,7 @@ const BookStatusSelector: React.FC<BookStatusSelectorProps> = ({
             checked={status === "ongoing"}
             onChange={() => onStatusChange("ongoing")}
           />
-          <span className="ml-2">连载中</span>
+          <span className="ml-2">{t("bookStatus.ongoing")}</span>
         </label>
         <label className="inline-flex items-center">
           <input
@@ -39,7 +42,7 @@ const BookStatusSelector: React.FC<BookStatusSelectorProps> = ({
             checked={status === "completed"}
             onChange={() => onStatusChange("completed")}
           />
-          <span className="ml-2">已完结</span>
+          <span className="ml-2">{t("bookStatus.completed")}</span>
         </label>
       </div>
     </div>

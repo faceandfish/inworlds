@@ -1,0 +1,10 @@
+{
+  "success": "Success",
+  "error": "Error",
+  "close": "Close",
+  "pagination": {
+    "pageInfo": "{total}ページ中 / {current}ページ目",
+    "previousPage": "前のページ",
+    "nextPage": "次のページ"
+  }
+}

@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef, useCallback, useState } from "react";
 import { BookInfo, FileUploadData } from "@/app/lib/definitions"; // 假设这是你的 definitions 文件的路径
+import { useTranslation } from "../useTranslation";
 
 interface CoverUploadProps {
   coverImage: FileUploadData["coverImage"];
@@ -15,6 +16,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const { t } = useTranslation("book");
 
   const handleEditClick = () => {
     fileInputRef.current?.click();
@@ -27,9 +29,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
       const file = e.target.files ? e.target.files[0] : null;
       if (file) {
         if (file.size > MAX_FILE_SIZE) {
-          setError(
-            "文件大小不能超过 2 MB。请选择一个较小的文件或压缩当前文件。"
-          );
+          setError(t("coverUpload.fileSizeError"));
           return;
         }
         setError(null);
@@ -46,7 +46,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
         htmlFor="cover-image"
         className="block text-2xl font-medium text-neutral-600"
       >
-        封面图片
+        {t("coverUpload.title")}
       </label>
       <div className="flex gap-10 ">
         <div>
@@ -68,7 +68,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
                   onClick={() => fileInputRef.current?.click()}
                   className="px-4 py-2 bg-orange-500 text-white rounded-md hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2"
                 >
-                  选择文件
+                  {t("coverUpload.selectFile")}
                 </button>
               </div>
             )}
@@ -89,38 +89,52 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
               onClick={handleEditClick}
               className="mt-2 w-44 py-2 px-4 border border-orange-500 text-orange-500 rounded-md shadow-sm text-sm font-medium hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 transition duration-150 ease-in-out"
             >
-              修改图片
+              {t("coverUpload.editImage")}
             </button>
           )}
         </div>
         <div className="bg-gray-50 px-10 h-56 py-3 leading-snug rounded-lg shadow-md text-sm text-neutral-500">
           <h3 className="font-bold text-lg mb-2 text-neutral-600">
-            书籍封面上传指南
+            {t("coverUpload.guideTitle")}
           </h3>
           <ul className="space-y-1">
             <li>
-              <span className="font-semibold">推荐尺寸：</span>400 x 600 像素
+              <span className="font-semibold">
+                {t("coverUpload.recommendedSize")}
+              </span>{" "}
+              400 x 600 pixels
             </li>
             <li>
-              <span className="font-semibold">尺寸范围：</span>300 x 450 至 800
-              x 1200 像素
+              <span className="font-semibold">
+                {t("coverUpload.sizeRange")}
+              </span>{" "}
+              300 x 450 to 800 x 1200 pixels
             </li>
             <li>
-              <span className="font-semibold">最大文件大小：</span>2 MB
+              <span className="font-semibold">
+                {t("coverUpload.maxFileSize")}
+              </span>{" "}
+              2 MB
             </li>
             <li>
-              <span className="font-semibold">推荐格式：</span>JPEG/JPG, PNG
+              <span className="font-semibold">
+                {t("coverUpload.recommendedFormat")}
+              </span>{" "}
+              JPEG/JPG, PNG
             </li>
             <li>
-              <span className="font-semibold">比例：</span>保持 2:3 的宽高比
+              <span className="font-semibold">
+                {t("coverUpload.aspectRatio")}
+              </span>{" "}
+              Maintain a 2:3 aspect ratio
             </li>
             <li>
-              <span className="font-semibold">布局：</span>
-              重要视觉元素请置于图片中心
+              <span className="font-semibold">{t("coverUpload.layout")}</span>{" "}
+              Place important visual elements in the center of the image
             </li>
           </ul>
           <p className="mt-2 text-xs text-neutral-500">
-            遵循这些指南将帮助您的书籍封面在我们的平台上获得最佳展示效果。
+            {t("coverUpload.guideNote")}
           </p>
         </div>
       </div>

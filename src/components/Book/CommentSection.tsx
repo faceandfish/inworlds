@@ -10,19 +10,29 @@ import {
 import Alert from "../Alert";
 import CommentItem from "../CommentItem";
 import Pagination from "../Pagination";
+import { useTranslation } from "../useTranslation";
+import BookContentSkeleton from "./skeleton/BookContentSkeleton";
 
 interface CommentSectionProps {
   bookId: number;
+  isLoggedIn: boolean; // 新增：用于判断用户是否已登录
+  onLogin: () => void; // 新增：登录回调函数
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({
+  bookId,
+  isLoggedIn,
+  onLogin
+}) => {
   const [comments, setComments] = useState<CommentInfo[]>([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [showLoginAlert, setShowLoginAlert] = useState(false);
   const commentsPerPage = 20;
+  const { t, isLoaded } = useTranslation("book");
 
   useEffect(() => {
     fetchComments(currentPage);
@@ -35,7 +45,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
       setComments(response.data.dataList);
       setTotalPages(Number(response.data.totalPage));
     } catch (err) {
-      setError("Failed to load comments");
+      setError(t("failedToLoadComments"));
     } finally {
       setLoading(false);
     }
@@ -45,21 +55,30 @@ const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
     e.preventDefault();
     if (!newComment.trim()) return;
 
+    if (!isLoggedIn) {
+      setShowLoginAlert(true);
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await addCommentOrReply(bookId, newComment);
       setComments([response.data, ...comments]);
       setNewComment("");
-      // Refresh the first page to show the new comment
       fetchComments(1);
     } catch (err) {
-      setError("添加评论失败，请稍后重试");
+      setError(t("addingCommentFailed"));
     } finally {
       setLoading(false);
     }
   };
 
   const handleReply = async (commentId: number, content: string) => {
+    if (!isLoggedIn) {
+      setShowLoginAlert(true);
+      return;
+    }
+
     try {
       const response = await addCommentOrReply(bookId, content, commentId);
       setComments(
@@ -73,11 +92,16 @@ const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
         )
       );
     } catch (err) {
-      setError("回复失败，请稍后重试");
+      setError(t("replyFailed"));
     }
   };
 
   const handleLike = async (commentId: number) => {
+    if (!isLoggedIn) {
+      setShowLoginAlert(true);
+      return;
+    }
+
     try {
       await likeComment(commentId);
       setComments(
@@ -88,7 +112,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
         )
       );
     } catch (err) {
-      setError("点赞失败，请稍后重试");
+      setError(t("likeFailed"));
     }
   };
 
@@ -96,24 +120,26 @@ const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
     setCurrentPage(page);
   };
 
-  return (
-    <div className="my-10">
-      <h2 className="text-2xl font-bold text-neutral-600 mb-4">留言评论</h2>
+  if (!isLoaded) {
+    return <BookContentSkeleton />; // 显示骨架屏
+  }
 
+  return (
+    <div className="my-5 md:my-10 px-4 md:px-0">
       <form onSubmit={handleSubmitComment} className="mb-6 flex flex-col">
         <textarea
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          placeholder="新留言..."
-          className="w-1/2 p-2 border rounded text-neutral-600 focus:outline-none"
+          placeholder={t("leaveComment")}
+          className="w-full md:w-1/2 p-2 border rounded text-neutral-600 focus:outline-none"
           rows={3}
         />
         <button
           type="submit"
           disabled={loading}
-          className="mt-2 px-4 py-2 w-24 bg-orange-400 text-white rounded hover:bg-orange-500 disabled:bg-neutral-400"
+          className="mt-2 px-4 py-2 w-full md:w-fit bg-orange-400 text-white rounded hover:bg-orange-500 disabled:bg-neutral-400"
         >
-          {loading ? "提交中..." : "添加留言"}
+          {loading ? t("submitting") : t("addComment")}
         </button>
       </form>
 
@@ -121,9 +147,26 @@ const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
         <Alert message={error} type="error" onClose={() => setError(null)} />
       )}
 
-      {loading && <p>Loading comments...</p>}
+      {showLoginAlert && (
+        <Alert
+          message={t("pleaseLoginToComment")}
+          type="error"
+          onClose={() => setShowLoginAlert(false)}
+          customButton={{
+            text: t("login"),
+            onClick: () => {
+              setShowLoginAlert(false);
+              onLogin();
+            }
+          }}
+          autoClose={false}
+        />
+      )}
 
-      <div className="mb-20">
+      {loading && <p>{t("loadingComments")}</p>}
+      {!loading && comments.length === 0 && <p>{t("noCommentsYet")}</p>}
+
+      <div className="mb-10 md:mb-20">
         {comments.map((comment) => (
           <CommentItem
             key={comment.id}
@@ -137,12 +180,23 @@ const CommentSection: React.FC<CommentSectionProps> = ({ bookId }) => {
           />
         ))}
 
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        )}
       </div>
+
+      {totalPages > currentPage && (
+        <button
+          onClick={() => setCurrentPage(currentPage + 1)}
+          className="w-full py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition-colors text-sm md:text-base"
+        >
+          {t("loadMore")}
+        </button>
+      )}
     </div>
   );
 };

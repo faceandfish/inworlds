@@ -1,5 +1,7 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "./useTranslation";
 
 interface AlertProps {
   message: string;
@@ -20,6 +22,7 @@ const Alert: React.FC<AlertProps> = ({
   autoClose = true
 }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const { t } = useTranslation("alert");
 
   useEffect(() => {
     if (autoClose) {
@@ -40,8 +43,8 @@ const Alert: React.FC<AlertProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="relative w-96 bg-white rounded-lg shadow-xl">
+    <div className="fixed px-6 md:px-0 inset-0 w-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+      <div className="relative md:w-96 w-full bg-white rounded-lg shadow-xl">
         <div
           className={`p-4 ${
             type === "success" ? "bg-orange-100" : "bg-red-100"
@@ -52,7 +55,7 @@ const Alert: React.FC<AlertProps> = ({
               type === "success" ? "text-orange-500" : "text-red-700"
             }`}
           >
-            {type === "success" ? "Success" : "Error"}
+            {type === "success" ? t("success") : t("error")}
           </h3>
           <button
             onClick={handleClose}
@@ -62,7 +65,7 @@ const Alert: React.FC<AlertProps> = ({
           </button>
         </div>
         <div className="p-4">
-          <p className="text-gray-700">{message}</p>
+          <p className="text-neutral-600 whitespace-pre-line">{message}</p>
         </div>
         <div className="flex justify-end p-4 rounded-b-lg">
           {customButton && (
@@ -81,7 +84,7 @@ const Alert: React.FC<AlertProps> = ({
                 : "bg-red-500 hover:bg-red-600"
             }`}
           >
-            Close
+            {t("close")}
           </button>
         </div>
       </div>

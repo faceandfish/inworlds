@@ -1,0 +1,123 @@
+{
+  "comments": {
+    "title": "コメント管理",
+    "noCommentsAvailable": "コメントはありません。",
+    "likeSuccess": "いいね成功！",
+    "likeFail": "いいねに失敗しました。後でもう一度お試しください",
+    "replySuccess": "返信成功！",
+    "replyFail": "返信に失敗しました。後でもう一度お試しください",
+    "deleteSuccess": "コメントが削除されました！",
+    "deleteFail": "削除に失敗しました。後でもう一度お試しください",
+    "blockSuccess": "ユーザーがブロックされました！",
+    "blockFail": "ユーザーのブロックに失敗しました。後でもう一度お試しください"
+  },
+  "mobileStudio": {
+    "title": "クリエイターズスタジオ",
+    "message": "最高の創作体験を提供するために、デスクトップデバイスでクリエイターズスタジオにアクセスすることをお勧めします。より大きな画面で、作品の管理、データ分析の閲覧、著作権の処理がより簡単に行えます。",
+    "suggestion": "コンピューターまたはタブレットデバイスでこのページにアクセスし、クリエイターズスタジオの全機能をご利用ください。"
+  },
+  "copyright": {
+    "title": "InWorlds著作権免責事項",
+    "lastUpdated": "最終更新日：2024年9月26日",
+    "rights": "© 2024 InWorlds. All rights reserved.",
+    "contact": "お問い合わせ：sundayoffice.jp@gmail.com",
+    "sections": {
+      "originalWorks": "1. オリジナル作品に関する声明",
+      "authorResponsibility": "2. 著者の責任に関する声明",
+      "nonCommercialUse": "3. 非商業的利用に関する声明",
+      "platformRights": "4. プラットフォームの権利と責任",
+      "copyrightComplaints": "5. 著作権侵害の申し立て処理",
+      "userAgreement": "6. ユーザー同意",
+      "applicableLaw": "7. 適用法"
+    },
+    "contactEmail": "著作権紛争連絡先メール：sundayoffice.jp@gmail.com",
+    "content": {
+      "originalWorks": "InWorldsプラットフォームは作家によるオリジナル作品の創作を奨励しています。本プラットフォームで公開されたすべてのオリジナル作品の著作権は個々の作者に帰属します。",
+      "copyrightComplaints": "作者はInWorldsプラットフォームで公開したコンテンツに対して責任を負います。剽窃、著作権侵害、その他の不適切な行為に関連する法的責任は作者が負います。InWorldsプラットフォームは合理的な範囲内で関連する問題の処理を支援します。",
+      "nonCommercialUse": "InWorldsプラットフォームで公開される作品は主に非商業目的で使用されます。作者が作品を商業目的で使用したい場合は、関連規定と双方の利益を確保するため、事前にプラットフォームと相談することをお勧めします。",
+      "platformRights": "この声明に違反する可能性のある作品について、InWorldsはまず作者と連絡を取り、共通の解決策を模索します。コミュニケーションが無効で明らかな違反が確認された場合にのみ、プラットフォームは必要な措置（関連コンテンツの一時的な削除など）を取る可能性があります。我々は、いかなる行動を取る前にも、作者の権利を十分に考慮し尊重することを約束します。",
+      "complaintHandling": "プラットフォーム上の作品があなたの著作権を侵害していると思われる場合は、速やかにご連絡ください。我々はすべての申し立てを真摯に受け止め、提供された情報に基づいて調査し適切に対処します。",
+      "userAgreement": "InWorldsプラットフォームをご利用いただく前に、この免責事項を注意深くお読みいただくようお願いいたします。条項について質問や懸念がある場合は、いつでもお気軽にお問い合わせください。我々はユーザーとの良好なコミュニケーションを重視し、すべてのユーザーに公平で透明性のある創作環境を提供することに尽力しています。",
+      "applicableLaw": "この免責事項はInWorldsの運営地の法律に準拠します。紛争が発生した場合、我々は相互理解と友好的な協議の原則に基づき、対話を通じて解決策を模索します。協議が不調に終わった場合は、運営地の関連法規に従って処理されます。"
+    }
+  },
+  "dataAnalysis": {
+    "title": "コンテンツ詳細",
+    "columns": {
+      "title": "タイトル",
+      "type": "タイプ",
+      "wordCount": "文字数",
+      "creationTime": "作成時間"
+    },
+    "detailedData": "詳細データ",
+    "analyticsItems": {
+      "views": "総閲覧数",
+      "viewsLast24h": "過去24時間の閲覧数",
+      "likes": "総いいね数",
+      "totalIncome": "総収入",
+      "comments": "総コメント数",
+      "incomeLast24h": "過去24時間の収入"
+    }
+  },
+  "income": {
+    "title": "収入詳細",
+    "monthlyIncome": "月間総収入",
+    "currency": "インクコイン",
+    "columns": {
+      "title": "タイトル",
+      "type": "タイプ",
+      "income24h": "24時間の収入",
+      "donationIncome": "寄付収入",
+      "totalIncome": "総収入",
+      "creationTime": "作成時間"
+    }
+  },
+  "studio": {
+    "userLoadingError": "ユーザー情報を読み込めません。再度ログインするか、後でお試しください。",
+    "loginButton": "ログインページに戻る",
+    "sidebar": {
+      "works": "作品",
+      "analysis": "データ分析",
+      "comments": "コメント",
+      "copyright": "著作権",
+      "income": "収入"
+    },
+    "workContent": {
+      "tabs": {
+        "published": "公開済みコンテンツ",
+        "ongoing": "連載中シリーズ",
+        "completed": "完結",
+        "draft": "下書き"
+      },
+      "columns": {
+        "title": "タイトル",
+        "status": "ステータス",
+        "lastUpdated": "最終更新",
+        "actions": "アクション"
+      },
+      "status": {
+        "ongoing": "連載中",
+        "completed": "完結",
+        "draft": "下書き"
+      },
+      "actions": {
+        "edit": "編集",
+        "unpublish": "非公開",
+        "publish": "公開",
+        "delete": "削除"
+      },
+      "confirmations": {
+        "unpublish": "この作品を非公開にしてもよろしいですか？",
+        "publish": "この作品を公開してもよろしいですか？",
+        "delete": "この作品を削除してもよろしいですか？"
+      },
+      "newWork": "新しい作品",
+      "errors": {
+        "fetchFailed": "作品リストの取得に失敗しました",
+        "unpublishFailed": "作品の非公開に失敗しました",
+        "publishFailed": "作品の公開に失敗しました",
+        "deleteFailed": "作品の削除に失敗しました"
+      }
+    }
+  }
+}

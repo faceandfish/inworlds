@@ -1,0 +1,58 @@
+{
+  "wallet": {
+    "title": "Purchase InkCoin",
+    "noRecords": "No records",
+    "balance": {
+      "current": "Current Balance:",
+      "currency": "InkCoin"
+    },
+    "donationTip": {
+      "title": "Donation Tip",
+      "content": "Your donation directly supports the author in creating more quality content. Thank you for your support!"
+    },
+    "historyTable": {
+      "purchaseTitle": "Purchase InkCoin History",
+      "donationTitle": "Donation History",
+      "columns": {
+        "date": "Date",
+        "purchaseCoins": "Coins",
+        "donationCoins": "Coins",
+        "amountPaid": "Paid",
+        "author": "Author",
+        "work": "Work"
+      }
+    },
+    "purchasedChapters": {
+      "title": "Purchased Chapters",
+      "bookTitle": "Book Title",
+      "chapterTitle": "Chapter Title",
+      "purchaseDate": "Purchase Date",
+      "cost": "Cost",
+      "coins": "InkCoin"
+    },
+    "purchaseOptions": {
+      "coins": "InkCoin",
+      "buy": "Buy",
+      "processing": "Processing..."
+    },
+    "alerts": {
+      "orderCreating": "Please wait, the order is being created...",
+      "orderCreationFailed": "Failed to create order, please try again.",
+      "orderCreationError": "An error occurred while creating the order, please try again.",
+      "paymentConfirmation": "Are you sure you want to purchase {coins} Ink Coins for {price} USD?",
+      "paymentWindowOpened": "The payment window has been opened. Please complete the payment in the new window, then click the 'Confirm Payment' button.",
+      "paymentProcessing": "Confirming payment, please wait...",
+      "purchaseSuccess": "Successfully purchased!",
+      "purchaseFailed": "Purchase failed, please try again.",
+      "paymentError": "An error occurred while processing the payment, please try again."
+    },
+    "buttons": {
+      "proceedToPayment": "Proceed to Payment",
+      "confirmPayment": "Confirm Payment"
+    },
+    "errors": {
+      "balanceFetchFailed": "Failed to get user balance:",
+      "balanceFetchError": "Error while fetching user balance:"
+    }
+  }
+}

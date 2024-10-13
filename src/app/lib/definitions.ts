@@ -1,3 +1,5 @@
+import { Locale } from "../i18n-config";
+
 // 文件上传接口
 export interface FileUploadData {
   coverImage?: File;
@@ -30,7 +32,7 @@ export interface UserInfo {
   introduction?: string;
   createdAt: string;
   phone?: string;
-  language?: string;
+  language?: Locale;
   gender?: "male" | "female" | "other";
   birthDate?: string;
   followersCount: number;
@@ -63,7 +65,7 @@ export interface UpdateUserRequest {
   email?: string;
   introduction?: string;
   phone?: string; // 可选字段，因为可能不是所有用户都有手机号
-  language?: string; // 可选字段，可以有默认值
+  language?: Locale;
   gender?: "male" | "female" | "other"; // 性别
   birthDate?: string; // 出生日期，格式为 ISO 8601 字符串，如 "1990-01-01"
 }
@@ -127,6 +129,14 @@ export interface ChapterInfo {
   authorNote?: string;
   publishStatus: "draft" | "published" | "scheduled"; // 新增：章节的发布状态
   publishDate?: string; //"scheduled"定时发布时间确定
+  // 新增: 表示章节是否收费
+  isPaid: boolean;
+  // 新增: 如果收费，表示收费金额（单位：金币）
+  price: number;
+
+  income24h: number; // 24小时收入
+  totalIncome: number; // 总收入
+  donationIncome: number; // 打赏收入
 }
 
 // 书籍信息
@@ -162,6 +172,12 @@ export interface BookInfo {
 
   status: "ongoing" | "completed"; // 书籍的连载状态：连载中或已完结
   publishStatus: "draft" | "published"; // 书籍的发布状态：草稿（仅作者可见）或已发布（所有人可见）
+
+  income24h: number; // 24小时总收入
+  totalIncome: number; // 总收入
+  donationIncome: number; // 总打赏收入
+  adIncome: number; // 广告收入（如果适用）
+  monthlyIncome: { month: string; income: number }[]; // 按月收入统计
 }
 
 // 评论信息
@@ -205,6 +221,12 @@ export interface ApiResponse<T> {
   code: number;
   msg: string;
   data: T;
+}
+
+export interface PasswordChangeResponse {
+  code: number;
+  msg: string;
+  data: void | null;
 }
 
 // 登录凭证
@@ -281,10 +303,12 @@ export interface SearchResult {
 
 // 打赏接口
 export interface SponsorInfo {
-  id: string;
-  username: string;
+  userId: number;
+  userName: string;
+  displayName: string;
   avatarUrl: string;
-  donationTime: string;
+  createAt: string;
+  coins: number;
 }
 
 //打赏
@@ -298,8 +322,8 @@ export interface PurchaseHistory {
   id: number;
   userId: number;
   coins: number;
-  amountPaid: number;
-  date: string;
+  amount: number;
+  createAt: string;
 }
 
 export interface DonationHistory {
@@ -307,8 +331,78 @@ export interface DonationHistory {
   userId: number; // 添加用户ID
   authorId: number; // 添加作者ID
   coins: number;
-  date: string;
+  createAt: string;
   authorName: string;
   bookTitle: string;
   bookId: number;
+}
+
+//paypal order
+export interface PayPalOrderRequest {
+  amount: string;
+  currency: string;
+  description: string;
+}
+
+// Define the PayPal order response type
+export interface PayPalOrderResponse {
+  orderId: string;
+  paymentUrl: string;
+}
+
+export interface ConfirmPayPalOrderRequest {
+  orderId: string;
+}
+
+export interface ConfirmPayPalOrderResponse {
+  orderId: string; //使用PayPal返回的支付ID。
+  payerId: string; //来自支付者信息中的payer_id。
+  saleId: string; //使用具体销售交易的ID。
+  amount: string; //交易的总金额
+  currency: string; //交易的货币单位
+}
+
+export interface UserBalance {
+  availableBalance: number;
+}
+
+export type TranslationFunction = (
+  key: string,
+  params?: Record<string, any>
+) => string;
+
+export interface UseTranslationResponse {
+  t: TranslationFunction;
+}
+
+export interface ChapterPaymentResponse {
+  chapterId: number;
+  coinsPaid: number;
+  newBalance: number;
+}
+
+export interface TipResponse {
+  authorId: number;
+  authorName: string;
+  coins: number;
+  newBalance: number;
+  bookId?: number;
+  bookTitle?: string;
+  chapterId?: number;
+}
+
+export interface PurchasedChapterInfo {
+  bookId: number;
+  chapterId: number;
+  chapterTitle: string;
+  chapterNumber: number;
+  bookTitle: string;
+  authorId: number;
+  authorName: string;
+  createAt: string;
+  coins: number;
+}
+
+export interface SearchHistoryResponse {
+  history: string[];
 }

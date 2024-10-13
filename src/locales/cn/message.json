@@ -1,0 +1,23 @@
+{
+  "favoriteBookPreviewCard": {
+    "author": "作者",
+    "latestChapter": "最新章节："
+  },
+  "messages": {
+    "loading": "加载中...",
+    "errorFetchingData": "获取数据时发生错误。请稍后再试。",
+    "favoriteBooks": "收藏的书籍",
+    "followedUsers": "关注的用户",
+    "systemNotifications": "系统通知"
+  },
+  "sidebar": {
+    "messageCenter": "消息中心",
+    "favoriteBooks": "收藏的书籍",
+    "followedUsers": "关注的用户",
+    "systemNotifications": "系统通知"
+  },
+  "userPreviewCard": {
+    "followers": "关注者：",
+    "mysteriousUser": "这个用户很神秘，还没有提供介绍。"
+  }
+}

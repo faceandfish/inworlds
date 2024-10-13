@@ -4,6 +4,7 @@ import { FileUploadData, UserInfo } from "@/app/lib/definitions";
 import Image from "next/image";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { uploadAvatar } from "@/app/lib/action";
+import { useTranslation } from "../useTranslation";
 
 interface AvatarUploadProps {
   user: UserInfo;
@@ -14,6 +15,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   user,
   onAvatarChange
 }) => {
+  const { t } = useTranslation("profile");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -45,14 +47,15 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
           await onAvatarChange(newAvatarUrl);
           setAvatarPreview(null);
           setAvatarFile(null);
-          alert("头像上传成功！");
+          alert(t("avatarUpload.uploadSuccess"));
         } else {
-          throw new Error(response.msg || "上传失败");
+          throw new Error(response.msg || t("avatarUpload.uploadFailed"));
         }
       } catch (error) {
-        console.error("上传头像失败:", error);
         alert(
-          `头像上传失败：${error instanceof Error ? error.message : "未知错误"}`
+          `${t("avatarUpload.uploadFailed")}${
+            error instanceof Error ? error.message : "未知错误"
+          }`
         );
       } finally {
         setIsUploading(false);
@@ -63,7 +66,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   return (
     <div className="space-y-10">
       <div className="border-b pb-2">
-        <h2 className="text-2xl font-bold text-neutral-600">头像管理</h2>
+        <h2 className="text-2xl font-bold text-neutral-600">
+          {t("avatarUpload.title")}
+        </h2>
       </div>
       <div className="flex flex-col items-center space-y-6 p-6">
         <div className="relative">
@@ -72,7 +77,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
             alt={user.displayName || "用户头像"}
             width={160}
             height={160}
-            className="rounded-full object-cover"
+            className="rounded-full object-cover w-40 h-40"
           />
           <button
             type="button"
@@ -91,9 +96,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         </div>
         <div className="text-center space-y-10">
           <p className="text-sm text-gray-500 mt-5">
-            上传一张新头像或更改您的当前头像。
+            {t("avatarUpload.uploadNew")}
             <br />
-            建议使用正方形图片，最佳尺寸为 200x200 像素。
+            {t("avatarUpload.bestSize")}
           </p>
           {avatarFile && (
             <button
@@ -103,7 +108,9 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
                 isUploading ? "opacity-50 cursor-not-allowed" : ""
               }`}
             >
-              {isUploading ? "上传中..." : "保存新头像"}
+              {isUploading
+                ? t("avatarUpload.uploading")
+                : t("avatarUpload.saveNewAvatar")}
             </button>
           )}
         </div>

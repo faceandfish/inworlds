@@ -1,0 +1,41 @@
+{
+  "pageTitle": "釋放你的創作潛能",
+  "whyChooseUs": {
+    "title": "為什麼選擇我們的平台？",
+    "reason1": "接觸百萬級讀者群體",
+    "reason2": "靈活的創作節奏",
+    "reason3": "專業的編輯團隊支持",
+    "reason4": "活躍的作者社區"
+  },
+  "revenueModel": {
+    "title": "豐厚的收益模式",
+    "model1": {
+      "title": "50% 廣告收益分成",
+      "description": "您將收穫到免費作品產生的廣告收入"
+    },
+    "model2": {
+      "title": "版權交易平台",
+      "description": "直接在平台出售您的作品版權，獲得額外收益"
+    },
+    "model3": {
+      "title": "70% 打賞和收費章節收入",
+      "description": "讀者的打賞和收費章節的收入，您將獲得70%作為回報"
+    }
+  },
+  "callToAction": "開啟你的創作之旅",
+  "faq": {
+    "title": "常見問題",
+    "question1": {
+      "question": "創作需要付費嗎？",
+      "answer": "完全免費！我們相信優質內容自然會帶來收益。"
+    },
+    "question2": {
+      "question": "我的作品版權歸屬？",
+      "answer": "版權100%歸您所有，我們僅獲得在平台展示和銷售的權利。"
+    },
+    "question3": {
+      "question": "對更新頻率有要求嗎？",
+      "answer": "沒有硬性要求，但建議保持穩定更新以維持讀者熱情。"
+    }
+  }
+}

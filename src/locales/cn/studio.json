@@ -1,0 +1,123 @@
+{
+  "comments": {
+    "title": "评论管理",
+    "noCommentsAvailable": "暂无评论。",
+    "likeSuccess": "点赞成功！",
+    "likeFail": "点赞失败，请稍后重试",
+    "replySuccess": "回复成功！",
+    "replyFail": "回复失败，请稍后重试",
+    "deleteSuccess": "评论已删除！",
+    "deleteFail": "删除失败，请稍后重试",
+    "blockSuccess": "用户已被屏蔽！",
+    "blockFail": "屏蔽用户失败，请稍后重试"
+  },
+  "mobileStudio": {
+    "title": "创作者工作室",
+    "message": "为了给您提供最佳的创作体验，我们建议您使用桌面设备访问创作者工作室。在更大的屏幕上，您可以更方便地管理您的作品、查看数据分析和处理版权事宜。",
+    "suggestion": "请在电脑或平板设备上访问本页面，以获得完整的创作者工作室功能。"
+  },
+  "copyright": {
+    "title": "InWorlds版权声明",
+    "lastUpdated": "最后更新：2024年9月26日",
+    "rights": "© 2024 InWorlds。保留所有权利。",
+    "contact": "联系我们：sundayoffice.jp@gmail.com",
+    "sections": {
+      "originalWorks": "1. 原创作品声明",
+      "authorResponsibility": "2. 作者责任声明",
+      "nonCommercialUse": "3. 非商业使用声明",
+      "platformRights": "4. 平台权利与责任",
+      "copyrightComplaints": "5. 版权投诉处理",
+      "userAgreement": "6. 用户协议",
+      "applicableLaw": "7. 适用法律"
+    },
+    "contactEmail": "版权纠纷联系邮箱：sundayoffice.jp@gmail.com",
+    "content": {
+      "originalWorks": "InWorlds平台鼓励作家创作原创作品。在本平台上发布的所有原创作品版权均归属于作者个人。",
+      "copyrightComplaints": "作者对其在InWorlds平台上发布的内容负有责任。如涉及任何抄袭、侵权或其他不当行为，相关法律责任由作者承担。InWorlds平台将在合理范围内协助处理相关问题。",
+      "nonCommercialUse": "在InWorlds平台上发布的作品主要用于非商业目的。如作者希望将作品用于商业用途，建议事先与平台沟通，以确保符合相关规定和双方利益。",
+      "platformRights": "对于可能违反本声明的作品，InWorlds将首先与作者沟通，寻求共同解决方案。只有在沟通无效且确认存在明显违规的情况下，平台可能会采取必要的措施，如暂时下架或删除相关内容。我们承诺在采取任何行动前，会充分考虑并尊重作者的权益。",
+      "complaintHandling": "如您认为平台上的某作品侵犯了您的版权，请及时与我们联系。我们将认真对待每一份投诉，并根据提供的信息进行调查和适当处理。",
+      "userAgreement": "我们诚挚邀请您在使用InWorlds平台前，仔细阅读本免责声明。如您对任何条款有疑问或顾虑，欢迎随时与我们联系讨论。我们重视与用户的良好沟通，并致力于为所有用户提供公平、透明的创作环境。",
+      "applicableLaw": "本免责声明适用于InWorlds运营所在地的法律。如产生任何争议，我们将本着相互理解、友好协商的原则，通过对话寻求解决方案。若协商未果，将根据运营地相关法律法规处理。"
+    }
+  },
+  "dataAnalysis": {
+    "title": "内容详情",
+    "columns": {
+      "title": "标题",
+      "type": "类型",
+      "wordCount": "字数",
+      "creationTime": "创建时间"
+    },
+    "detailedData": "详细数据",
+    "analyticsItems": {
+      "views": "总浏览量",
+      "viewsLast24h": "过去24小时浏览量",
+      "likes": "总点赞数",
+      "totalIncome": "总收入",
+      "comments": "总评论数",
+      "incomeLast24h": "过去24小时收入"
+    }
+  },
+  "income": {
+    "title": "收入详情",
+    "monthlyIncome": "月总收入",
+    "currency": "墨币",
+    "columns": {
+      "title": "标题",
+      "type": "类型",
+      "income24h": "24小时收入",
+      "donationIncome": "打赏收入",
+      "totalIncome": "总收入",
+      "creationTime": "创建时间"
+    }
+  },
+  "studio": {
+    "userLoadingError": "无法加载用户信息。请重新登录或稍后再试。",
+    "loginButton": "返回登录页面",
+    "sidebar": {
+      "works": "作品",
+      "analysis": "数据分析",
+      "comments": "评论",
+      "copyright": "版权",
+      "income": "收入"
+    },
+    "workContent": {
+      "tabs": {
+        "published": "已发布内容",
+        "ongoing": "连载中",
+        "completed": "已完结",
+        "draft": "草稿"
+      },
+      "columns": {
+        "title": "标题",
+        "status": "状态",
+        "lastUpdated": "最后更新",
+        "actions": "操作"
+      },
+      "status": {
+        "ongoing": "连载中",
+        "completed": "已完结",
+        "draft": "草稿"
+      },
+      "actions": {
+        "edit": "编辑",
+        "unpublish": "取消发布",
+        "publish": "发布",
+        "delete": "删除"
+      },
+      "confirmations": {
+        "unpublish": "确定要取消发布这个作品吗？",
+        "publish": "确定要公开发布这个作品吗？",
+        "delete": "确定要删除这个作品吗？"
+      },
+      "newWork": "新作品",
+      "errors": {
+        "fetchFailed": "获取作品列表失败",
+        "unpublishFailed": "取消发布作品失败",
+        "publishFailed": "发布作品失败",
+        "deleteFailed": "删除作品失败"
+      }
+    }
+  }
+}

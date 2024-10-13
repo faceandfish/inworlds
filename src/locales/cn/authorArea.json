@@ -1,0 +1,41 @@
+{
+  "pageTitle": "释放你的创作潜能",
+  "whyChooseUs": {
+    "title": "为什么选择我们的平台？",
+    "reason1": "接触百万级读者群体",
+    "reason2": "灵活的创作节奏",
+    "reason3": "专业的编辑团队支持",
+    "reason4": "活跃的作者社区"
+  },
+  "revenueModel": {
+    "title": "丰厚的收益模式",
+    "model1": {
+      "title": "50% 广告收益分成",
+      "description": "您将收获到免费作品产生的广告收入"
+    },
+    "model2": {
+      "title": "版权交易平台",
+      "description": "直接在平台出售您的作品版权，获得额外收益"
+    },
+    "model3": {
+      "title": "70% 打赏和收费章节收入",
+      "description": "读者的打赏和收费章节的收入，您将获得70%作为回报"
+    }
+  },
+  "callToAction": "开启你的创作之旅",
+  "faq": {
+    "title": "常见问题",
+    "question1": {
+      "question": "创作需要付费吗？",
+      "answer": "完全免费！我们相信优质内容自然会带来收益。"
+    },
+    "question2": {
+      "question": "我的作品版权归属？",
+      "answer": "版权100%归您所有，我们仅获得在平台展示和销售的权利。"
+    },
+    "question3": {
+      "question": "对更新频率有要求吗？",
+      "answer": "没有硬性要求，但建议保持稳定更新以维持读者热情。"
+    }
+  }
+}

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { BookInfo } from "@/app/lib/definitions";
 import BookIntro from "../WritingPage/BookIntro";
 import Alert from "../Alert";
+import { useTranslation } from "../useTranslation";
 
 interface BookDetailsProps {
   book: BookInfo;
@@ -11,6 +12,8 @@ interface BookDetailsProps {
 }
 
 const BookDetails: React.FC<BookDetailsProps> = ({ book, onSave }) => {
+  const { t } = useTranslation("bookedit");
+
   const [editedBook, setEditedBook] = useState<
     Pick<BookInfo, "title" | "description">
   >({
@@ -33,12 +36,12 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, onSave }) => {
     try {
       const success = await onSave(editedBook);
       if (success) {
-        setAlert({ message: "书籍详情更新成功", type: "success" });
+        setAlert({ message: t("bookDetails.updateSuccess"), type: "success" });
       } else {
-        setAlert({ message: "更新书籍详情失败", type: "error" });
+        setAlert({ message: t("bookDetails.updateFail"), type: "error" });
       }
     } catch (error) {
-      setAlert({ message: "更新书籍详情时出错", type: "error" });
+      setAlert({ message: t("bookDetails.updateError"), type: "error" });
     }
   };
 
@@ -57,7 +60,7 @@ const BookDetails: React.FC<BookDetailsProps> = ({ book, onSave }) => {
           type="submit"
           className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
         >
-          保存修改
+          {t("general.save")}
         </button>
       </form>
       {alert && (

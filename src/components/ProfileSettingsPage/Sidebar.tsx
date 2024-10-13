@@ -6,6 +6,7 @@ import {
   BellIcon,
   CameraIcon
 } from "@heroicons/react/24/outline";
+import { useTranslation } from "../useTranslation";
 
 interface MenuItem {
   id: string;
@@ -22,12 +23,22 @@ const Sidebar: React.FC<SidebarProps> = ({
   activeSection,
   setActiveSection
 }) => {
+  const { t } = useTranslation("profile");
+
   const menuItems: MenuItem[] = [
-    { id: "profile", name: "个人资料", icon: UserCircleIcon },
-    { id: "avatar", name: "头像管理", icon: CameraIcon },
-    { id: "account", name: "账户设置", icon: CogIcon },
-    { id: "security", name: "安全设置", icon: ShieldCheckIcon },
-    { id: "notifications", name: "通知设置", icon: BellIcon }
+    { id: "profile", name: t("sidebar.personalProfile"), icon: UserCircleIcon },
+    { id: "avatar", name: t("sidebar.avatarManagement"), icon: CameraIcon },
+    { id: "account", name: t("sidebar.accountSettings"), icon: CogIcon },
+    {
+      id: "security",
+      name: t("sidebar.securitySettings"),
+      icon: ShieldCheckIcon
+    }
+    // {
+    //   id: "notifications",
+    //   name: t("sidebar.notificationSettings"),
+    //   icon: BellIcon
+    // }
   ];
 
   return (

@@ -1,0 +1,23 @@
+{
+  "favoriteBookPreviewCard": {
+    "author": "Author",
+    "latestChapter": "Latest Chapter: Chapter"
+  },
+  "messages": {
+    "loading": "Loading...",
+    "errorFetchingData": "An error occurred while fetching data. Please try again later.",
+    "favoriteBooks": "Favorite Books",
+    "followedUsers": "Followed Users",
+    "systemNotifications": "System Notifications"
+  },
+  "sidebar": {
+    "messageCenter": "Message Center",
+    "favoriteBooks": "Favorite Books",
+    "followedUsers": "Followed Users",
+    "systemNotifications": "System Notifications"
+  },
+  "userPreviewCard": {
+    "followers": "Followers:",
+    "mysteriousUser": "This user is mysterious and hasn't provided an introduction yet."
+  }
+}

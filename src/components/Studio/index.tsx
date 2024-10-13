@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useCallback, Suspense } from "react";
+import React, { useState, useCallback, Suspense, useEffect } from "react";
 import Sidebar from "./Sidebar";
 import Alert from "../Alert";
 import { useRouter } from "next/navigation";
@@ -7,11 +7,24 @@ import ContentWrapper from "./ContentWrapper";
 import SidebarSkeleton from "./Skeleton/SidebarSkeleton";
 import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
 import { useUser } from "../UserContextProvider";
+import { useTranslation } from "../useTranslation";
+import MobileStudioNotice from "./Skeleton/MobileStudioNotice";
 
 const Studio: React.FC = () => {
   const [activeSection, setActiveSection] = useState("works");
   const { user, loading: userLoading } = useUser();
   const router = useRouter();
+  const { t } = useTranslation("studio");
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const handleSectionChange = useCallback((section: string) => {
     setActiveSection(section);
@@ -31,16 +44,19 @@ const Studio: React.FC = () => {
   if (!user) {
     return (
       <Alert
-        message="无法加载用户信息。请重新登录或稍后再试。"
+        message={t("studio.userLoadingError")}
         type="error"
         onClose={() => {}}
         customButton={{
-          text: "返回登录页面",
+          text: t("studio.loginButton"),
           onClick: () => router.push("/login")
         }}
         autoClose={false}
       />
     );
+  }
+  if (isMobile) {
+    return <MobileStudioNotice />;
   }
 
   return (

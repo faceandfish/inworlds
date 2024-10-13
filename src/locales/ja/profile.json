@@ -1,0 +1,113 @@
+{
+  "followButton": {
+    "follow": "フォロー",
+    "unfollow": "フォロー解除",
+    "processing": "処理中...",
+    "loginRequired": "フォローするにはログインしてください",
+    "followSuccess": "フォローに成功しました！",
+    "unfollowSuccess": "フォロー解除に成功しました",
+    "operationFailed": "操作に失敗しました。後でもう一度お試しください",
+    "login": "ログイン"
+  },
+  "header": {
+    "invalidUserId": "無効なユーザーID",
+    "fetchUserError": "ユーザー情報の取得に失敗しました",
+    "noIntroduction": "このユーザーは怠け者で、まだ自己紹介を書いていません。",
+    "works": "作品",
+    "followers": "フォロワー",
+    "following": "フォロー中"
+  },
+  "sponsorList": {
+    "title": "スポンサーリスト",
+    "donationTime": "寄付時間"
+  },
+  "userActions": {
+    "editProfile": "プロフィール編集",
+    "manageWorks": "作品管理",
+    "donate": "寄付"
+  },
+  "worksSection": {
+    "error": "エラー：",
+    "noBooksFound": "本が見つかりません",
+    "ongoingSeries": "人気連載作品",
+    "completedWorks": "完結作品"
+  },
+  "accountSettings": {
+    "title": "アカウント設定",
+    "username": "ユーザー名",
+    "email": "メールアドレス",
+    "phone": "電話番号",
+    "language": "言語設定",
+    "gender": "性別",
+    "birthDate": "生年月日",
+    "male": "男性",
+    "female": "女性",
+    "other": "その他",
+    "saveChanges": "変更を保存"
+  },
+  "languages": {
+    "en": "English",
+    "cn": "简体中文",
+    "tw": "繁體中文",
+    "ja": "日本語"
+  },
+  "avatarUpload": {
+    "title": "アバター管理",
+    "uploadNew": "新しいアバターをアップロードまたは現在のアバターを変更します。",
+    "bestSize": "正方形の画像を推奨します。理想的なサイズは200x200ピクセルです。",
+    "uploading": "アップロード中...",
+    "saveNewAvatar": "新しいアバターを保存",
+    "uploadSuccess": "アバターのアップロードに成功しました！",
+    "uploadFailed": "アバターのアップロードに失敗しました：",
+    "unknownError": "不明なエラー"
+  },
+  "userSettings": {
+    "editProfileTitle": "個人情報の編集",
+    "loading": "読み込み中...",
+    "profileUpdateSuccess": "プロフィールの更新に成功しました！",
+    "profileUpdateFail": "プロフィールの更新に失敗しました。後でもう一度お試しください。",
+    "avatarUpdateSuccess": "アバターの更新に成功しました！",
+    "passwordChangeSuccess": "パスワードの変更に成功しました！",
+    "passwordChangeFail": "パスワードの変更に失敗しました。後でもう一度お試しください。",
+    "networkError": "パスワードの変更に失敗しました。ネットワーク接続を確認し、後でもう一度お試しください。"
+  },
+  "notificationSettings": {
+    "title": "通知設定",
+    "notificationMethods": "通知方法",
+    "pushNotifications": "プッシュ通知",
+    "emailNotifications": "メール通知",
+    "smsNotifications": "SMS通知",
+    "notificationTypes": "通知タイプ",
+    "newMessageNotification": "新規メッセージ通知",
+    "newFollowerNotification": "新規フォロワー通知",
+    "systemUpdateNotification": "システム更新通知",
+    "favoriteBookUpdateNotification": "お気に入りの本の更新通知",
+    "followedAuthorUpdateNotification": "フォロー中の著者の更新通知",
+    "saveNotificationSettings": "通知設定を保存"
+  },
+  "profileSettings": {
+    "title": "個人プロフィール",
+    "nickname": "ニックネーム",
+    "introduction": "自己紹介",
+    "saveChanges": "変更を保存"
+  },
+  "securitySettings": {
+    "title": "セキュリティ設定",
+    "currentPassword": "現在のパスワード",
+    "newPassword": "新しいパスワード",
+    "confirmNewPassword": "新しいパスワード（確認）",
+    "enterCurrentPassword": "現在のパスワードを入力",
+    "enterNewPassword": "新しいパスワードを入力",
+    "reenterNewPassword": "新しいパスワードを再入力",
+    "updateSecuritySettings": "セキュリティ設定を更新",
+    "fillAllFields": "すべてのパスワード欄を入力してください",
+    "passwordMismatch": "新しいパスワードと確認用パスワードが一致しません"
+  },
+  "sidebar": {
+    "personalProfile": "個人プロフィール",
+    "avatarManagement": "アバター管理",
+    "accountSettings": "アカウント設定",
+    "securitySettings": "セキュリティ設定",
+    "notificationSettings": "通知設定"
+  }
+}

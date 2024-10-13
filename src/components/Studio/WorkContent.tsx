@@ -19,12 +19,12 @@ import Link from "next/link";
 import Alert from "../Alert";
 import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
 import { useUser } from "../UserContextProvider";
+import { useTranslation } from "../useTranslation";
 
 const ITEMS_PER_PAGE = 5;
 
 // OPTIMIZATION: 将这些常量移到组件外部，避免在每次渲染时重新创建
 const tabs = ["published", "ongoing", "completed", "draft"] as const;
-const tabNames = ["已发布内容", "正在连载中", "已完结", "草稿箱"];
 
 const WorkContent: React.FC = () => {
   const router = useRouter();
@@ -34,6 +34,14 @@ const WorkContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
+  const { t } = useTranslation("studio");
+
+  const tabNames = [
+    t("studio.workContent.tabs.published"),
+    t("studio.workContent.tabs.ongoing"),
+    t("studio.workContent.tabs.completed"),
+    t("studio.workContent.tabs.draft")
+  ];
 
   useEffect(() => {
     if (user && user.id) {
@@ -116,7 +124,7 @@ const WorkContent: React.FC = () => {
   );
 
   const handleUnpublish = useCallback(async (bookId: number) => {
-    if (window.confirm("确定要下架这个作品吗？")) {
+    if (window.confirm(t("studio.workContent.confirmations.unpublish"))) {
       const response = await updateBookDetails(bookId, {
         publishStatus: "draft"
       });
@@ -133,7 +141,7 @@ const WorkContent: React.FC = () => {
   }, []);
 
   const handlePublish = useCallback(async (bookId: number) => {
-    if (window.confirm("确定要公开发布这个作品吗？")) {
+    if (window.confirm(t("studio.workContent.confirmations.publish"))) {
       const response = await updateBookDetails(bookId, {
         publishStatus: "published"
       });
@@ -150,7 +158,7 @@ const WorkContent: React.FC = () => {
   }, []);
 
   const handleDelete = useCallback(async (bookId: number) => {
-    if (window.confirm("确定要删除这个作品吗？")) {
+    if (window.confirm(t("studio.workContent.confirmations.delete"))) {
       const response = await deleteBook(bookId);
       if (response.code === 200) {
         setAllBooks((prev) => prev.filter((book) => book.id !== bookId));
@@ -173,12 +181,14 @@ const WorkContent: React.FC = () => {
         <span className="col-span-1 text-sm text-center mx-5 text-neutral-500">
           {book.publishStatus === "published"
             ? book.status === "ongoing"
-              ? "连载中"
-              : "已完结"
-            : "草稿"}
+              ? t("studio.workContent.status.ongoing")
+              : t("studio.workContent.status.completed")
+            : t("studio.workContent.status.draft")}
         </span>
         <span className="text-sm col-span-2 text-center text-neutral-500">
-          {book.lastSaved}
+          {book.lastSaved || book.createdAt ? (
+            <>{book.lastSaved || book.createdAt}</>
+          ) : null}
         </span>
       </Link>
       <div className="col-span-2  text-center space-x-10 ">
@@ -189,7 +199,7 @@ const WorkContent: React.FC = () => {
             handleEdit(book.id);
           }}
         >
-          編輯
+          {t("studio.workContent.actions.edit")}
         </button>
 
         {book.publishStatus === "published" ? (
@@ -200,7 +210,7 @@ const WorkContent: React.FC = () => {
               handleUnpublish(book.id);
             }}
           >
-            下架
+            {t("studio.workContent.actions.unpublish")}
           </button>
         ) : (
           <button
@@ -210,7 +220,7 @@ const WorkContent: React.FC = () => {
               handlePublish(book.id);
             }}
           >
-            公开
+            {t("studio.workContent.actions.publish")}
           </button>
         )}
 
@@ -221,7 +231,7 @@ const WorkContent: React.FC = () => {
             handleDelete(book.id);
           }}
         >
-          刪除
+          {t("studio.workContent.actions.delete")}
         </button>
       </div>
     </li>
@@ -251,11 +261,20 @@ const WorkContent: React.FC = () => {
       </ul>
       <div className="mt-6">
         <div className="grid grid-cols-8  text-neutral-600 bg-neutral-50 font-semibold">
-          <div className="p-3 col-span-3">书名</div>
-          <div className="p-3 text-center col-span-1">状态</div>
-          <div className="p-3 text-center col-span-2">最后更新</div>
-          <div className="p-3 text-center col-span-2">操作</div>
+          <div className="p-3 col-span-3">
+            {t("studio.workContent.columns.title")}
+          </div>
+          <div className="p-3 text-center col-span-1">
+            {t("studio.workContent.columns.status")}
+          </div>
+          <div className="p-3 text-center col-span-2">
+            {t("studio.workContent.columns.lastUpdated")}
+          </div>
+          <div className="p-3 text-center col-span-2">
+            {t("studio.workContent.columns.actions")}
+          </div>
         </div>
+
         <ul className="h-64 ">
           {paginatedBooks.map((book: BookInfo) => (
             <BookListItem key={book.id} book={book} />
@@ -268,7 +287,7 @@ const WorkContent: React.FC = () => {
               className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded transition-colors duration-200"
               onClick={handleNewWork}
             >
-              新增作品
+              {t("studio.workContent.newWork")}
             </button>
           </Link>
         </div>

@@ -1,5 +1,6 @@
 import React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
+import { useTranslation } from "./useTranslation";
 
 interface PaginationProps {
   currentPage: number;
@@ -12,6 +13,8 @@ const Pagination: React.FC<PaginationProps> = ({
   totalPages,
   onPageChange
 }) => {
+  const { t } = useTranslation("alert");
+
   const handlePageChange = (pageNumber: number) => {
     if (pageNumber >= 1 && pageNumber <= totalPages) {
       onPageChange(pageNumber);
@@ -28,12 +31,12 @@ const Pagination: React.FC<PaginationProps> = ({
             ? "hover:text-gray-900"
             : "opacity-50 cursor-not-allowed"
         }`}
-        aria-label="Previous page"
+        aria-label={t("pagination.previousPage")}
       >
         <ChevronLeftIcon className="h-5 w-5" />
       </button>
       <span className="text-sm text-gray-700">
-        第 {currentPage} 页 / 共 {totalPages} 页
+        {t("pagination.pageInfo", { current: currentPage, total: totalPages })}
       </span>
       <button
         onClick={() => handlePageChange(currentPage + 1)}
@@ -43,7 +46,7 @@ const Pagination: React.FC<PaginationProps> = ({
             ? "hover:text-gray-900"
             : "opacity-50 cursor-not-allowed"
         }`}
-        aria-label="Next page"
+        aria-label={t("pagination.nextPage")}
       >
         <ChevronRightIcon className="h-5 w-5" />
       </button>

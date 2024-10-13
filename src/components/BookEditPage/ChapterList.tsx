@@ -5,10 +5,11 @@ import { BookInfo, ChapterInfo } from "@/app/lib/definitions";
 import {
   CalendarIcon,
   XMarkIcon,
-  PencilIcon
+  CurrencyDollarIcon
 } from "@heroicons/react/24/outline";
 import Alert from "../Alert";
 import AuthorNote from "../WritingPage/AuthorNote";
+import { useTranslation } from "../useTranslation";
 
 interface ChapterListProps {
   chapters: ChapterInfo[];
@@ -24,6 +25,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   book,
   onUpdateChapter
 }) => {
+  const { t } = useTranslation("bookedit");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [chapters, setChapters] = useState(initialChapters);
   const [selectedChapter, setSelectedChapter] = useState<ChapterInfo | null>(
@@ -43,6 +45,12 @@ const ChapterList: React.FC<ChapterListProps> = ({
 
   const [minDateTime, setMinDateTime] = useState("");
   const [forceUpdate, setForceUpdate] = useState(false);
+  // 新增: 收费设置相关的状态
+  const [isPricingMenuOpen, setIsPricingMenuOpen] = useState(false);
+  const [selectedChapterForPricing, setSelectedChapterForPricing] =
+    useState<ChapterInfo | null>(null);
+  const [isPaid, setIsPaid] = useState(false);
+  const [price, setPrice] = useState(0);
 
   useEffect(() => {
     const now = new Date();
@@ -153,7 +161,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
         .replace(",", "");
       setNewDate(formattedDate);
     } else {
-      setAlert({ message: "请选择未来的时间", type: "error" });
+      setAlert({ message: t("chapterList.selectFutureTime"), type: "error" });
     }
   };
 
@@ -189,6 +197,39 @@ const ChapterList: React.FC<ChapterListProps> = ({
     setSelectedChapter(chapter);
     setCurrentAuthorNote(chapter.authorNote || "");
     setIsAuthorNoteDialogOpen(true);
+  };
+
+  // 新增: 打开收费设置菜单的函数
+  const openPricingMenu = (chapter: ChapterInfo) => {
+    setSelectedChapterForPricing(chapter);
+    setIsPaid(chapter.isPaid);
+    setPrice(chapter.price);
+    setIsPricingMenuOpen(true);
+  };
+
+  // 新增: 处理收费设置确认的函数
+  const handlePricingConfirm = async () => {
+    if (selectedChapterForPricing) {
+      const updates: Partial<ChapterInfo> = {
+        isPaid: isPaid,
+        price: isPaid ? price : 0
+      };
+      const success = await onUpdateChapter(
+        selectedChapterForPricing.id,
+        updates
+      );
+      if (success) {
+        setChapters(
+          chapters.map((ch) =>
+            ch.id === selectedChapterForPricing.id ? { ...ch, ...updates } : ch
+          )
+        );
+        setAlert({ message: "章节收费设置更新成功", type: "success" });
+      } else {
+        setAlert({ message: "章节收费设置更新失败", type: "error" });
+      }
+      setIsPricingMenuOpen(false);
+    }
   };
 
   const handleAuthorNoteChange = (note: string) => {
@@ -241,62 +282,78 @@ const ChapterList: React.FC<ChapterListProps> = ({
               : "bg-green-200 text-green-800"
           }`}
         >
-          {book.status === "ongoing" ? "连载中" : "已完结"}
+          {book.status === "ongoing"
+            ? t("chapterList.ongoing")
+            : t("chapterList.completed")}
         </span>
         <select
           className="border rounded p-2 outline-none hover:border-orange-400"
           onChange={(e) => setSortOrder(e.target.value as "asc" | "desc")}
           value={sortOrder}
         >
-          <option value="asc">最早章节排序</option>
-          <option value="desc">最晚章节排序</option>
+          <option value="asc">{t("chapterList.sortEarliest")}</option>
+          <option value="desc">{t("chapterList.sortLatest")}</option>
         </select>
       </div>
       <ul className="mt-5 h-[640px] overflow-y-auto">
         {sortedChapters.map((chapter) => (
           <li
             key={chapter.id}
-            className="grid grid-cols-8 gap-10 items-center border-b px-5 py-3 hover:bg-neutral-100"
+            className="flex  items-center justify-between border-b px-5 py-3 hover:bg-neutral-100"
           >
-            <Link
-              href={`/writing/${book.id}/chapter/${chapter.id}`}
-              className="col-span-3 text-lg text-neutral-600 font-medium hover:text-orange-500"
-            >
-              第{chapter.chapterNumber}章：{chapter.title}
-            </Link>
-            <button
-              className="grid-span-1  text-neutral-400 p-2 rounded border border-neutral-400 shadow-sm text-sm hover:bg-neutral-400 hover:text-white"
-              onClick={() => openAuthorNoteDialog(chapter)}
-            >
-              作者留言
-            </button>
-            <button
-              onClick={() => openDialog(chapter)}
-              className={`col-span-1 p-2 rounded border border-neutral-400 shadow-sm text-sm hover:bg-neutral-400 hover:text-white whitespace-nowrap overflow-hidden ${
-                getChapterStatus(chapter) === "published"
-                  ? "text-neutral-400"
-                  : getChapterStatus(chapter) === "draft"
-                  ? "text-orange-400"
-                  : "text-blue-400"
-              }`}
-            >
-              {getChapterStatus(chapter) === "scheduled" ? (
-                <div className="animate-scroll ">
-                  {getStatusDisplay(getChapterStatus(chapter))}
-                  {chapter.publishDate &&
-                    ` (${formatDate(chapter.publishDate)})`}
-                </div>
-              ) : (
-                getStatusDisplay(getChapterStatus(chapter))
-              )}
-            </button>
-            <span className="text-neutral-500 text-sm col-span-1">
-              字数：{chapter.wordCount}
-            </span>
-            <span className="text-neutral-500 text-sm col-span-2">
-              最后修改：
-              {formatDate(chapter.lastModified!)}
-            </span>
+            <div className="flex-col justify-between ">
+              <Link
+                href={`/writing/${book.id}/chapter/${chapter.id}`}
+                className="w-2/3  text-lg text-neutral-600 font-medium hover:text-orange-500"
+              >
+                {t("chapterList.chapter")} {chapter.chapterNumber}:
+                {chapter.title}
+              </Link>
+              <div className="space-x-5 text-neutral-400 text-sm">
+                <span>
+                  {t("chapterList.lastModified")} {chapter.wordCount}
+                </span>
+                <span>
+                  {t("chapterList.lastModified")}
+                  {formatDate(chapter.lastModified!)}
+                </span>
+              </div>
+            </div>
+            <div className="space-x-10 flex items-center ">
+              <button
+                className="flex-shrink-0 text-neutral-400  w-20 flex items-center justify-center  p-2 rounded border border-neutral-400 shadow-sm text-sm hover:bg-neutral-400 hover:text-white"
+                onClick={() => openPricingMenu(chapter)}
+              >
+                <CurrencyDollarIcon className="h-5 w-5  mr-1 " />
+                {chapter.isPaid ? ` ${chapter.price}` : t("chapterList.free")}
+              </button>
+              <button
+                className="flex-shrink-0  text-neutral-400 p-2 w-20 rounded border border-neutral-400 shadow-sm text-sm hover:bg-neutral-400 hover:text-white"
+                onClick={() => openAuthorNoteDialog(chapter)}
+              >
+                {t("chapterList.authorNote")}
+              </button>
+              <button
+                onClick={() => openDialog(chapter)}
+                className={`flex-shrink-0 p-2 w-20 rounded border border-neutral-400 shadow-sm text-sm hover:bg-neutral-400 hover:text-white whitespace-nowrap overflow-hidden ${
+                  getChapterStatus(chapter) === "published"
+                    ? "text-neutral-400"
+                    : getChapterStatus(chapter) === "draft"
+                    ? "text-orange-400"
+                    : "text-blue-400"
+                }`}
+              >
+                {getChapterStatus(chapter) === "scheduled" ? (
+                  <div className="animate-scroll ">
+                    {getStatusDisplay(getChapterStatus(chapter))}
+                    {chapter.publishDate &&
+                      ` (${formatDate(chapter.publishDate)})`}
+                  </div>
+                ) : (
+                  getStatusDisplay(getChapterStatus(chapter))
+                )}
+              </button>
+            </div>
           </li>
         ))}
       </ul>
@@ -306,7 +363,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
           <div className="bg-white p-6 rounded-lg w-96">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-neutral-600">
-                更新章节状态
+                {t("chapterList.updateStatus")}
               </h3>
               <button
                 onClick={() => setIsDialogOpen(false)}
@@ -325,14 +382,18 @@ const ChapterList: React.FC<ChapterListProps> = ({
                 }
                 className="w-full border rounded p-2 text-neutral-600 focus:outline-none"
               >
-                <option value="draft">保存草稿</option>
-                <option value="published">发布章节</option>
-                <option value="scheduled">定时发布</option>
+                <option value="draft">{t("chapterList.saveDraft")}</option>
+                <option value="published">
+                  {t("chapterList.publishChapter")}
+                </option>
+                <option value="scheduled">
+                  {t("chapterList.schedulePublish")}
+                </option>
               </select>
             </div>
 
             {newStatus === "scheduled" && (
-              <div className="mb-4 relative">
+              <div className="mb-4 relative ">
                 <input
                   type="datetime-local"
                   value={newDate ? newDate.slice(0, 16).replace(" ", "T") : ""}
@@ -383,6 +444,72 @@ const ChapterList: React.FC<ChapterListProps> = ({
                 className="px-4 py-2 bg-orange-400 text-white rounded hover:bg-orange-500"
               >
                 保存留言
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 新增: 收费设置菜单 */}
+      {isPricingMenuOpen && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-lg w-96">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-neutral-600">
+                {t("chapterList.pricingSetup")}
+              </h3>
+              <button
+                onClick={() => setIsPricingMenuOpen(false)}
+                className="text-neutral-400 hover:text-neutral-600"
+              >
+                <XMarkIcon className="h-6 w-6" />
+              </button>
+            </div>
+            <div className="mb-4">
+              <label className="flex items-center space-x-2">
+                <input
+                  type="radio"
+                  checked={!isPaid}
+                  onChange={() => setIsPaid(false)}
+                  className="form-radio"
+                />
+                <span>{t("pricingFree")}</span>
+              </label>
+              <label className="flex items-center space-x-2 mt-2">
+                <input
+                  type="radio"
+                  checked={isPaid}
+                  onChange={() => setIsPaid(true)}
+                  className="form-radio"
+                />
+                <span>收费</span>
+              </label>
+            </div>
+            {isPaid && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  {t("chapterList.priceLabel")}
+                  <span className="text-neutral-400">
+                    {" "}
+                    {t("chapterList.free")}
+                  </span>
+                </label>
+                <input
+                  type="number"
+                  value={price}
+                  onChange={(e) => setPrice(Number(e.target.value))}
+                  min="0"
+                  step="1"
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-orange-500 focus:border-orange-500"
+                />
+              </div>
+            )}
+            <div className="flex justify-end">
+              <button
+                onClick={handlePricingConfirm}
+                className="px-4 py-2 bg-orange-400 text-white rounded hover:bg-orange-500"
+              >
+                {t("chapterList.confirmSetting")}
               </button>
             </div>
           </div>

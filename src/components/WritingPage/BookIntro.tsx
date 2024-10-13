@@ -1,5 +1,6 @@
 import React from "react";
 import { BookInfo } from "@/app/lib/definitions";
+import { useTranslation } from "../useTranslation";
 
 interface BookIntroProps {
   book: Pick<BookInfo, "title" | "description">;
@@ -21,6 +22,7 @@ const BookIntro: React.FC<BookIntroProps> = ({
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onBookChange({ title: e.target.value });
   };
+  const { t } = useTranslation("book");
 
   const handleDescriptionChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>
@@ -35,7 +37,7 @@ const BookIntro: React.FC<BookIntroProps> = ({
           htmlFor="book-title"
           className="text-gray-400 absolute top-2 left-3 text-sm"
         >
-          标题（必填）
+          {t("bookIntro.titleLabel")}
         </label>
         <input
           type="text"
@@ -44,7 +46,7 @@ const BookIntro: React.FC<BookIntroProps> = ({
           value={book.title}
           onChange={handleTitleChange}
           className="w-full h-20 border rounded border-gray-400 py-6 px-3 pt-8 text-gray-700 leading-tight focus:outline-none focus:border-orange-400"
-          placeholder="输入书名"
+          placeholder={t("bookIntro.titlePlaceholder")}
           required
           maxLength={100}
         />
@@ -58,7 +60,7 @@ const BookIntro: React.FC<BookIntroProps> = ({
           htmlFor="book-brief"
           className="text-gray-400 absolute top-2 left-3 text-sm"
         >
-          详情描述（必填）
+          {t("bookIntro.descriptionLabel")}
         </label>
         <textarea
           id="book-brief"
@@ -67,7 +69,7 @@ const BookIntro: React.FC<BookIntroProps> = ({
           onChange={handleDescriptionChange}
           rows={descriptionRows}
           className="w-full  border rounded border-neutral-400 py-8 px-3 text-neutral-700 leading-tight focus:outline-none focus:border-orange-400"
-          placeholder="输入详情内容..."
+          placeholder={t("bookIntro.descriptionPlaceholder")}
           required
           maxLength={1000}
         />

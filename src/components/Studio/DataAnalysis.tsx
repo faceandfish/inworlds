@@ -5,10 +5,12 @@ import Pagination from "../Pagination";
 import Link from "next/link";
 import DataAnalysisSkeleton from "./Skeleton/DataAnalysisSkeleton";
 import { useUser } from "../UserContextProvider";
+import { useTranslation } from "../useTranslation";
 
 const ITEMS_PER_PAGE = 5;
 
 const DataAnalysis: React.FC = () => {
+  const { t } = useTranslation("studio");
   const { user } = useUser();
   const [books, setBooks] = useState<BookInfo[]>([]);
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
@@ -21,12 +23,23 @@ const DataAnalysis: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const analyticsItems = [
-    { label: "总浏览量", key: "views" },
-    { label: "24小时浏览量", key: "viewsLast24h" },
-    { label: "总点赞数", key: "likes" },
-    { label: "总收入", key: "totalIncome", unit: "元" },
-    { label: "总留言数", key: "comments" },
-    { label: "24小时收入", key: "incomeLast24h", unit: "元" }
+    { label: t("dataAnalysis.analyticsItems.views"), key: "views" },
+    {
+      label: t("dataAnalysis.analyticsItems.viewsLast24h"),
+      key: "viewsLast24h"
+    },
+    { label: t("dataAnalysis.analyticsItems.likes"), key: "likes" },
+    {
+      label: t("dataAnalysis.analyticsItems.totalIncome"),
+      key: "totalIncome",
+      unit: t("income.currency")
+    },
+    { label: t("dataAnalysis.analyticsItems.comments"), key: "comments" },
+    {
+      label: t("dataAnalysis.analyticsItems.incomeLast24h"),
+      key: "incomeLast24h",
+      unit: t("income.currency")
+    }
   ];
 
   useEffect(() => {
@@ -91,20 +104,28 @@ const DataAnalysis: React.FC = () => {
     <div className="min-h-screen w-full mx-auto px-10">
       <div className="bg-white py-4">
         <h2 className="text-2xl font-semibold text-neutral-600 mb-4">
-          内容详情
+          {t("dataAnalysis.title")}
         </h2>
         <div className="grid grid-cols-7 text-neutral-600 bg-neutral-100 font-semibold">
-          <div className="p-3 col-span-3">标题</div>
-          <div className="p-3 text-center col-span-1">类型</div>
-          <div className="p-3 text-center col-span-1">字数</div>
-          <div className="p-3 text-center col-span-2">创作时间</div>
+          <div className="p-3 col-span-3">
+            {t("dataAnalysis.columns.title")}
+          </div>
+          <div className="p-3 text-center col-span-1">
+            {t("dataAnalysis.columns.type")}
+          </div>
+          <div className="p-3 text-center col-span-1">
+            {t("dataAnalysis.columns.wordCount")}
+          </div>
+          <div className="p-3 text-center col-span-2">
+            {t("dataAnalysis.columns.creationTime")}
+          </div>
         </div>
         <ul className="h-64">
           {books.map((book) => (
             <li
               key={book.id}
               className={`grid grid-cols-7 py-3 px-3 items-center border-b border-neutral-100 hover:bg-neutral-100 transition-colors duration-150 ${
-                selectedBookId === book.id ? "bg-neutral-100" : ""
+                selectedBookId === book.id
               }`}
             >
               <Link
@@ -144,7 +165,8 @@ const DataAnalysis: React.FC = () => {
           className="bg-white py-10 h-screen flex flex-col"
         >
           <h2 className="text-xl p-3 font-semibold bg-neutral-100 text-neutral-600 mb-10">
-            详细数据 - {books.find((book) => book.id === selectedBookId)?.title}
+            {t("dataAnalysis.detailedData")} -
+            {books.find((book) => book.id === selectedBookId)?.title}
           </h2>
           <div className="grid grid-cols-2 gap-6 flex-grow overflow-y-auto px-4">
             {analyticsItems.map((item) => (

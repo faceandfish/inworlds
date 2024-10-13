@@ -18,6 +18,7 @@ import { getImageUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import CommentsSkeleton from "./Skeleton/CommentsSkeleton";
 import { useUser } from "../UserContextProvider";
+import { useTranslation } from "../useTranslation";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -27,6 +28,7 @@ interface CommentsData {
 }
 
 const Comments: React.FC = () => {
+  const { t } = useTranslation("studio");
   const { user } = useUser();
   const [currentPage, setCurrentPage] = useState(1);
   const [commentsData, setCommentsData] = useState<CommentsData | null>(null);
@@ -86,10 +88,10 @@ const Comments: React.FC = () => {
     if (!user?.id) return;
     try {
       await likeComment(commentId);
-      setAlertInfo({ message: "点赞成功！", type: "success" });
+      setAlertInfo({ message: t("comments.likeSuccess"), type: "success" });
       fetchComments(user.id);
     } catch (error) {
-      setAlertInfo({ message: "点赞失败，请稍后重试", type: "error" });
+      setAlertInfo({ message: t("comments.likeFail"), type: "error" });
     }
   };
 
@@ -102,10 +104,10 @@ const Comments: React.FC = () => {
       )?.bookId;
       if (!bookId) throw new Error("Book ID not found");
       await addCommentOrReply(bookId, content, commentId);
-      setAlertInfo({ message: "回复成功！", type: "success" });
+      setAlertInfo({ message: t("comments.replySuccess"), type: "success" });
       fetchComments(user.id);
     } catch (error) {
-      setAlertInfo({ message: "回复失败，请稍后重试", type: "error" });
+      setAlertInfo({ message: t("comments.replyFail"), type: "error" });
     }
   };
 
@@ -114,10 +116,10 @@ const Comments: React.FC = () => {
     if (!user?.id) return;
     try {
       await deleteComment(commentId);
-      setAlertInfo({ message: "评论已删除！", type: "success" });
+      setAlertInfo({ message: t("comments.deleteSuccess"), type: "success" });
       fetchComments(user.id);
     } catch (error) {
-      setAlertInfo({ message: "删除失败，请稍后重试", type: "error" });
+      setAlertInfo({ message: t("comments.deleteFail"), type: "error" });
     }
   };
 
@@ -128,10 +130,10 @@ const Comments: React.FC = () => {
       const bookId = commentsData.books[0]?.id;
       if (!bookId) throw new Error("No books available");
       await blockUserInBook(userId, bookId);
-      setAlertInfo({ message: "用户已被拉黑！", type: "success" });
+      setAlertInfo({ message: t("comments.blockSuccess"), type: "success" });
       fetchComments(user.id);
     } catch (error) {
-      setAlertInfo({ message: "拉黑用户失败，请稍后重试", type: "error" });
+      setAlertInfo({ message: t("comments.blockFail"), type: "error" });
     }
   };
 
@@ -151,12 +153,14 @@ const Comments: React.FC = () => {
   }
 
   if (!commentsData) {
-    return <div>No comments available.</div>;
+    return <div>t("comments.noCommentsAvailable")</div>;
   }
 
   return (
     <div className="container mx-auto px-10">
-      <h1 className="text-2xl font-bold pb-6 border-b">评论管理</h1>
+      <h1 className="text-2xl font-bold pb-6 border-b">
+        {t("comments.title")}
+      </h1>
       <ul className="divide-y divide-gray-200 ">
         {paginatedComments.map((comment: CommentInfo) => {
           const book = commentsData.books.find(

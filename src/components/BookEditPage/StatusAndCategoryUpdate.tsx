@@ -3,6 +3,7 @@ import { BookInfo } from "@/app/lib/definitions";
 import BookStatusSelector from "../WritingPage/BookStatusSelector";
 import CategorySelect from "../WritingPage/CategorySelect";
 import Alert from "../Alert";
+import { useTranslation } from "../useTranslation";
 
 interface StatusAndCategoryUpdateProps {
   book: BookInfo;
@@ -15,6 +16,7 @@ const StatusAndCategoryUpdate: React.FC<StatusAndCategoryUpdateProps> = ({
   book,
   onUpdate
 }) => {
+  const { t } = useTranslation("bookedit");
   const [status, setStatus] = useState<BookInfo["status"]>(book.status);
   const [category, setCategory] = useState<BookInfo["category"]>(book.category);
   const [alert, setAlert] = useState<{
@@ -26,12 +28,15 @@ const StatusAndCategoryUpdate: React.FC<StatusAndCategoryUpdateProps> = ({
     try {
       const success = await onUpdate({ status, category });
       if (success) {
-        setAlert({ message: "书籍状态和分类更新成功", type: "success" });
+        setAlert({
+          message: t("statusAndCategory.updateSuccess"),
+          type: "success"
+        });
       } else {
-        setAlert({ message: "更新书籍状态和分类失败", type: "error" });
+        setAlert({ message: t("statusAndCategory.updateFail"), type: "error" });
       }
     } catch (error) {
-      setAlert({ message: "更新书籍状态和分类时出错", type: "error" });
+      setAlert({ message: t("statusAndCategory.updateError"), type: "error" });
     }
   };
 
@@ -43,7 +48,7 @@ const StatusAndCategoryUpdate: React.FC<StatusAndCategoryUpdateProps> = ({
         onClick={handleUpdate}
         className="mt-4 bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
       >
-        保存修改
+        {t("statusAndCategory.saveChanges")}
       </button>
       {alert && (
         <Alert

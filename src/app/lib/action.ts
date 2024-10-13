@@ -15,7 +15,19 @@ import {
   Message,
   FileUploadData,
   PublicUserInfo,
-  SearchResult
+  SearchResult,
+  PasswordChangeResponse,
+  PayPalOrderRequest,
+  PayPalOrderResponse,
+  ConfirmPayPalOrderResponse,
+  ConfirmPayPalOrderRequest,
+  DonationHistory,
+  PurchaseHistory,
+  UserBalance,
+  SponsorInfo,
+  TipResponse,
+  ChapterPaymentResponse,
+  PurchasedChapterInfo
 } from "./definitions";
 import { getToken, removeToken, setToken } from "./token";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -24,7 +36,7 @@ let token: string | null = null;
 
 // 创建 axios 实例
 const api = axios.create({
-  baseURL: "http://8.142.44.107:8088/inworlds/api",
+  baseURL: "http://13.208.244.92:8088/inworlds/api",
   headers: {
     "Content-Type": "application/json"
   }
@@ -51,7 +63,7 @@ export const login = async (
     formData.append("password", password);
 
     const response: AxiosResponse<ApiResponse<string>> = await api.post(
-      "http://8.142.44.107:8088/inworlds/api/login",
+      "/login",
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" }
@@ -101,7 +113,7 @@ export const getUserInfo = async (
 ): Promise<ApiResponse<UserInfo>> => {
   try {
     const response: AxiosResponse<ApiResponse<UserInfo>> = await api.get(
-      "http://8.142.44.107:8088/inworlds/api/user/principal",
+      "/user/principal",
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -110,7 +122,7 @@ export const getUserInfo = async (
     );
 
     if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取用户信息失败");
+      throw new Error("获取用户信息失败，请登录");
     }
 
     return response.data;
@@ -134,7 +146,7 @@ export async function logout(): Promise<{ code: number; msg: string }> {
   try {
     console.log("尝试从API获取数据");
     const response = await api.post<{ code: number; msg: string }>(
-      "http://8.142.44.107:8088/inworlds/api/logout",
+      "/logout",
       null,
       {
         headers: {
@@ -169,7 +181,7 @@ export async function register(
     formData.append("email", credentials.email);
 
     const response: AxiosResponse<ApiResponse<string>> = await api.post(
-      "http://8.142.44.107:8088/inworlds/api/register",
+      "/register",
       formData,
       {
         headers: { "Content-Type": "multipart/form-data" }
@@ -186,6 +198,7 @@ export async function register(
 export const updateProfile = async (
   updateData: UpdateUserRequest
 ): Promise<ApiResponse<UserInfo>> => {
+  console.log("Sending update request with:", updateData);
   try {
     const token = getToken();
     const response = await api.put<ApiResponse<UserInfo>>(
@@ -244,10 +257,10 @@ export const uploadAvatar = async (
 
 export const changePassword = async (
   passwordData: ChangePasswordRequest
-): Promise<ApiResponse<void>> => {
+): Promise<PasswordChangeResponse> => {
   try {
     const token = getToken();
-    const response = await api.put<ApiResponse<void>>(
+    const response = await api.put<PasswordChangeResponse>(
       "/user/password",
       passwordData,
       {
@@ -258,14 +271,16 @@ export const changePassword = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "修改密码失败");
-    }
-
+    // 无论响应码如何，都返回响应数据
     return response.data;
   } catch (error) {
     console.error("修改密码时出错:", error);
-    throw error;
+    // 如果发生网络错误或其他异常，返回一个格式化的错误响应
+    return {
+      code: 500,
+      msg: error instanceof Error ? error.message : "修改密码时发生未知错误",
+      data: null
+    };
   }
 };
 
@@ -282,6 +297,11 @@ export const uploadBookDraft = async (
     | "followersCount"
     | "commentsCount"
     | "authorAvatarUrl"
+    | "income24h"
+    | "totalIncome"
+    | "donationIncome"
+    | "adIncome"
+    | "monthlyIncome"
   >,
   token: string
 ): Promise<ApiResponse<BookInfo>> => {
@@ -297,7 +317,7 @@ export const uploadBookDraft = async (
     formData.append("bookData", JSON.stringify(bookDataWithStatus));
 
     const response = await api.post<ApiResponse<BookInfo>>(
-      "http://8.142.44.107:8088/inworlds/api/book/draft",
+      "/book/draft",
       formData,
       {
         headers: {
@@ -325,7 +345,7 @@ export const updateUserType = async (
 ): Promise<ApiResponse<UserInfo>> => {
   try {
     const response = await api.put<ApiResponse<UserInfo>>(
-      `http://8.142.44.107:8088/inworlds/api/user/${userId}/type`,
+      `/user/${userId}/type`,
       { userType: "creator" },
       {
         headers: {
@@ -359,6 +379,11 @@ export const publishBook = async (
     | "followersCount"
     | "commentsCount"
     | "authorAvatarUrl"
+    | "income24h"
+    | "totalIncome"
+    | "donationIncome"
+    | "adIncome"
+    | "monthlyIncome"
   >,
   token: string
 ): Promise<ApiResponse<BookInfo>> => {
@@ -374,7 +399,7 @@ export const publishBook = async (
     formData.append("bookData", JSON.stringify(bookDataWithStatus));
 
     const response = await api.post<ApiResponse<BookInfo>>(
-      "http://8.142.44.107:8088/inworlds/api/book/publish",
+      "/book/publish",
       formData,
       {
         headers: {
@@ -414,7 +439,7 @@ export const fetchBooksList = async (
       checkStatus: checkStatus
     });
 
-    const url = `http://8.142.44.107:8088/inworlds/api/user/${userId}/books?${params.toString()}`;
+    const url = `/user/${userId}/books?${params.toString()}`;
 
     const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(url, {
       headers: {
@@ -454,14 +479,11 @@ export const deleteBook = async (
   bookId: number
 ): Promise<ApiResponse<null>> => {
   try {
-    const response = await api.delete<ApiResponse<null>>(
-      `http://8.142.44.107:8088/inworlds/api/book/${bookId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${getToken()}`
-        }
+    const response = await api.delete<ApiResponse<null>>(`/book/${bookId}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`
       }
-    );
+    });
 
     if (response.data.code === 200) {
       return response.data;
@@ -483,9 +505,7 @@ export const getBookDetails = async (
   bookId: number
 ): Promise<ApiResponse<BookInfo>> => {
   try {
-    const response = await api.get<ApiResponse<BookInfo>>(
-      `http://8.142.44.107:8088/inworlds/api/book/${bookId}`
-    );
+    const response = await api.get<ApiResponse<BookInfo>>(`/book/${bookId}`);
 
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "获取书籍详情失败");
@@ -506,7 +526,7 @@ export const getChapterList = async (
 ): Promise<ApiResponse<PaginatedData<ChapterInfo>>> => {
   try {
     const response = await api.get<ApiResponse<PaginatedData<ChapterInfo>>>(
-      `http://8.142.44.107:8088/inworlds/api/book/${bookId}/chapters`,
+      `/book/${bookId}/chapters`,
       {
         params: { currentPage, pageSize }
       }
@@ -530,7 +550,7 @@ export const getChapterContent = async (
 ): Promise<ApiResponse<ChapterInfo>> => {
   try {
     const response = await api.get<ApiResponse<ChapterInfo>>(
-      `http://8.142.44.107:8088/inworlds/api/book/${bookId}/chapter/${chapterNumber}`
+      `/book/${bookId}/chapter/${chapterNumber}`
     );
 
     if (response.data.code !== 200) {
@@ -552,7 +572,7 @@ export const getBookComments = async (
 ): Promise<ApiResponse<PaginatedData<CommentInfo>>> => {
   try {
     const response = await api.get<ApiResponse<PaginatedData<CommentInfo>>>(
-      `http://8.142.44.107:8088/inworlds/api/book/${bookId}/comments`,
+      `/book/${bookId}/comments`,
       {
         params: { currentPage, pageSize }
       }
@@ -666,10 +686,7 @@ export const fetchSingleBookAnalytics = async (
       throw new Error("Token 不可用，请重新登录");
     }
 
-    const url = `http://8.142.44.107:8088/inworlds/api/book/${bookId}/analytics`;
-
-    console.log("请求URL:", url);
-    console.log("使用的 Token:", token);
+    const url = `/book/${bookId}/analytics`;
 
     const response = await api.get<ApiResponse<AnalyticsData>>(url, {
       headers: {
@@ -697,7 +714,7 @@ export const fetchHomepageBooks = async (
   limit: number = 20
 ): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
   try {
-    const url = `http://8.142.44.107:8088/inworlds/api/books/homepage`;
+    const url = `/books/homepage`;
 
     const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(url, {
       params: { page, limit }
@@ -909,7 +926,7 @@ export const checkFollowStatus = async (userId: number): Promise<boolean> => {
   try {
     const token = getToken();
     const response = await api.get<ApiResponse<{ isFollowing: boolean }>>(
-      `/user/${userId}/follow-status`,
+      `/user/${userId}/followstatus`,
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -1057,7 +1074,16 @@ export const updateChapter = async (
 
 export const addNewChapter = async (
   bookId: number,
-  chapterData: Omit<ChapterInfo, "id" | "bookId" | "createdAt" | "lastModified">
+  chapterData: Omit<
+    ChapterInfo,
+    | "id"
+    | "bookId"
+    | "createdAt"
+    | "lastModified"
+    | "income24h"
+    | "totalIncome"
+    | "donationIncome"
+  >
 ): Promise<ApiResponse<ChapterInfo>> => {
   try {
     const token = getToken();
@@ -1084,6 +1110,37 @@ export const addNewChapter = async (
     return response.data;
   } catch (error) {
     console.error("Error adding new chapter:", error);
+    throw error;
+  }
+};
+
+export const fetchIncomeData = async (
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(
+      `/user/books/income`,
+      {
+        params: { currentPage, pageSize },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to fetch income data");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching income data:", error);
     throw error;
   }
 };
@@ -1232,6 +1289,322 @@ export const searchBooks = async (
     return response.data;
   } catch (error) {
     console.error("搜索书籍时出错:", error);
+    throw error;
+  }
+};
+
+export const getSearchHistory = async (): Promise<ApiResponse<string[]>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.get<ApiResponse<string[]>>("/search/history", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to fetch search history");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching search history:", error);
+    throw error;
+  }
+};
+
+//paypal
+export const createPayPalOrder = async (
+  orderData: PayPalOrderRequest
+): Promise<ApiResponse<PayPalOrderResponse>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.post<ApiResponse<PayPalOrderResponse>>(
+      "/create/order",
+      orderData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      console.error("API Error Response:", response.data);
+      throw new Error(response.data.msg || "Failed to create PayPal order");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error creating PayPal order:", error);
+    throw error;
+  }
+};
+
+export const confirmPayPalOrder = async (
+  orderData: ConfirmPayPalOrderRequest
+): Promise<ApiResponse<ConfirmPayPalOrderResponse>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.post<ApiResponse<ConfirmPayPalOrderResponse>>(
+      "/confirm/order",
+      orderData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to confirm PayPal order");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error confirming PayPal order:", error);
+    throw error;
+  }
+};
+
+// 获取用户余额
+export const getUserBalance = async (): Promise<ApiResponse<UserBalance>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token 不可用，请重新登录");
+    }
+
+    const response = await api.get<ApiResponse<UserBalance>>("/user/balance", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取用户余额失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取用户余额时出错:", error);
+    throw error;
+  }
+};
+
+// 获取购买历史
+export const getPurchaseHistory = async (
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<ApiResponse<PaginatedData<PurchaseHistory>>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token 不可用，请重新登录");
+    }
+
+    const response = await api.get<ApiResponse<PaginatedData<PurchaseHistory>>>(
+      "/user/purchase/history",
+      {
+        params: { currentPage, pageSize },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取购买历史失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取购买历史时出错:", error);
+    throw error;
+  }
+};
+
+// 获取打赏历史
+export const getDonationHistory = async (
+  currentPage: number = 1,
+  pageSize: number = 5
+): Promise<ApiResponse<PaginatedData<DonationHistory>>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token 不可用，请重新登录");
+    }
+
+    const response = await api.get<ApiResponse<PaginatedData<DonationHistory>>>(
+      "/user/donation/history",
+      {
+        params: { currentPage, pageSize },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取打赏历史失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取打赏历史时出错:", error);
+    throw error;
+  }
+};
+
+export const getSponsorList = async (
+  userId: string,
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<ApiResponse<PaginatedData<SponsorInfo>>> => {
+  try {
+    const response: AxiosResponse<ApiResponse<PaginatedData<SponsorInfo>>> =
+      await api.get(`/user/${userId}/sponsors`, {
+        params: { currentPage, pageSize }
+      });
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to fetch sponsor list");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching sponsor list:", error);
+    throw error;
+  }
+};
+
+// Pay for a chapter
+export const payForChapter = async (
+  bookId: number,
+  chapterId: number
+): Promise<ApiResponse<ChapterPaymentResponse>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.post<ApiResponse<ChapterPaymentResponse>>(
+      `/book/${bookId}/chapter/${chapterId}/pay`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    switch (response.data.code) {
+      case 200:
+        return response.data; // 付费成功
+      case 601:
+        return response.data; // 返回已购买的响应
+      case 602:
+        return response.data;
+      default:
+        throw new Error(response.data.msg || "Failed to pay for chapter");
+    }
+  } catch (error) {
+    console.error("Error paying for chapter:", error);
+    throw error;
+  }
+};
+
+// Tip (donate to) an author
+export const tipAuthor = async (
+  authorId: number,
+  coins: number,
+  bookId?: number,
+  chapterId?: number
+): Promise<ApiResponse<TipResponse>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const tipData = {
+      coins,
+      bookId,
+      chapterId
+    };
+
+    console.log("Sending tip request:", { authorId, ...tipData });
+
+    const response = await api.post<ApiResponse<TipResponse>>(
+      `/user/${authorId}/tip`,
+      tipData,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    console.log("Raw API response:", response);
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to tip author");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error tipping author:", error);
+    throw error;
+  }
+};
+
+//章节购买记录
+export const getBookPurchasedChapters = async (
+  currentPage: number = 1,
+  pageSize: number = 5,
+  bookId?: number
+): Promise<ApiResponse<PaginatedData<PurchasedChapterInfo>>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.get<
+      ApiResponse<PaginatedData<PurchasedChapterInfo>>
+    >("/book/chapters/purchased", {
+      params: { bookId, currentPage, pageSize },
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    if (response.data.code !== 200) {
+      throw new Error(
+        response.data.msg || "Failed to fetch purchased chapters"
+      );
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching purchased chapters:", error);
     throw error;
   }
 };

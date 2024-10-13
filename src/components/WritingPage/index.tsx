@@ -15,21 +15,21 @@ import CategorySelect from "@/components/WritingPage/CategorySelect";
 import AgeRating from "@/components/WritingPage/AgeRating";
 import ContentEditor from "@/components/WritingPage/ContentEditor";
 import AuthorNote from "@/components/WritingPage/AuthorNote";
+import Alert from "@/components/Alert"; // 确保正确导入Alert组件
 
 import { publishBook, updateUserType, uploadBookDraft } from "@/app/lib/action";
-import { toast } from "react-toastify";
 import { NewUserView } from "./NewUserView";
 
 import BookStatusSelector from "./BookStatusSelector";
 import { getToken } from "@/app/lib/token";
 import { useUser } from "../UserContextProvider";
+import { useTranslation } from "../useTranslation";
+import MobileWritingNotice from "./MobileWritingNotice";
 
 const WritingPage: React.FC = () => {
   const router = useRouter();
-  // 使用自定义钩子获取用户信息
-  const { user, loading, error, updateUser } = useUser();
-
-  // 书籍数据状态
+  const { user, loading, error: userError, updateUser } = useUser();
+  const [isMobile, setIsMobile] = useState(false);
   const [bookData, setBookData] = useState<Partial<BookInfo>>({
     title: "",
     description: "",
@@ -42,45 +42,15 @@ const WritingPage: React.FC = () => {
     authorId: user?.id
   });
 
+  const { t } = useTranslation("book");
   const [fileData, setFileData] = useState<FileUploadData>({
     coverImage: undefined
   });
 
-  // 表单错误状态
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
 
-  // 表单验证函数
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {};
-
-    if (!bookData.title?.trim()) {
-      console.log("Title is empty");
-      newErrors.title = "请输入标题";
-    }
-    if (!fileData.coverImage) {
-      console.log("Cover image is missing");
-      newErrors.coverImage = "请上传封面图片";
-    }
-    if (!bookData.category) {
-      console.log("Category is not selected"); // 新增：日志
-      newErrors.category = "请选择类别";
-    }
-    if (!bookData.status) {
-      console.log("Book status is not selected"); // 新增：日志
-      newErrors.status = "请选择书籍状态";
-    }
-    if (!bookData.ageRating) newErrors.ageRating = "请选择年龄分级";
-    if (!bookData.chapters || bookData.chapters.length === 0) {
-      console.log("No chapters found");
-      newErrors.content = "请输入正文内容";
-    } else if (!bookData.chapters[0].content?.trim()) {
-      console.log("First chapter content is empty");
-      newErrors.content = "正文内容不能为空";
-    }
-    console.log("Validation errors:", newErrors);
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
   useEffect(() => {
     if (user) {
       setBookData((prev) => ({
@@ -91,12 +61,87 @@ const WritingPage: React.FC = () => {
     }
   }, [user]);
 
-  // 处理书籍数据变化
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768); // 假设小于 768px 为移动设备
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
+  const showError = (message: string) => {
+    setAlertMessage(message);
+    setAlertType("error");
+    setShowAlert(true);
+  };
+
+  const showSuccess = (message: string) => {
+    setAlertMessage(message);
+    setAlertType("success");
+    setShowAlert(true);
+  };
+
+  const validateForm = () => {
+    if (!bookData.title?.trim()) {
+      showError(t("writingPage.enterTitle"));
+      document.getElementById("intro")?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!bookData.description?.trim()) {
+      showError(t("writingPage.enterDescription"));
+      document.getElementById("intro")?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!fileData.coverImage) {
+      showError(t("writingPage.uploadCover"));
+      document.getElementById("cover")?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!bookData.category) {
+      showError(t("writingPage.selectCategory"));
+      document.getElementById("cover")?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!bookData.status) {
+      showError(t("writingPage.selectBookStatus"));
+      document.getElementById("cover")?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!bookData.ageRating) {
+      showError(t("writingPage.selectAgeRating"));
+      document.getElementById("cover")?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!bookData.chapters || bookData.chapters.length === 0) {
+      showError(t("writingPage.addChapter"));
+      document
+        .getElementById("content")
+        ?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!bookData.chapters[0].title?.trim()) {
+      showError(t("writingPage.enterChapterTitle"));
+      document
+        .getElementById("content")
+        ?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    if (!bookData.chapters[0].content?.trim()) {
+      showError(t("writingPage.enterChapterContent"));
+      document
+        .getElementById("content")
+        ?.scrollIntoView({ behavior: "smooth" });
+      return false;
+    }
+    return true;
+  };
+
   const handleBookDataChange = (field: keyof BookInfo, value: any) => {
     setBookData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // 处理章节更新
   const handleChapterUpdate = (updatedChapter: Partial<ChapterInfo>) => {
     setBookData((prev) => {
       const existingChapterIndex = prev.chapters?.findIndex(
@@ -104,15 +149,11 @@ const WritingPage: React.FC = () => {
       );
 
       if (existingChapterIndex === -1 || existingChapterIndex === undefined) {
-        // 如果章节不存在，创建新章节
-        console.log("Creating new chapter:", updatedChapter); // 新增：日志
         return {
           ...prev,
           chapters: [...(prev.chapters || []), updatedChapter as ChapterInfo]
         };
       } else {
-        // 更新现有章节
-        console.log("Updating existing chapter:", updatedChapter); // 新增：日志
         return {
           ...prev,
           chapters: prev.chapters!.map((chapter, index) =>
@@ -126,23 +167,8 @@ const WritingPage: React.FC = () => {
   };
 
   const saveOrPublishBook = async (publishStatus: "draft" | "published") => {
-    console.log("Attempting to save or publish book:", bookData, fileData); // 新增：日志
     if (validateForm()) {
       try {
-        if (!fileData.coverImage) {
-          throw new Error("请上传封面图片");
-        }
-
-        // 确保所有必需字段都有值
-        if (
-          !bookData.title ||
-          !bookData.category ||
-          !bookData.ageRating ||
-          !bookData.status
-        ) {
-          throw new Error("缺少必要的书籍信息");
-        }
-
         if (!user) {
           throw new Error("用户未登录");
         }
@@ -165,12 +191,17 @@ const WritingPage: React.FC = () => {
           | "authorAvatarUrl"
           | "favoritesCount"
           | "authorFollowersCount"
+          | "income24h"
+          | "totalIncome"
+          | "donationIncome"
+          | "adIncome"
+          | "monthlyIncome"
         > = {
-          title: bookData.title,
+          title: bookData.title!,
           description: bookData.description || "",
-          category: bookData.category,
-          ageRating: bookData.ageRating,
-          status: bookData.status,
+          category: bookData.category!,
+          ageRating: bookData.ageRating!,
+          status: bookData.status!,
           publishStatus,
           authorName: user.displayName || "",
           authorId: user.id,
@@ -182,27 +213,21 @@ const WritingPage: React.FC = () => {
         const saveFunction =
           publishStatus === "draft" ? uploadBookDraft : publishBook;
         const response = await saveFunction(
-          fileData.coverImage,
+          fileData.coverImage!,
           bookDataToSave,
           token
         );
 
         if (response.code === 200 || response.msg === "成功") {
-          console.log("保存成功:", response.data);
           setBookData((prev) => ({
             ...prev,
             ...response.data,
             publishStatus
           }));
-          toast.success(
-            publishStatus === "draft" ? "草稿已保存" : "内容已发布"
-          );
-          // 根据操作类型跳转到不同的页面
-          if (publishStatus === "draft") {
-            router.push(`/studio/${user.id}`); // 假设草稿页面的路径是 /my-drafts
-          } else {
-            router.push(`/studio/${user.id}`); // 假设已发布书籍页面的路径是 /my-books
-          }
+          showSuccess(publishStatus === "draft" ? "草稿已保存" : "内容已发布");
+          setTimeout(() => {
+            router.push(`/studio/${user.id}`);
+          }, 2000);
         } else {
           throw new Error(
             response.msg ||
@@ -210,11 +235,7 @@ const WritingPage: React.FC = () => {
           );
         }
       } catch (error) {
-        console.error(
-          `${publishStatus === "draft" ? "保存草稿" : "发布内容"}失败:`,
-          error
-        );
-        toast.error(
+        showError(
           error instanceof Error
             ? error.message
             : `${
@@ -222,30 +243,25 @@ const WritingPage: React.FC = () => {
               }失败，请重试`
         );
       }
-    } else {
-      console.log("Form validation failed"); // 新增：日志
-      toast.error("请填写所有必填字段");
     }
   };
 
   const handleSaveDraft = () => saveOrPublishBook("draft");
   const handlePublish = () => saveOrPublishBook("published");
 
-  // 处理用户类型变更（普通用户变为创作者）
   const handleUserTypeChange = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error("未找到认证token");
+        throw new Error(t("writingPage.authTokenNotFound"));
       }
 
       if (!user) {
-        throw new Error("未找到用户信息");
+        throw new Error(t("writingPage.userNotLoggedIn"));
       }
 
       const response = await updateUserType(user.id, token);
 
-      // 更新本地用户状态
       if (response.data.userType === "creator") {
         const updatedUser: UserInfo = {
           ...user,
@@ -255,14 +271,12 @@ const WritingPage: React.FC = () => {
           followingCount: 0,
           favoritesCount: 0
         };
-        // 更新用户信息
         updateUser(updatedUser);
       }
 
-      toast.success("成功成为创作者！");
+      showSuccess(t("writingPage.becomeCreatorSuccess"));
     } catch (error) {
-      console.error("更新用户类型失败:", error);
-      toast.error("更新用户类型失败，请重试");
+      showError(t("writingPage.updateUserTypeFailed"));
     }
   };
 
@@ -270,49 +284,42 @@ const WritingPage: React.FC = () => {
     handleBookDataChange("status", status);
   };
 
-  // 处理加载状态
-  if (loading) {
-    return <div>Loading...</div>;
+  if (userError) {
+    return <div>{t("writingPage.userError", { error: userError })}</div>;
   }
 
-  // 处理错误状态
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
-  // 处理无用户信息的情况
   if (!user) {
-    return <div>No user information available</div>;
+    return <div>{t("writingPage.noUserInfo")}</div>;
   }
 
+  if (isMobile) {
+    return <MobileWritingNotice />;
+  }
   return (
     <div className="font-sans">
       {user.userType === "regular" ? (
-        // 显示新用户视图，提示用户成为创作者
         <NewUserView user={user} onUserTypeChange={handleUserTypeChange} />
       ) : (
-        // 显示创作页面
-        <div className="flex">
+        <div className="flex  bg-white">
           <WritingSidebar
             onSaveDraft={handleSaveDraft}
             onPublish={handlePublish}
             publishStatus={bookData.publishStatus as BookInfo["publishStatus"]}
           />
-          <div className=" w-2/3 px-20 bg-white pt-10">
-            <form className="space-y-20 " onSubmit={(e) => e.preventDefault()}>
-              <div id="intro">
+          <div className="w-full px-20 flex justify-center  ">
+            <form className="" onSubmit={(e) => e.preventDefault()}>
+              <div id="intro" className="py-16  ">
                 <BookIntro
                   book={{
                     title: bookData.title || "",
                     description: bookData.description || ""
                   }}
-                  error={errors.title}
                   onBookChange={(updates) =>
                     setBookData((prev) => ({ ...prev, ...updates }))
                   }
                 />
               </div>
-              <div id="cover">
+              <div id="cover" className="pt-16">
                 <CoverUpload
                   coverImage={fileData.coverImage || undefined}
                   coverImageUrl={bookData.coverImageUrl!}
@@ -321,27 +328,28 @@ const WritingPage: React.FC = () => {
                     setBookData((prev) => ({ ...prev, coverImageUrl: url }));
                   }}
                 />
-                <CategorySelect
-                  value={bookData.category || "female-story"}
-                  onChange={(category) =>
-                    handleBookDataChange("category", category)
-                  }
-                  error={errors.category}
-                />
+                <div className="py-16">
+                  <CategorySelect
+                    value={bookData.category || "female-story"}
+                    onChange={(category) =>
+                      handleBookDataChange("category", category)
+                    }
+                  />
+                </div>
                 <BookStatusSelector
                   status={bookData.status || "ongoing"}
                   onStatusChange={handleStatusChange}
-                  error={errors.status}
                 />
-                <AgeRating
-                  value={bookData.ageRating || "allAges"}
-                  onChange={(ageRating) =>
-                    handleBookDataChange("ageRating", ageRating)
-                  }
-                  error={errors.ageRating}
-                />
+                <div className="py-6">
+                  <AgeRating
+                    value={bookData.ageRating || "allAges"}
+                    onChange={(ageRating) =>
+                      handleBookDataChange("ageRating", ageRating)
+                    }
+                  />
+                </div>
               </div>
-              <div id="content">
+              <div id="content" className="pt-16">
                 <ContentEditor
                   chapter={
                     bookData.chapters?.[0] ??
@@ -354,7 +362,7 @@ const WritingPage: React.FC = () => {
                   onContentChange={handleChapterUpdate}
                 />
               </div>
-              <div id="authornote">
+              <div id="authornote" className="h-screen pt-16">
                 <AuthorNote
                   authorNote={bookData.chapters?.[0]?.authorNote || ""}
                   onAuthorNoteChange={(newNote) =>
@@ -368,6 +376,14 @@ const WritingPage: React.FC = () => {
             </form>
           </div>
         </div>
+      )}
+      {showAlert && (
+        <Alert
+          message={alertMessage}
+          type={alertType}
+          onClose={() => setShowAlert(false)}
+          autoClose={true}
+        />
       )}
     </div>
   );

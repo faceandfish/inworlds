@@ -1,7 +1,7 @@
 // utils/imageUrl.ts
 
-const IMAGE_BASE_URL = "http://8.142.44.107:9000/book-bucket/";
-const AVATAR_BASE_URL = "http://8.142.44.107:9000/avatar-bucket/";
+const IMAGE_BASE_URL = " http://13.208.244.92:9000/book-bucket/";
+const AVATAR_BASE_URL = " http://13.208.244.92:9000/avatar-bucket/";
 
 export function getImageUrl(path: string): string {
   if (!path) return getFallbackImageUrl();

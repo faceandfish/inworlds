@@ -1,0 +1,123 @@
+{
+  "comments": {
+    "title": "Comment Management",
+    "noCommentsAvailable": "No comments available.",
+    "likeSuccess": "Like successful!",
+    "likeFail": "Like failed, please try again later",
+    "replySuccess": "Reply successful!",
+    "replyFail": "Reply failed, please try again later",
+    "deleteSuccess": "Comment deleted!",
+    "deleteFail": "Delete failed, please try again later",
+    "blockSuccess": "User has been blocked!",
+    "blockFail": "Failed to block user, please try again later"
+  },
+  "mobileStudio": {
+    "title": "Creator's Studio",
+    "message": "To provide you with the best creative experience, we recommend accessing the Creator's Studio on a desktop device. On a larger screen, you can more easily manage your works, view data analytics, and handle copyright matters.",
+    "suggestion": "Please visit this page on a computer or tablet device to access the full Creator's Studio functionality."
+  },
+  "copyright": {
+    "title": "InWorlds Copyright Disclaimer",
+    "lastUpdated": "Last updated: September 26, 2024",
+    "rights": "© 2024 InWorlds. All rights reserved.",
+    "contact": "Contact us: sundayoffice.jp@gmail.com",
+    "sections": {
+      "originalWorks": "1. Original Works Statement",
+      "authorResponsibility": "2. Author Responsibility Statement",
+      "nonCommercialUse": "3. Non-Commercial Use Statement",
+      "platformRights": "4. Platform Rights and Responsibilities",
+      "copyrightComplaints": "5. Copyright Complaint Handling",
+      "userAgreement": "6. User Agreement",
+      "applicableLaw": "7. Applicable Law"
+    },
+    "contactEmail": "Copyright dispute contact email: sundayoffice.jp@gmail.com",
+    "content": {
+      "originalWorks": "InWorlds平台鼓励作家创作原创作品。在本平台上发布的所有原创作品版权均归属于作者个人。",
+      "copyrightComplaints": "作者对其在InWorlds平台上发布的内容负有责任。如涉及任何抄袭、侵权或其他不当行为，相关法律责任由作者承担。InWorlds平台将在合理范围内协助处理相关问题。",
+      "nonCommercialUse": "在InWorlds平台上发布的作品主要用于非商业目的。如作者希望将作品用于商业用途，建议事先与平台沟通，以确保符合相关规定和双方利益。",
+      "platformRights": "对于可能违反本声明的作品，InWorlds将首先与作者沟通，寻求共同解决方案。只有在沟通无效且确认存在明显违规的情况下，平台可能会采取必要的措施，如暂时下架或删除相关内容。我们承诺在采取任何行动前，会充分考虑并尊重作者的权益。",
+      "complaintHandling": "如您认为平台上的某作品侵犯了您的版权，请及时与我们联系。我们将认真对待每一份投诉，并根据提供的信息进行调查和适当处理。",
+      "userAgreement": "我们诚挚邀请您在使用InWorlds平台前，仔细阅读本免责声明。如您对任何条款有疑问或顾虑，欢迎随时与我们联系讨论。我们重视与用户的良好沟通，并致力于为所有用户提供公平、透明的创作环境。",
+      "applicableLaw": "本免责声明适用于InWorlds运营所在地的法律。如产生任何争议，我们将本着相互理解、友好协商的原则，通过对话寻求解决方案。若协商未果，将根据运营地相关法律法规处理。"
+    }
+  },
+  "dataAnalysis": {
+    "title": "Content Details",
+    "columns": {
+      "title": "Title",
+      "type": "Type",
+      "wordCount": "Word Count",
+      "creationTime": "Creation Time"
+    },
+    "detailedData": "Detailed Data",
+    "analyticsItems": {
+      "views": "Total Views",
+      "viewsLast24h": "Views in Last 24h",
+      "likes": "Total Likes",
+      "totalIncome": "Total Income",
+      "comments": "Total Comments",
+      "incomeLast24h": "Income in Last 24h"
+    }
+  },
+  "income": {
+    "title": "Income Details",
+    "monthlyIncome": "Total Monthly Income",
+    "currency": "Ink Coins",
+    "columns": {
+      "title": "Title",
+      "type": "Type",
+      "income24h": "24h Income",
+      "donationIncome": "Donation Income",
+      "totalIncome": "Total Income",
+      "creationTime": "Creation Time"
+    }
+  },
+  "studio": {
+    "userLoadingError": "Unable to load user information. Please log in again or try later.",
+    "loginButton": "Return to Login Page",
+    "sidebar": {
+      "works": "Works",
+      "analysis": "Data Analysis",
+      "comments": "Comments",
+      "copyright": "Copyright",
+      "income": "Income"
+    },
+    "workContent": {
+      "tabs": {
+        "published": "Published Content",
+        "ongoing": "Ongoing Series",
+        "completed": "Completed",
+        "draft": "Drafts"
+      },
+      "columns": {
+        "title": "Title",
+        "status": "Status",
+        "lastUpdated": "Last Updated",
+        "actions": "Actions"
+      },
+      "status": {
+        "ongoing": "Ongoing",
+        "completed": "Completed",
+        "draft": "Draft"
+      },
+      "actions": {
+        "edit": "Edit",
+        "unpublish": "Unpublish",
+        "publish": "Publish",
+        "delete": "Delete"
+      },
+      "confirmations": {
+        "unpublish": "Are you sure you want to unpublish this work?",
+        "publish": "Are you sure you want to publicly publish this work?",
+        "delete": "Are you sure you want to delete this work?"
+      },
+      "newWork": "New Work",
+      "errors": {
+        "fetchFailed": "Failed to fetch works list",
+        "unpublishFailed": "Failed to unpublish work",
+        "publishFailed": "Failed to publish work",
+        "deleteFailed": "Failed to delete work"
+      }
+    }
+  }
+}

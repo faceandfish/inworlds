@@ -1,6 +1,7 @@
 import React, { useState, useRef } from "react";
 import { BookInfo, FileUploadData } from "@/app/lib/definitions";
 import Alert from "../Alert";
+import { useTranslation } from "../useTranslation";
 
 interface ExistingCoverUploadProps {
   currentCoverUrl: string;
@@ -13,6 +14,7 @@ const ExistingCoverUpload: React.FC<ExistingCoverUploadProps> = ({
   onCoverChange,
   onSubmit
 }) => {
+  const { t } = useTranslation("bookedit");
   const [previewUrl, setPreviewUrl] = useState<string>(currentCoverUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [alert, setAlert] = useState<{
@@ -37,12 +39,12 @@ const ExistingCoverUpload: React.FC<ExistingCoverUploadProps> = ({
     try {
       const success = await onSubmit();
       if (success) {
-        setAlert({ message: "封面更新成功", type: "success" });
+        setAlert({ message: t("coverUpload.updateSuccess"), type: "success" });
       } else {
-        setAlert({ message: "封面更新失败", type: "error" });
+        setAlert({ message: t("coverUpload.updateFail"), type: "error" });
       }
     } catch (error) {
-      setAlert({ message: "更新封面时出错", type: "error" });
+      setAlert({ message: t("coverUpload.updateError"), type: "error" });
     }
   };
 
@@ -61,37 +63,53 @@ const ExistingCoverUpload: React.FC<ExistingCoverUploadProps> = ({
             onClick={handleEditClick}
             className="mt-4 px-4 py-2 bg-neutral-100  text-neutral-600 rounded hover:bg-neutral-300 focus:outline-none"
           >
-            更换封面
+            {t("coverUpload.changePhoto")}
           </button>
         </div>
         <div className=" px-10 h-56 py-3 leading-snug rounded-lg text-sm text-neutral-500">
           <h3 className="font-bold text-lg mb-2 text-neutral-600">
-            书籍封面上传指南
+            {t("coverUpload.uploadGuide")}
           </h3>
           <ul className="space-y-1">
             <li>
-              <span className="font-semibold">推荐尺寸：</span>400 x 600 像素
+              <span className="font-semibold">
+                {t("coverUpload.recommendedSize")}
+              </span>
+              400 x 600 pixels
             </li>
             <li>
-              <span className="font-semibold">尺寸范围：</span>300 x 450 至 800
-              x 1200 像素
+              <span className="font-semibold">
+                {t("coverUpload.sizeRange")}
+              </span>
+              300 x 450 to 800 x 1200 pixels
             </li>
             <li>
-              <span className="font-semibold">最大文件大小：</span>2 MB
+              <span className="font-semibold">
+                {t("coverUpload.maxFileSizeLabel")}
+              </span>
+              2 MB
             </li>
             <li>
-              <span className="font-semibold">推荐格式：</span>JPEG/JPG, PNG
+              <span className="font-semibold">
+                {t("coverUpload.recommendedFormatLabel")}
+              </span>
+              JPEG/JPG, PNG
             </li>
             <li>
-              <span className="font-semibold">比例：</span>保持 2:3 的宽高比
+              <span className="font-semibold">
+                {t("coverUpload.aspectRatioLabel")}
+              </span>
+              2:3
             </li>
             <li>
-              <span className="font-semibold">布局：</span>
-              重要视觉元素请置于图片中心
+              <span className="font-semibold">
+                {t("coverUpload.layoutLabel")}
+              </span>
+              {t("coverUpload.layoutTipDetail")}
             </li>
           </ul>
           <p className="mt-2 text-xs text-neutral-500">
-            遵循这些指南将帮助您的书籍封面在我们的平台上获得最佳展示效果。
+            {t("coverUpload.guidelineNoteDetail")}
           </p>
         </div>
       </div>
@@ -106,7 +124,7 @@ const ExistingCoverUpload: React.FC<ExistingCoverUploadProps> = ({
         onClick={handleSubmit}
         className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
       >
-        保存新封面
+        {t("coverUpload.saveNewCover")}
       </button>
 
       {alert && (

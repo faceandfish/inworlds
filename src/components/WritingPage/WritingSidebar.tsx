@@ -6,37 +6,14 @@ import {
   DocumentTextIcon,
   ChatBubbleBottomCenterTextIcon
 } from "@heroicons/react/24/outline";
-import { toast } from "react-toastify";
 import { BookInfo } from "@/app/lib/definitions";
+import { useTranslation } from "../useTranslation";
 
 interface SidebarOption {
   id: string;
   title: string;
   icon: React.ElementType;
 }
-
-const sidebarOptions: SidebarOption[] = [
-  {
-    id: "intro",
-    title: "编辑简介",
-    icon: PencilIcon
-  },
-  {
-    id: "cover",
-    title: "添加细节",
-    icon: PhotoIcon
-  },
-  {
-    id: "content",
-    title: "编辑正文",
-    icon: DocumentTextIcon
-  },
-  {
-    id: "authornote",
-    title: "作者有话说",
-    icon: ChatBubbleBottomCenterTextIcon
-  }
-];
 
 interface WritingSidebarProps {
   publishStatus: BookInfo["publishStatus"];
@@ -49,6 +26,31 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
   onSaveDraft,
   onPublish
 }) => {
+  const { t } = useTranslation("book");
+
+  const sidebarOptions: SidebarOption[] = [
+    {
+      id: "intro",
+      title: t("writingSidebar.editIntro"),
+      icon: PencilIcon
+    },
+    {
+      id: "cover",
+      title: t("writingSidebar.addDetails"),
+      icon: PhotoIcon
+    },
+    {
+      id: "content",
+      title: t("writingSidebar.editContent"),
+      icon: DocumentTextIcon
+    },
+    {
+      id: "authornote",
+      title: t("writingSidebar.authorMessage"),
+      icon: ChatBubbleBottomCenterTextIcon
+    }
+  ];
+
   const handleOptionClick = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -57,10 +59,10 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
   };
 
   return (
-    <div className="w-64  flex-shrink-0">
-      <div className="w-64 min-h-screen   flex flex-col items-center fixed left-0 top-0 pt-16 ">
+    <div className="w-64  flex-shrink-0 border-r">
+      <div className="w-64 h-screen  flex flex-col items-center fixed left-0 top-0 pt-16 ">
         <h2 className="text-2xl font-bold bg-orange-400 w-full text-center py-5 text-white mb-6">
-          开始创作吧
+          {t("writingSidebar.startCreating")}
         </h2>
         <ul className="space-y-4 mb-8 ">
           {sidebarOptions.map((option) => (
@@ -81,13 +83,13 @@ const WritingSidebar: React.FC<WritingSidebarProps> = ({
               onClick={onSaveDraft}
               className="w-full bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 rounded shadow transition duration-200 border border-gray-400"
             >
-              保存草稿
+              {t("writingSidebar.saveDraft")}
             </button>
             <button
               onClick={onPublish}
               className="w-full bg-orange-400 hover:bg-orange-500 text-white font-semibold py-2 px-4 rounded shadow transition duration-200 "
             >
-              发布文章
+              {t("writingSidebar.publishArticle")}
             </button>
           </div>
         </div>

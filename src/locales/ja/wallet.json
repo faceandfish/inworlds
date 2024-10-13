@@ -1,0 +1,58 @@
+{
+  "wallet": {
+    "title": "インクコインの購入",
+    "noRecords": "記録なし",
+    "balance": {
+      "current": "現在の残高：",
+      "currency": "インクコイン"
+    },
+    "donationTip": {
+      "title": "寄付のヒント",
+      "content": "あなたの寄付は作者が更に質の高いコンテンツを作成するための直接的な支援となります。ご支援ありがとうございます！"
+    },
+    "historyTable": {
+      "purchaseTitle": "購入履歴",
+      "donationTitle": "寄付履歴",
+      "columns": {
+        "date": "日付",
+        "purchaseCoins": "購入コイン",
+        "donationCoins": "寄付コイン",
+        "amountPaid": "支払額",
+        "author": "作者",
+        "work": "作品"
+      }
+    },
+    "purchasedChapters": {
+      "title": "購入済みの章",
+      "bookTitle": "書籍名",
+      "chapterTitle": "章タイトル",
+      "purchaseDate": "購入日",
+      "cost": "費用",
+      "coins": "インクコイン"
+    },
+    "purchaseOptions": {
+      "coins": "インクコイン",
+      "buy": "購入",
+      "processing": "処理中..."
+    },
+    "alerts": {
+      "orderCreating": "注文を作成中です。お待ちください...",
+      "orderCreationFailed": "注文の作成に失敗しました。もう一度お試しください。",
+      "orderCreationError": "注文の作成中にエラーが発生しました。もう一度お試しください。",
+      "paymentConfirmation": "{coins}インクコインを{price}ドルで購入してもよろしいですか？",
+      "paymentWindowOpened": "支払いウィンドウが開きました。新しいウィンドウで支払いを完了し、「支払い確認」ボタンをクリックしてください。",
+      "paymentProcessing": "支払いを確認中です。お待ちください...",
+      "purchaseSuccess": "インクコインの購入に成功しました！",
+      "purchaseFailed": "購入に失敗しました。もう一度お試しください。",
+      "paymentError": "支払い処理中にエラーが発生しました。もう一度お試しください。"
+    },
+    "buttons": {
+      "proceedToPayment": "支払いに進む",
+      "confirmPayment": "支払いを確認"
+    },
+    "errors": {
+      "balanceFetchFailed": "ユーザーの残高の取得に失敗しました：",
+      "balanceFetchError": "ユーザーの残高の取得中にエラーが発生しました："
+    }
+  }
+}
