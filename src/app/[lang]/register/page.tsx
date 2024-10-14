@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { RegisterCredentials } from "../../lib/definitions";
 import { register } from "../../lib/action";
+import { useTranslation } from "@/components/useTranslation";
+import Alert from "@/components/Alert";
 
 const Register = () => {
   const router = useRouter();
+  const { t } = useTranslation("navbar");
   const [formData, setFormData] = useState<RegisterCredentials>({
     username: "",
     email: "",
@@ -16,7 +19,7 @@ const Register = () => {
   });
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [link, setLink] = useState("");
+  const [showAlert, setShowAlert] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
@@ -40,17 +43,17 @@ const Register = () => {
 
     try {
       const response = await register(formData);
-
       if (response.code === 200) {
-        setLink(response.data);
-        // Registration successful
-        router.push("/login");
+        setShowAlert(true);
+      } else if (response.code === 701) {
+        setError(t("username_already_registered"));
+      } else if (response.code === 702) {
+        setError(t("email_already_registered"));
       } else {
-        // Registration failed
-        setError(response.msg || "Registration failed");
+        setError(t("registration_failed"));
       }
     } catch (error) {
-      setError("An error occurred during registration");
+      setError(t("registration_error"));
       console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
@@ -71,115 +74,108 @@ const Register = () => {
       </div>
 
       <div className="absolute top-0 left-0 right-0 md:top-1/2 md:right-32 md:left-auto md:transform md:-translate-y-1/2 rounded-none md:rounded-2xl z-10 bg-white px-4 py-8 md:px-10 min-h-screen md:min-h-0">
-        {link ? (
-          <div className="text-center">
-            <h2 className="md:text-2xl text-xl font-bold mb-6">验证您的邮箱</h2>
-            <p className="mb-4">请点击以下链接验证您的邮箱：</p>
-            <a
-              href={link}
-              className="text-blue-500 hover:text-blue-700 underline"
-              target="_blank"
-              rel="noopener noreferrer"
+        <h2 className="text-2xl font-bold mb-6 text-center">{t("register")}</h2>
+        {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+        <form onSubmit={handleSubmit}>
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="username"
             >
-              验证邮箱
-            </a>
+              {t("username")}
+            </label>
+            <input
+              className="shadow appearance-none border rounded md:w-96 w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="username"
+              type="text"
+              placeholder={t("enter_username")}
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
           </div>
-        ) : (
-          <>
-            <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-            {error && <p className="text-red-500 text-center mb-4">{error}</p>}
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="username"
-                >
-                  Username
-                </label>
-                <input
-                  className="shadow appearance-none border rounded md:w-96 w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="username"
-                  type="text"
-                  placeholder="Enter your username"
-                  value={formData.username}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="email"
-                >
-                  Email
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="email"
-                  type="email"
-                  placeholder="Enter your email"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="loginPwd"
-                >
-                  Password
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={formData.password}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label
-                  className="block text-gray-700 text-sm font-bold mb-2"
-                  htmlFor="rePassword"
-                >
-                  Confirm Password
-                </label>
-                <input
-                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                  id="rePassword"
-                  type="password"
-                  placeholder="Confirm your password"
-                  value={formData.rePassword}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <button
-                  className="hover:bg-orange-500 bg-orange-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-                  type="submit"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Registering..." : "Register"}
-                </button>
-              </div>
-              <div className="mt-3 text-center">
-                Already have an account?
-                <Link
-                  href="/login"
-                  className="text-orange-400 hover:text-orange-500"
-                >
-                  {" "}
-                  Login
-                </Link>
-              </div>
-            </form>
-          </>
-        )}
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="email"
+            >
+              {t("email")}
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="email"
+              type="email"
+              placeholder={t("enter_email")}
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="loginPwd"
+            >
+              {t("password")}
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="password"
+              type="password"
+              placeholder={t("enter_password")}
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="mb-4">
+            <label
+              className="block text-gray-700 text-sm font-bold mb-2"
+              htmlFor="rePassword"
+            >
+              {t("confirm_password")}
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="rePassword"
+              type="password"
+              placeholder={t("confirm_password")}
+              value={formData.rePassword}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="flex items-center justify-between">
+            <button
+              className="hover:bg-orange-500 bg-orange-400 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+              type="submit"
+              disabled={isLoading}
+            >
+              {isLoading ? t("registering") : t("register")}
+            </button>
+          </div>
+          <div className="mt-3 text-center">
+            {t("already_have_account")}
+            <Link
+              href="/login"
+              className="text-orange-400 hover:text-orange-500"
+            >
+              {" "}
+              {t("login")}
+            </Link>
+          </div>
+        </form>
       </div>
+      {showAlert && (
+        <Alert
+          message={t("registration_success_message")}
+          type="success"
+          onClose={() => {
+            setShowAlert(false);
+            router.push("/login");
+          }}
+        />
+      )}
     </div>
   );
 };

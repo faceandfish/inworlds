@@ -27,5 +27,19 @@
   "dontHaveAccount": "Don't have an account?",
   "registerLink": "Register",
   "loginError": "Login failed",
-  "unexpectedError": "An unexpected error occurred during login"
+  "unexpectedError": "An unexpected error occurred during login",
+  "registering": "Registering...",
+  "passwords_do_not_match": "Passwords do not match",
+  "username_already_registered": "This username is already registered",
+  "email_already_registered": "This email is already registered",
+  "registration_failed": "Registration failed",
+  "registration_error": "An error occurred during registration",
+  "already_have_account": "Already have an account?",
+  "username": "Username",
+  "enter_username": "Enter your username",
+  "email": "Email",
+  "enter_email": "Enter your email",
+  "enter_password": "Enter your password",
+  "confirm_password": "Confirm password",
+  "registration_success_message": "Registration successful!\nWe have sent a verification link to your email. Please check your inbox and click the link to complete the registration."
 }

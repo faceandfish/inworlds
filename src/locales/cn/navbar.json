@@ -27,5 +27,19 @@
   "dontHaveAccount": "还没有账号？",
   "registerLink": "注册",
   "loginError": "登录失败",
-  "unexpectedError": "登录过程中发生意外错误"
+  "unexpectedError": "登录过程中发生意外错误",
+  "registering": "注册中...",
+  "passwords_do_not_match": "密码不匹配",
+  "username_already_registered": "该用户名已被注册",
+  "email_already_registered": "该邮箱已被注册",
+  "registration_failed": "注册失败",
+  "registration_error": "注册过程中发生错误",
+  "already_have_account": "已经有账号了？",
+  "username": "用户名",
+  "enter_username": "输入您的用户名",
+  "email": "电子邮箱",
+  "enter_email": "输入您的电子邮箱",
+  "enter_password": "输入您的密码",
+  "confirm_password": "确认密码",
+  "registration_success_message": "注册成功！\n我们已经向您的邮箱发送了一个验证链接，请查看您的邮箱并点击链接以完成注册。"
 }

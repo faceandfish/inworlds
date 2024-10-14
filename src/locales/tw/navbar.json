@@ -27,5 +27,19 @@
   "dontHaveAccount": "還沒有帳號？",
   "registerLink": "註冊",
   "loginError": "登入失敗",
-  "unexpectedError": "登入過程中發生意外錯誤"
+  "unexpectedError": "登入過程中發生意外錯誤",
+  "registering": "註冊中...",
+  "passwords_do_not_match": "密碼不匹配",
+  "username_already_registered": "該用戶名已被註冊",
+  "email_already_registered": "該電郵已被註冊",
+  "registration_failed": "註冊失敗",
+  "registration_error": "註冊過程中發生錯誤",
+  "already_have_account": "已經有帳號了？",
+  "username": "用戶名",
+  "enter_username": "輸入您的用戶名",
+  "email": "電子郵箱",
+  "enter_email": "輸入您的電子郵箱",
+  "enter_password": "輸入您的密碼",
+  "confirm_password": "確認密碼",
+  "registration_success_message": "註冊成功！\n我們已經向您的郵箱發送了一個驗證連結，請查看您的郵箱並點擊連結以完成註冊。"
 }

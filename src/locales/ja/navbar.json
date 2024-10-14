@@ -27,5 +27,19 @@
   "dontHaveAccount": "アカウントをお持ちでないですか？",
   "registerLink": "登録",
   "loginError": "ログインに失敗しました",
-  "unexpectedError": "ログイン中に予期せぬエラーが発生しました"
+  "unexpectedError": "ログイン中に予期せぬエラーが発生しました",
+  "registering": "登録中...",
+  "passwords_do_not_match": "パスワードが一致しません",
+  "username_already_registered": "このユーザー名は既に登録されています",
+  "email_already_registered": "このメールアドレスは既に登録されています",
+  "registration_failed": "登録に失敗しました",
+  "registration_error": "登録中にエラーが発生しました",
+  "already_have_account": "既にアカウントをお持ちですか？",
+  "username": "ユーザー名",
+  "enter_username": "ユーザー名を入力してください",
+  "email": "メールアドレス",
+  "enter_email": "メールアドレスを入力してください",
+  "enter_password": "パスワードを入力してください",
+  "confirm_password": "パスワードの確認",
+  "registration_success_message": "登録が完了しました！\nご登録のメールアドレスに確認リンクを送信しました。メールをご確認の上、リンクをクリックして登録を完了してください。"
 }

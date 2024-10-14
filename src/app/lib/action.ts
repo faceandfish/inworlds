@@ -187,9 +187,14 @@ export async function register(
         headers: { "Content-Type": "multipart/form-data" }
       }
     );
-    console.log(response.data);
     return response.data;
   } catch (error) {
+    if (axios.isAxiosError(error) && error.response) {
+      const responseData = error.response.data as ApiResponse<string>;
+      if (responseData.code === 701 || responseData.code === 702) {
+        return responseData;
+      }
+    }
     console.error("注册失败:", error);
     throw error;
   }
