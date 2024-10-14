@@ -19,12 +19,7 @@ export default async function Home({ params: { lang } }: Props) {
 }
 
 export async function generateStaticParams() {
-  return [
-    { lang: "en" },
-    { lang: "cn" },
-    { lang: "tw" },
-    { lang: "ja" }
-  ] as const;
+  return [{ lang: "en" }, { lang: "cn" }, { lang: "tw" }, { lang: "ja" }];
 }
 
 export async function generateMetadata({
