@@ -6,7 +6,7 @@ import SecuritySettings from "./SecuritySettings";
 import NotificationSettings from "./NotificationSettings";
 import AvatarUpload from "./AvatarUpload";
 import Sidebar from "./Sidebar";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import {
   UserInfo,
   UpdateUserRequest,

@@ -3,7 +3,7 @@ import { FiThumbsUp, FiMessageSquare, FiTrash2, FiSlash } from "react-icons/fi";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import Alert from "./Alert";
-import { CommentInfo } from "../app/lib/definitions";
+import { CommentInfo } from "../../app/lib/definitions";
 
 interface CommentActions {
   onLike: (commentId: number) => Promise<void>;

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { BookInfo, ChapterInfo } from "@/app/lib/definitions";
 import ContentEditor from "../WritingPage/ContentEditor";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "../useTranslation";
 

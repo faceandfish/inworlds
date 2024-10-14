@@ -7,9 +7,9 @@ import {
   likeComment
 } from "@/app/lib/action";
 
-import Alert from "../Alert";
-import CommentItem from "../CommentItem";
-import Pagination from "../Pagination";
+import Alert from "../Main/Alert";
+import CommentItem from "../Main/CommentItem";
+import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
 import BookContentSkeleton from "./skeleton/BookContentSkeleton";
 

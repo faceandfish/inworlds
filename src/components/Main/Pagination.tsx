@@ -1,6 +1,6 @@
 import React from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
-import { useTranslation } from "./useTranslation";
+import { useTranslation } from "../useTranslation";
 
 interface PaginationProps {
   currentPage: number;

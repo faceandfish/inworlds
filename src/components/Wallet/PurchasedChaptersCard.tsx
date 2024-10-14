@@ -2,7 +2,7 @@ import React from "react";
 import { PurchasedChapterInfo, PaginatedData } from "@/app/lib/definitions";
 import { useTranslation } from "../useTranslation";
 import { HiBookOpen } from "react-icons/hi2";
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 
 interface PurchasedChaptersCardProps {
   purchasedChapters: PaginatedData<PurchasedChapterInfo>;

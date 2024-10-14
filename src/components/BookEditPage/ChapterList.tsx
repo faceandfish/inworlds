@@ -7,7 +7,7 @@ import {
   XMarkIcon,
   CurrencyDollarIcon
 } from "@heroicons/react/24/outline";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import AuthorNote from "../WritingPage/AuthorNote";
 import { useTranslation } from "../useTranslation";
 

@@ -2,7 +2,7 @@ import React from "react";
 import { PurchaseHistory, PaginatedData } from "@/app/lib/definitions";
 import { useTranslation } from "../useTranslation";
 import { HiShoppingCart } from "react-icons/hi2";
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 
 interface PurchaseHistoryCardProps {
   purchaseHistory: PaginatedData<PurchaseHistory>;

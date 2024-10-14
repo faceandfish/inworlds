@@ -1,9 +1,10 @@
-import { BookInfo } from "@/app/lib/definitions";
 import { fetchHomepageBooks } from "@/app/lib/action";
 import { Metadata } from "next";
 import { getDictionary } from "../dictionaries";
 import { Locale, Namespace } from "../i18n-config"; // 更新导入
-import HomePage from "@/components/HomePage";
+
+import { Suspense } from "react";
+import HomePage from "@/components/Main/HomePage";
 
 type Props = {
   params: { lang: Locale };

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import { useTranslation } from "./useTranslation";
+import { useTranslation } from "../useTranslation";
 
 interface AlertProps {
   message: string;

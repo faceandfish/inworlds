@@ -9,11 +9,11 @@ import {
   likeComment,
   addCommentOrReply
 } from "@/app/lib/action";
-import CommentItem from "../CommentItem";
+import CommentItem from "../Main/CommentItem";
 
 import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
-import Alert from "../Alert";
-import Pagination from "../Pagination";
+import Alert from "../Main/Alert";
+import Pagination from "../Main/Pagination";
 import { getImageUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import CommentsSkeleton from "./Skeleton/CommentsSkeleton";

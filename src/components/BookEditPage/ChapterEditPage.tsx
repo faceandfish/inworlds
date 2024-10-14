@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ChapterInfo, BookInfo } from "@/app/lib/definitions";
 import ContentEditor from "../WritingPage/ContentEditor";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import {
   getBookDetails,
   getChapterContent,

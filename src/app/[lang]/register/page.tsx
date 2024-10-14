@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { RegisterCredentials } from "../../lib/definitions";
 import { register } from "../../lib/action";
 import { useTranslation } from "@/components/useTranslation";
-import Alert from "@/components/Alert";
+import Alert from "@/components/Main/Alert";
 
 const Register = () => {
   const router = useRouter();

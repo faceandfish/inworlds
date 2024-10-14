@@ -6,7 +6,7 @@ import { AiOutlineLogout } from "react-icons/ai";
 import { FaChevronRight } from "react-icons/fa";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 
 interface LogoutButtonProps {
   onClick?: () => void;

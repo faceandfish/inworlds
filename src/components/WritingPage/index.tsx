@@ -15,7 +15,6 @@ import CategorySelect from "@/components/WritingPage/CategorySelect";
 import AgeRating from "@/components/WritingPage/AgeRating";
 import ContentEditor from "@/components/WritingPage/ContentEditor";
 import AuthorNote from "@/components/WritingPage/AuthorNote";
-import Alert from "@/components/Alert"; // 确保正确导入Alert组件
 
 import { publishBook, updateUserType, uploadBookDraft } from "@/app/lib/action";
 import { NewUserView } from "./NewUserView";
@@ -25,6 +24,7 @@ import { getToken } from "@/app/lib/token";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
 import MobileWritingNotice from "./MobileWritingNotice";
+import Alert from "../Main/Alert";
 
 const WritingPage: React.FC = () => {
   const router = useRouter();

@@ -21,10 +21,10 @@ import {
   getChapterList,
   payForChapter
 } from "@/app/lib/action";
-import Pagination from "../Pagination";
-import Alert from "../Alert";
+import Pagination from "../Main/Pagination";
+import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
-import TipButton from "../TipButton";
+import TipButton from "../Main/TipButton";
 import { useUser } from "../UserContextProvider";
 import { usePurchasedChapters } from "../PurchasedChaptersProvider.tsx";
 

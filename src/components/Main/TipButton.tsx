@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { tipAuthor } from "@/app/lib/action";
-import { useTranslation } from "./useTranslation";
+import { useTranslation } from "../useTranslation";
 import Alert from "./Alert";
 
 interface TipButtonProps {

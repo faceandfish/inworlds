@@ -10,7 +10,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Sidebar from "./Sidebar";
 import BookDetails from "./BookDetails";
 import ChapterList from "./ChapterList";
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 import CoverUpload from "../WritingPage/CoverUpload";
 import StatusAndCategoryUpdate from "./StatusAndCategoryUpdate";
 import NewChapter from "./NewChapter";

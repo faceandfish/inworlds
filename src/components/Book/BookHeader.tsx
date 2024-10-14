@@ -10,7 +10,7 @@ import {
   checkBookFavoriteStatus
 } from "@/app/lib/action";
 import Link from "next/link";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useUser } from "../UserContextProvider";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "../useTranslation";

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useTransition } from "react";
 import { BookInfo, AnalyticsData } from "@/app/lib/definitions";
 import { fetchBooksList, fetchSingleBookAnalytics } from "@/app/lib/action";
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 import Link from "next/link";
 import DataAnalysisSkeleton from "./Skeleton/DataAnalysisSkeleton";
 import { useUser } from "../UserContextProvider";

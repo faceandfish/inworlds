@@ -14,9 +14,9 @@ import {
   fetchBooksList,
   updateBookDetails
 } from "@/app/lib/action";
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 import Link from "next/link";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";

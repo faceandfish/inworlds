@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { followUser, unfollowUser, checkFollowStatus } from "@/app/lib/action";
 import { useUser } from "../UserContextProvider";
 import { useRouter } from "next/navigation";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 
 interface FollowButtonProps {

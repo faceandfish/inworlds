@@ -23,7 +23,7 @@ import {
   getPurchaseHistory,
   getUserBalance
 } from "@/app/lib/action";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 import WalletSkeleton from "./WalletSkeleton";
 import { PurchasedChaptersCard } from "./PurchasedChaptersCard";

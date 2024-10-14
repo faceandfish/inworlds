@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BookInfo } from "@/app/lib/definitions";
 import BookStatusSelector from "../WritingPage/BookStatusSelector";
 import CategorySelect from "../WritingPage/CategorySelect";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 
 interface StatusAndCategoryUpdateProps {

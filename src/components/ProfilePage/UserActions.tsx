@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { checkFollowStatus } from "@/app/lib/action";
 import FollowButton from "./FollowButton";
-import TipButton from "../TipButton";
+import TipButton from "../Main/TipButton";
 import { useTranslation } from "../useTranslation";
 
 interface UserActionsProps {

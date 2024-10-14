@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import CommentSection from "@/components/Book/CommentSection";
 import { BookInfo, ChapterInfo, PaginatedData } from "@/app/lib/definitions";
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 import { getChapterList } from "@/app/lib/action";
 import { useUser } from "../UserContextProvider";
 import { useRouter } from "next/navigation";

@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useCallback, Suspense, useEffect } from "react";
 import Sidebar from "./Sidebar";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useRouter } from "next/navigation";
 import ContentWrapper from "./ContentWrapper";
 import SidebarSkeleton from "./Skeleton/SidebarSkeleton";

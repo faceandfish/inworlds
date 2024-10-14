@@ -6,7 +6,7 @@ import {
   CurrencyDollarIcon
 } from "@heroicons/react/24/outline";
 import { UserInfo } from "@/app/lib/definitions";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 
 interface NewUserViewProps {

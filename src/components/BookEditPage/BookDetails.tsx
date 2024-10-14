@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BookInfo } from "@/app/lib/definitions";
 import BookIntro from "../WritingPage/BookIntro";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 
 interface BookDetailsProps {

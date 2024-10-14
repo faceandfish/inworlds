@@ -12,7 +12,7 @@ import Category from "@/components/Navbar/Category";
 import { BookInfo } from "@/app/lib/definitions";
 import { fetchHomepageBooks } from "@/app/lib/action";
 import BookPreviewCardSkeleton from "@/components/Book/skeleton/BookPreviewCardSkeleton";
-import { useTranslation } from "./useTranslation";
+import { useTranslation } from "../useTranslation";
 
 interface HomePageProps {
   initialBooks: BookInfo[];

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
 
 // 模拟数据

@@ -1,6 +1,6 @@
 import React, { useState, useRef } from "react";
 import { BookInfo, FileUploadData } from "@/app/lib/definitions";
-import Alert from "../Alert";
+import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 
 interface ExistingCoverUploadProps {

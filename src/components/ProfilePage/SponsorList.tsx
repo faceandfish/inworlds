@@ -4,7 +4,7 @@ import { SponsorInfo } from "@/app/lib/definitions";
 import { getSponsorList } from "@/app/lib/action";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { useTranslation } from "../useTranslation";
-import Pagination from "../Pagination";
+import Pagination from "../Main/Pagination";
 
 interface SponsorListItemProps {
   sponsor: SponsorInfo;
