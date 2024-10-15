@@ -1,0 +1,26 @@
+{
+  "title": "Need Help?",
+  "description": "If you have any questions or need assistance, please don't hesitate to contact us. We're happy to provide support.",
+  "contactInfo": "You can contact us via the following email address:",
+  "contactDescription": "Whether you have questions, suggestions, or feedback, we welcome you to contact us at any time. Our team will respond to your email as soon as possible.",
+  "faqTitle": "Frequently Asked Questions",
+  "additionalInfo": "If your question isn't answered in the list above, please feel free to contact us via email. Our team will be glad to assist you.",
+  "faq": {
+    "author": {
+      "question": "How do I become an author?",
+      "answer": "You can click the 'Start Creating' button in the top right corner of the website and fill in the necessary information to begin creating."
+    },
+    "earnings": {
+      "question": "How can I earn money by publishing works?",
+      "answer": "For free works, we will embed advertising content, and 50% of the advertising revenue will be distributed to the authors."
+    },
+    "editWork": {
+      "question": "How do I edit my work?",
+      "answer": "You can click on your profile picture in the top right corner of the website to enter your author studio, then click on edit. You can modify your work content there, and choose to publish your work when you're done."
+    },
+    "editProfile": {
+      "question": "How do I edit my profile?",
+      "answer": "After logging in, click on the avatar in the top right corner, then select 'Edit Account'. There, you can update your personal information, avatar, and more."
+    }
+  }
+}

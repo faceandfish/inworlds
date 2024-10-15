@@ -11,7 +11,8 @@ export const i18n = {
     "profile",
     "studio",
     "wallet",
-    "authorArea"
+    "authorArea",
+    "help"
   ],
   languageMapping: {
     "zh-cn": "cn",
