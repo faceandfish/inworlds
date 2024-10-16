@@ -1,10 +1,9 @@
 // utils/imageUrl.ts
 
-const IMAGE_BASE_URL = "http://13.208.244.92:9000/book-bucket/";
-const AVATAR_BASE_URL = "http://13.208.244.92:9000/avatar-bucket/";
+const IMAGE_BASE_URL = "https://13.208.244.92:9000/book-bucket/";
+const AVATAR_BASE_URL = "https://13.208.244.92:9000/avatar-bucket/";
 
 export function getImageUrl(path: string): string {
-  if (!path) return getFallbackImageUrl();
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
@@ -12,7 +11,6 @@ export function getImageUrl(path: string): string {
 }
 
 export function getAvatarUrl(path: string): string {
-  if (!path) return getFallbackImageUrl();
   if (path.startsWith("http://") || path.startsWith("https://")) {
     // 解析 URL 以获取主机名
     try {
@@ -26,8 +24,4 @@ export function getAvatarUrl(path: string): string {
     return path; // 对于其他外部 URL，也直接返回
   }
   return `${AVATAR_BASE_URL}${path}`;
-}
-
-export function getFallbackImageUrl(): string {
-  return "/avatar.png"; // 替换为您的默认图片路径
 }
