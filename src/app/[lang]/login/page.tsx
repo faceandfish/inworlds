@@ -1,12 +1,13 @@
 import { LoginForm } from "@/components/Navbar/LoginForm";
 import Image from "next/image";
+import LoginImage from "../../../public/login-bg.png";
 
 export default function LoginPage() {
   return (
     <div className="relative h-screen bg-[#ffecd1] overflow-hidden">
       <div className="absolute w-full md:w-2/3 left-0 md:left-auto h-full -top-20">
         <Image
-          src="https://www.inworlds.xyz/register-bg.png"
+          src={LoginImage}
           fill
           style={{ objectFit: "cover" }}
           alt="login background"

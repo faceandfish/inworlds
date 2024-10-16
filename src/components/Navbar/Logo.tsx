@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import LogoImage from "../../../public/inworlds.png";
 
 const Logo = () => {
   console.log("Logo image path:", "/inworlds.png");
@@ -8,7 +9,7 @@ const Logo = () => {
       <Link href="/">
         <div className="w-20 md:w-32">
           <Image
-            src="/inworlds.png"
+            src={LogoImage}
             alt="logo"
             width={1231}
             height={280}
