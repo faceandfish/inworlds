@@ -6,7 +6,7 @@ export default function LoginPage() {
     <div className="relative h-screen bg-[#ffecd1] overflow-hidden">
       <div className="absolute w-full md:w-2/3 left-0 md:left-auto h-full -top-20">
         <Image
-          src="/login-bg.png"
+          src="https://www.inworlds.xyz/register-bg.png"
           fill
           style={{ objectFit: "cover" }}
           alt="login background"
