@@ -7,7 +7,7 @@ import { RegisterCredentials } from "../../lib/definitions";
 import { register } from "../../lib/action";
 import { useTranslation } from "@/components/useTranslation";
 import Alert from "@/components/Main/Alert";
-import RegisterImage from "../../../public/register-bg.png";
+import RegisterImage from "../../../../public/register-bg.png";
 
 const Register = () => {
   const router = useRouter();

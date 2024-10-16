@@ -1,6 +1,6 @@
 import { LoginForm } from "@/components/Navbar/LoginForm";
 import Image from "next/image";
-import LoginImage from "../../../public/login-bg.png";
+import LoginImage from "../../../../public/loginBg.png";
 
 export default function LoginPage() {
   return (
