@@ -27,14 +27,7 @@ export function useTranslation(namespace: Namespace = "navbar") {
     } else {
       selectedLocale = i18n.defaultLocale;
     }
-    console.log(
-      "Selected locale:",
-      selectedLocale,
-      "User language:",
-      user?.language,
-      "Params lang:",
-      params.lang
-    );
+
     return selectedLocale;
   }, [user, params.lang]);
 

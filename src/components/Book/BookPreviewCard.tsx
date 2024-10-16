@@ -36,8 +36,6 @@ export const BookPreviewCard = React.memo(
       setShowAgeVerification(false);
     };
 
-    console.log("封面:", getImageUrl(book.coverImageUrl));
-
     return (
       <>
         <Link href={`/book/${book.id.toString()}`} onClick={handleBookClick}>

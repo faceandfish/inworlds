@@ -3,7 +3,6 @@ import Link from "next/link";
 import LogoImage from "../../../public/inworlds.png";
 
 const Logo = () => {
-  console.log("Logo image path:", "/inworlds.png");
   return (
     <>
       <Link href="/">
