@@ -1,15 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
-import { useTranslation } from "../useTranslation";
 
 const Logo = () => {
-  const { lang } = useTranslation();
+  console.log("Logo image path:", "/inworlds.png");
   return (
     <>
-      <Link href={`/${lang}`}>
+      <Link href="/">
         <div className="w-20 md:w-32">
           <Image
-            src={`/${lang}/inworlds.png`}
+            src="/inworlds.png"
             alt="logo"
             width={1231}
             height={280}
