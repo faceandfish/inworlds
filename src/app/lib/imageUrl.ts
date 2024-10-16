@@ -1,9 +1,12 @@
 // utils/imageUrl.ts
 
 const IMAGE_BASE_URL = "https://api.inworlds.xyz:9000/book-bucket/";
-const AVATAR_BASE_URL = "https://api.inworlds.xyz:9000//avatar-bucket/";
+const AVATAR_BASE_URL = "https://api.inworlds.xyz:9000/avatar-bucket/";
 
 export function getImageUrl(path: string): string {
+  if (!path) {
+    return "";
+  }
   if (path.startsWith("http://") || path.startsWith("https://")) {
     return path;
   }
@@ -11,6 +14,9 @@ export function getImageUrl(path: string): string {
 }
 
 export function getAvatarUrl(path: string): string {
+  if (!path) {
+    return ""; // 或者返回一个默认的头像 URL
+  }
   if (path.startsWith("http://") || path.startsWith("https://")) {
     // 解析 URL 以获取主机名
     try {

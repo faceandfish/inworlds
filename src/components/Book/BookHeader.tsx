@@ -109,7 +109,8 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
         <div className="flex flex-col justify-around mt-4 md:mt-0">
           <h2 className="text-2xl md:text-3xl font-bold">{book.title}</h2>
           <p className="text-neutral-500 text-sm">
-            {t("updatedTime")}: {formatDate(book.lastSaved!)}
+            {t("updatedTime")}:{" "}
+            {book.lastSaved ? formatDate(book.lastSaved) : "unknown"}
           </p>
           <div className="flex gap-5 text-neutral-500">
             <p>

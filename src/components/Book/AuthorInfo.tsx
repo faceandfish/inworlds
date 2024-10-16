@@ -16,7 +16,7 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({ book }) => {
   const { t, isLoaded } = useTranslation("book");
 
   return (
-    <div className="w-full md:w-80 border-t md:border-l border-gray-100 pt-6 md:pt-0 mt-6 md:mt-0 flex flex-col items-center justify-around space-y-4 md:space-y-0 pb-6 md:pb-0">
+    <div className="w-full md:w-80 border-t md:border-l border-gray-100 pt-6 md:pt-0 mt-6 md:mt-0 flex flex-col items-center justify-around space-y-4  pb-6 md:pb-0">
       <Link href={`/user/${book.authorId}`}>
         <Image
           src={getAvatarUrl(book.authorAvatarUrl)}
