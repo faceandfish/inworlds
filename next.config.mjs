@@ -4,13 +4,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "13.208.244.92",
+        hostname: "api.inworlds.xyz",
         port: "9000",
         pathname: "/book-bucket/**"
       },
       {
         protocol: "https",
-        hostname: "13.208.244.92",
+        hostname: "api.inworlds.xyz",
         port: "9000",
         pathname: "/avatar-bucket/**"
       },
