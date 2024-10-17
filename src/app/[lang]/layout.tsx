@@ -3,6 +3,7 @@ import Navbar from "@/components/Navbar";
 import { PurchasedChaptersProvider } from "@/components/PurchasedChaptersProvider.tsx";
 import { Suspense } from "react";
 import UserMenuSkeleton from "@/components/Navbar/Skeleton/UserMenuSkeleton";
+import AdSenseScript from "@/components/AdSenseScript";
 
 export default function LangLayout({
   children,
@@ -14,6 +15,7 @@ export default function LangLayout({
   return (
     <UserProvider>
       <PurchasedChaptersProvider>
+        <AdSenseScript />
         <Suspense fallback={<UserMenuSkeleton />}>
           <Navbar className="fixed top-0 w-full z-50" />{" "}
         </Suspense>

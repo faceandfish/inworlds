@@ -154,7 +154,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
 
   return (
     <>
-      <div className="min-h-screen bg-neutral-200 flex flex-col relative -top-16 md:static md:top-auto">
+      <div className="min-h-screen bg-neutral-200 flex flex-col relative  md:static md:top-auto">
         <div className="flex-grow flex flex-col items-center  bg-neutral-50 justify-between mx-auto w-full md:w-4/5">
           <div className="w-full  flex-grow px-4 md:px-20">
             <div className="flex w-full flex-wrap gap-2 py-4 md:py-8 border-b text-neutral-500 items-center text-sm md:text-base">
