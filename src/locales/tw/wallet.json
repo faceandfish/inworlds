@@ -53,6 +53,11 @@
     "errors": {
       "balanceFetchFailed": "獲取用戶餘額失敗：",
       "balanceFetchError": "獲取用戶餘額時發生錯誤："
+    },
+    "withdraw": {
+      "title": "提現功能正在建設中",
+      "description": "我們正在努力為您開發這項功能，請稍後再試。",
+      "estimatedCompletion": "預計完成時間：近期"
     }
   }
 }

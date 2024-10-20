@@ -62,6 +62,7 @@
   "income": {
     "title": "Income Details",
     "monthlyIncome": "Total Monthly Income",
+    "withdraw": "Withdraw",
     "currency": "Ink Coins",
     "columns": {
       "title": "Title",
@@ -102,9 +103,15 @@
       },
       "actions": {
         "edit": "Edit",
+        "confirm": "Confirm",
         "unpublish": "Unpublish",
         "publish": "Publish",
         "delete": "Delete"
+      },
+      "notifications": {
+        "unpublishSuccess": "The work has been successfully unpublished",
+        "publishSuccess": "The work has been successfully published",
+        "deleteSuccess": "The work has been successfully deleted"
       },
       "confirmations": {
         "unpublish": "Are you sure you want to unpublish this work?",

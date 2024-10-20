@@ -53,6 +53,11 @@
     "errors": {
       "balanceFetchFailed": "ユーザーの残高の取得に失敗しました：",
       "balanceFetchError": "ユーザーの残高の取得中にエラーが発生しました："
+    },
+    "withdraw": {
+      "title": "出金機能は現在開発中です",
+      "description": "この機能の開発に取り組んでいます。後ほどお試しください。",
+      "estimatedCompletion": "完成予定時期：近日中"
     }
   }
 }

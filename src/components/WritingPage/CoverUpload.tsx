@@ -15,7 +15,12 @@ interface CoverUploadProps {
   bookTitle: string;
 }
 
-const defaultCovers: StaticImageData[] = [cover1, cover2, cover3, cover4];
+const defaultCovers: { src: StaticImageData; name: string }[] = [
+  { src: cover1, name: "cover1.jpg" },
+  { src: cover2, name: "cover2.jpg" },
+  { src: cover3, name: "cover3.jpg" },
+  { src: cover4, name: "cover4.jpg" }
+];
 
 const CoverUpload: React.FC<CoverUploadProps> = ({
   coverImage,
@@ -52,13 +57,18 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
     [onCoverChange, t]
   );
 
-  const handleDefaultCoverSelect = (cover: StaticImageData) => {
-    setSelectedDefaultCover(cover);
-    onCoverChange(null, cover.src);
+  const handleDefaultCoverSelect = (cover: {
+    src: StaticImageData;
+    name: string;
+  }) => {
+    setSelectedDefaultCover(cover.src);
+    onCoverChange(null, cover.name);
   };
 
   const currentCoverUrl =
     selectedDefaultCover?.src ||
+    (coverImageUrl &&
+      defaultCovers.find((c) => c.name === coverImageUrl)?.src) ||
     coverImageUrl ||
     (coverImage instanceof File ? URL.createObjectURL(coverImage) : "");
 
@@ -132,7 +142,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
                   className=" w-full aspect-[2/3] h-24 border-2 border-gray-300 rounded overflow-hidden focus:outline-none focus:ring-2 focus:ring-orange-500"
                 >
                   <Image
-                    src={cover}
+                    src={cover.src}
                     width={400}
                     height={600}
                     objectFit="cover"

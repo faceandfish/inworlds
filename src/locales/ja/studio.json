@@ -62,6 +62,7 @@
   "income": {
     "title": "収入詳細",
     "monthlyIncome": "月間総収入",
+    "withdraw": "出金",
     "currency": "インクコイン",
     "columns": {
       "title": "タイトル",
@@ -102,9 +103,15 @@
       },
       "actions": {
         "edit": "編集",
+        "confirm": "確認",
         "unpublish": "非公開",
         "publish": "公開",
         "delete": "削除"
+      },
+      "notifications": {
+        "unpublishSuccess": "作品の公開が正常に取り消されました",
+        "publishSuccess": "作品が正常に公開されました",
+        "deleteSuccess": "作品が正常に削除されました"
       },
       "confirmations": {
         "unpublish": "この作品を非公開にしてもよろしいですか？",

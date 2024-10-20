@@ -180,9 +180,12 @@ const WritingPage: React.FC = () => {
         }
 
         let coverImageFile: File | null = null;
+        let coverImageUrl: string | undefined = undefined;
         if (fileData.coverImage) {
           coverImageFile = fileData.coverImage;
-        } else if (!bookData.coverImageUrl) {
+        } else if (bookData.coverImageUrl) {
+          coverImageUrl = bookData.coverImageUrl;
+        } else {
           throw new Error(t("writingPage.uploadCover"));
         }
 
@@ -216,7 +219,7 @@ const WritingPage: React.FC = () => {
           authorName: user.displayName || "",
           authorId: user.id,
           chapters: bookData.chapters,
-          coverImageUrl: bookData.coverImageUrl
+          coverImageUrl: coverImageUrl
         };
 
         const saveFunction =

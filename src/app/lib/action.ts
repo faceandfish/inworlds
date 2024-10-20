@@ -27,7 +27,8 @@ import {
   SponsorInfo,
   TipResponse,
   ChapterPaymentResponse,
-  PurchasedChapterInfo
+  PurchasedChapterInfo,
+  IncomeBookInfo
 } from "./definitions";
 import { getToken, removeToken, setToken } from "./token";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -1118,15 +1119,15 @@ export const addNewChapter = async (
 
 export const fetchIncomeData = async (
   currentPage: number = 1,
-  pageSize: number = 20
-): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
+  pageSize: number = 5
+): Promise<ApiResponse<PaginatedData<IncomeBookInfo>>> => {
   try {
     const token = getToken();
     if (!token) {
       throw new Error("Token not available. Please log in again.");
     }
 
-    const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(
+    const response = await api.get<ApiResponse<PaginatedData<IncomeBookInfo>>>(
       `/user/books/income`,
       {
         params: { currentPage, pageSize },

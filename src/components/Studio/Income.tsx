@@ -1,84 +1,67 @@
-import React, { useState } from "react";
-
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
+import { fetchIncomeData } from "@/app/lib/action";
+import {
+  IncomeBookInfo,
+  PaginatedData,
+  ApiResponse
+} from "@/app/lib/definitions";
+import { useUser } from "../UserContextProvider";
 
-// 模拟数据
-const allWorks = [
-  {
-    id: 1,
-    title: "星际迷航",
-    income24h: 1200,
-    donationIncome: 500,
-    totalIncome: 5000,
-    category: "科幻",
-    wordCount: 50000,
-    createdAt: "2024-01-15"
-  },
-  {
-    id: 2,
-    title: "魔法世界",
-    income24h: 800,
-    donationIncome: 300,
-    totalIncome: 3000,
-    category: "奇幻",
-    wordCount: 45000,
-    createdAt: "2024-02-01"
-  },
-  {
-    id: 3,
-    title: "未来之城",
-    income24h: 1500,
-    donationIncome: 700,
-    totalIncome: 6000,
-    category: "科幻",
-    wordCount: 55000,
-    createdAt: "2024-02-15"
-  },
-  {
-    id: 4,
-    title: "龙与魔法",
-    income24h: 1000,
-    donationIncome: 400,
-    totalIncome: 4000,
-    category: "奇幻",
-    wordCount: 48000,
-    createdAt: "2024-03-01"
-  },
-  {
-    id: 5,
-    title: "科技革命",
-    income24h: 2000,
-    donationIncome: 800,
-    totalIncome: 7000,
-    category: "科技",
-    wordCount: 60000,
-    createdAt: "2024-03-15"
-  },
-  {
-    id: 6,
-    title: "古代神话",
-    income24h: 1800,
-    donationIncome: 600,
-    totalIncome: 5500,
-    category: "神话",
-    wordCount: 52000,
-    createdAt: "2024-04-01"
-  }
-];
-
-const monthlyIncome = 18000;
 const ITEMS_PER_PAGE = 5;
 
 const Income: React.FC = () => {
-  const { t } = useTranslation("studio");
+  const { t, lang } = useTranslation("studio");
+  const { user } = useUser();
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(allWorks.length / ITEMS_PER_PAGE);
+  const [incomeData, setIncomeData] =
+    useState<PaginatedData<IncomeBookInfo> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [monthlyIncome, setMonthlyIncome] = useState(0);
 
-  const getCurrentWorks = () => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return allWorks.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  };
+  useEffect(() => {
+    const loadIncomeData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const response: ApiResponse<PaginatedData<IncomeBookInfo>> =
+          await fetchIncomeData(currentPage, ITEMS_PER_PAGE);
+        setIncomeData(response.data);
+        // Calculate monthly income (this is a simplification, you might want to adjust based on your actual data)
+        const totalIncome = response.data.dataList.reduce(
+          (sum, book) => sum + book.totalIncome,
+          0
+        );
+        setMonthlyIncome(totalIncome);
+      } catch (err) {
+        setError(t("income.errors.fetchFailed"));
+        console.error("Failed to fetch income data:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadIncomeData();
+  }, [currentPage, t]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen w-full mx-auto px-10 flex items-center justify-center">
+        <p>{t("common.loading")}</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen w-full mx-auto px-10 flex items-center justify-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full mx-auto px-10">
@@ -91,9 +74,18 @@ const Income: React.FC = () => {
           <h2 className="text-xl font-semibold text-orange-800 mb-2">
             {t("income.monthlyIncome")}
           </h2>
-          <p className="text-4xl font-bold text-orange-600">
-            {monthlyIncome.toLocaleString()} {t("income.currency")}
-          </p>
+          <div className="flex gap-10 items-center">
+            <p className="text-4xl font-bold text-orange-600">
+              {monthlyIncome.toLocaleString()} {t("income.currency")}
+            </p>
+            {user && (
+              <Link href={`/${lang}/user/${user.id}/withdraw`}>
+                <span className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 cursor-pointer">
+                  {t("income.withdraw")}
+                </span>
+              </Link>
+            )}
+          </div>
         </div>
 
         {/* 作品收入列表 */}
@@ -112,37 +104,37 @@ const Income: React.FC = () => {
           </div>
         </div>
         <ul className="h-64">
-          {getCurrentWorks().map((work) => (
+          {incomeData?.dataList.map((book) => (
             <li
-              key={work.id}
+              key={book.id}
               className="grid grid-cols-7 py-3 px-3 items-center border-b border-neutral-100 hover:bg-neutral-100 transition-colors duration-150"
             >
               <span className="col-span-2 font-medium text-neutral-600 truncate">
-                {work.title}
+                {book.title}
               </span>
               <span className="text-sm text-center text-neutral-500">
-                {work.category}
+                {book.category}
               </span>
               <span className="text-sm text-center text-orange-400">
-                {work.income24h.toLocaleString()} {t("income.currency")}
+                {book.income24h.toLocaleString()} {t("income.currency")}
               </span>
               <span className="text-sm text-center text-orange-400">
-                {work.donationIncome.toLocaleString()} {t("income.currency")}
+                {book.donationIncome.toLocaleString()} {t("income.currency")}
               </span>
               <span className="text-sm text-center text-orange-400">
-                {work.totalIncome.toLocaleString()} {t("income.currency")}
+                {book.totalIncome.toLocaleString()} {t("income.currency")}
               </span>
               <span className="text-sm text-center text-neutral-500">
-                {work.createdAt}
+                {book.createdAt}
               </span>
             </li>
           ))}
         </ul>
 
-        <div className="py-10 ">
+        <div className="py-10">
           <Pagination
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={incomeData?.totalPage || 1}
             onPageChange={setCurrentPage}
           />
         </div>

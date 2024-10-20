@@ -53,6 +53,11 @@
     "errors": {
       "balanceFetchFailed": "Failed to get user balance:",
       "balanceFetchError": "Error while fetching user balance:"
+    },
+    "withdraw": {
+      "title": "Withdraw Function Under Construction",
+      "description": "We are working hard to develop this feature for you. Please try again later.",
+      "estimatedCompletion": "Estimated completion time: Coming soon"
     }
   }
 }

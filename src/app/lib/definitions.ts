@@ -195,16 +195,15 @@ export interface CommentInfo {
   replies?: CommentInfo[]; // 直接回复的数组
 }
 
-// 收入数据
-export interface IncomeData {
-  totalIncome: number;
-  adIncome: number;
+export interface IncomeBookInfo {
+  id: number;
+  title: string;
+  category: string;
+  income24h: number;
   donationIncome: number;
-  copyrightIncome: number;
-  monthlyIncome: { month: string; income: number }[];
-  currency: string; // 添加货币类型
+  totalIncome: number;
+  createdAt: string;
 }
-
 // 定义分析数据接口
 export interface AnalyticsData {
   bookId: number;

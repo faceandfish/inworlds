@@ -23,7 +23,6 @@ import { useTranslation } from "../useTranslation";
 
 const ITEMS_PER_PAGE = 5;
 
-// OPTIMIZATION: 将这些常量移到组件外部，避免在每次渲染时重新创建
 const tabs = ["published", "ongoing", "completed", "draft"] as const;
 
 const WorkContent: React.FC = () => {
@@ -35,6 +34,21 @@ const WorkContent: React.FC = () => {
   const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation("studio");
+
+  // New state for Alert
+  const [alertProps, setAlertProps] = useState<{
+    message: string;
+    type: "success" | "error";
+    isOpen: boolean;
+    customButton?: {
+      text: string;
+      onClick: () => void;
+    };
+  }>({
+    message: "",
+    type: "success",
+    isOpen: false
+  });
 
   const tabNames = [
     t("studio.workContent.tabs.published"),
@@ -58,7 +72,11 @@ const WorkContent: React.FC = () => {
         })
         .catch((error) => {
           if (!ignore) {
-            throw error; // 这将被 Error Boundary 捕获
+            setAlertProps({
+              message: error.message,
+              type: "error",
+              isOpen: true
+            });
           }
         })
         .finally(() => {
@@ -100,9 +118,8 @@ const WorkContent: React.FC = () => {
       (currentPage - 1) * ITEMS_PER_PAGE,
       currentPage * ITEMS_PER_PAGE
     );
-  }, [filteredBooks, currentPage]); // OPTIMIZATION: 使用 useMemo 来记忆分页结果
+  }, [filteredBooks, currentPage]);
 
-  // OPTIMIZATION: 使用 useCallback 来记忆这些处理函数
   const handleTabChange = useCallback((newTab: (typeof tabs)[number]) => {
     setActiveTab(newTab);
     setCurrentPage(1);
@@ -123,52 +140,119 @@ const WorkContent: React.FC = () => {
     [router]
   );
 
-  const handleUnpublish = useCallback(async (bookId: number) => {
-    if (window.confirm(t("studio.workContent.confirmations.unpublish"))) {
-      const response = await updateBookDetails(bookId, {
-        publishStatus: "draft"
+  const handleUnpublish = useCallback(
+    async (bookId: number) => {
+      setAlertProps({
+        message: t("studio.workContent.confirmations.unpublish"),
+        type: "error",
+        isOpen: true,
+        customButton: {
+          text: t("studio.workContent.actions.confirm"),
+          onClick: async () => {
+            const response = await updateBookDetails(bookId, {
+              publishStatus: "draft"
+            });
+            if (response.code === 200) {
+              setAllBooks((prev) =>
+                prev.map((book) =>
+                  book.id === bookId
+                    ? { ...book, publishStatus: "draft" }
+                    : book
+                )
+              );
+              setAlertProps({
+                message: t("studio.workContent.notifications.unpublishSuccess"),
+                type: "success",
+                isOpen: true
+              });
+            } else {
+              setAlertProps({
+                message:
+                  response.msg ||
+                  t("studio.workContent.errors.unpublishFailed"),
+                type: "error",
+                isOpen: true
+              });
+            }
+          }
+        }
       });
-      if (response.code === 200) {
-        setAllBooks((prev) =>
-          prev.map((book) =>
-            book.id === bookId ? { ...book, publishStatus: "draft" } : book
-          )
-        );
-      } else {
-        throw new Error(response.msg || "下架作品失败");
-      }
-    }
-  }, []);
+    },
+    [t]
+  );
 
-  const handlePublish = useCallback(async (bookId: number) => {
-    if (window.confirm(t("studio.workContent.confirmations.publish"))) {
-      const response = await updateBookDetails(bookId, {
-        publishStatus: "published"
+  const handlePublish = useCallback(
+    async (bookId: number) => {
+      setAlertProps({
+        message: t("studio.workContent.confirmations.publish"),
+        type: "success",
+        isOpen: true,
+        customButton: {
+          text: t("studio.workContent.actions.confirm"),
+          onClick: async () => {
+            const response = await updateBookDetails(bookId, {
+              publishStatus: "published"
+            });
+            if (response.code === 200) {
+              setAllBooks((prev) =>
+                prev.map((book) =>
+                  book.id === bookId
+                    ? { ...book, publishStatus: "published" }
+                    : book
+                )
+              );
+              setAlertProps({
+                message: t("studio.workContent.notifications.publishSuccess"),
+                type: "success",
+                isOpen: true
+              });
+            } else {
+              setAlertProps({
+                message:
+                  response.msg || t("studio.workContent.errors.publishFailed"),
+                type: "error",
+                isOpen: true
+              });
+            }
+          }
+        }
       });
-      if (response.code === 200) {
-        setAllBooks((prev) =>
-          prev.map((book) =>
-            book.id === bookId ? { ...book, publishStatus: "published" } : book
-          )
-        );
-      } else {
-        throw new Error(response.msg || "发布作品失败");
-      }
-    }
-  }, []);
+    },
+    [t]
+  );
 
-  const handleDelete = useCallback(async (bookId: number) => {
-    if (window.confirm(t("studio.workContent.confirmations.delete"))) {
-      const response = await deleteBook(bookId);
-      if (response.code === 200) {
-        setAllBooks((prev) => prev.filter((book) => book.id !== bookId));
-      } else {
-        throw new Error(response.msg || "Failed to delete work");
-      }
-    }
-  }, []);
+  const handleDelete = useCallback(
+    async (bookId: number) => {
+      setAlertProps({
+        message: t("studio.workContent.confirmations.delete"),
+        type: "error",
+        isOpen: true,
+        customButton: {
+          text: t("studio.workContent.actions.confirm"),
+          onClick: async () => {
+            const response = await deleteBook(bookId);
+            if (response.code === 200) {
+              setAllBooks((prev) => prev.filter((book) => book.id !== bookId));
+              setAlertProps({
+                message: t("studio.workContent.notifications.deleteSuccess"),
+                type: "success",
+                isOpen: true
+              });
+            } else {
+              setAlertProps({
+                message:
+                  response.msg || t("studio.workContent.errors.deleteFailed"),
+                type: "error",
+                isOpen: true
+              });
+            }
+          }
+        }
+      });
+    },
+    [t]
+  );
 
-  // OPTIMIZATION: 考虑将列表项提取为单独的组件，以优化渲染性能
   const BookListItem = React.memo(({ book }: { book: BookInfo }) => (
     <li className="grid grid-cols-8 items-center border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150">
       <Link
@@ -298,8 +382,18 @@ const WorkContent: React.FC = () => {
           onPageChange={handlePageChange}
         />
       </div>
+
+      {alertProps.isOpen && (
+        <Alert
+          message={alertProps.message}
+          type={alertProps.type}
+          onClose={() => setAlertProps((prev) => ({ ...prev, isOpen: false }))}
+          customButton={alertProps.customButton}
+          autoClose={!alertProps.customButton}
+        />
+      )}
     </div>
   );
 };
 
-export default React.memo(WorkContent); // OPTIMIZATION: 使用 React.memo 来优化整个组件的渲染
+export default React.memo(WorkContent);

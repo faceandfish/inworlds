@@ -62,6 +62,7 @@
   "income": {
     "title": "收入詳情",
     "monthlyIncome": "月總收入",
+    "withdraw": "提現",
     "currency": "墨幣",
     "columns": {
       "title": "標題",
@@ -102,9 +103,15 @@
       },
       "actions": {
         "edit": "編輯",
+        "confirm": "確認",
         "unpublish": "取消發布",
         "publish": "發布",
         "delete": "刪除"
+      },
+      "notifications": {
+        "unpublishSuccess": "作品已成功取消發布",
+        "publishSuccess": "作品已成功發布",
+        "deleteSuccess": "作品已成功刪除"
       },
       "confirmations": {
         "unpublish": "確定要取消發布這個作品嗎？",

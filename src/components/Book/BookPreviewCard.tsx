@@ -14,6 +14,13 @@ interface ClipProps {
   height?: string;
 }
 
+const defaultCovers: string[] = [
+  "cover1.jpg",
+  "cover2.jpg",
+  "cover3.jpg",
+  "cover4.jpg"
+];
+
 export const BookPreviewCard = React.memo(
   ({ book, width = "w-80", height = "h-48" }: ClipProps) => {
     const [showAgeVerification, setShowAgeVerification] = useState(false);
@@ -36,24 +43,36 @@ export const BookPreviewCard = React.memo(
       setShowAgeVerification(false);
     };
 
+    const isDefaultCover =
+      book.coverImageUrl && defaultCovers.includes(book.coverImageUrl);
+
     return (
       <>
         <Link href={`/book/${book.id.toString()}`} onClick={handleBookClick}>
           <div className={`flex ${width} ${height} flex-1 hover:bg-neutral-50`}>
-            <div className="w-36 h-full border  rounded flex-shrink-0 overflow-hidden">
+            <div className="w-36 h-full relative border  rounded flex-shrink-0 overflow-hidden">
               {book.coverImageUrl ? (
-                <Image
-                  src={getImageUrl(book.coverImageUrl)}
-                  width={400}
-                  height={600}
-                  alt={`${book.title} cover` || "cover"}
-                  className="w-36 h-48 object-cover"
-                  onError={(e) => {
-                    console.error(
-                      `Image loading failed: ${book.coverImageUrl}`
-                    );
-                  }}
-                />
+                <>
+                  <Image
+                    src={getImageUrl(book.coverImageUrl)}
+                    width={400}
+                    height={600}
+                    alt={`${book.title} cover` || "cover"}
+                    className="w-36 h-48 object-cover"
+                    onError={(e) => {
+                      console.error(
+                        `Image loading failed: ${book.coverImageUrl}`
+                      );
+                    }}
+                  />
+                  {isDefaultCover && (
+                    <div className="absolute inset-x-0 top-1/3 transform -translate-y-1/2 flex items-center justify-center">
+                      <p className="text-white text-center font-bold px-2 py-1 break-words bg-black bg-opacity-50 rounded">
+                        {book.title}
+                      </p>
+                    </div>
+                  )}
+                </>
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-white">
                   {t("cover")}
