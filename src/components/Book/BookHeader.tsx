@@ -98,10 +98,12 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
       <div className="flex flex-col md:flex-row gap-5 md:gap-10">
         {/* 书籍封面 */}
         <div className="w-full md:w-44 h-64 md:h-56 shadow-md rounded-xl overflow-hidden">
-          <img
-            src={getImageUrl(book.coverImageUrl)}
+          <Image
+            src={getImageUrl(book.coverImageUrl || "")}
             alt={`${book.title} cover`}
             className="w-full h-full object-cover"
+            width={400}
+            height={600}
           />
         </div>
 

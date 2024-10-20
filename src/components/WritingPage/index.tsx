@@ -16,8 +16,7 @@ import AgeRating from "@/components/WritingPage/AgeRating";
 import ContentEditor from "@/components/WritingPage/ContentEditor";
 import AuthorNote from "@/components/WritingPage/AuthorNote";
 
-import { publishBook, updateUserType, uploadBookDraft } from "@/app/lib/action";
-import { NewUserView } from "./NewUserView";
+import { publishBook, uploadBookDraft } from "@/app/lib/action";
 
 import BookStatusSelector from "./BookStatusSelector";
 import { getToken } from "@/app/lib/token";
@@ -94,7 +93,7 @@ const WritingPage: React.FC = () => {
       document.getElementById("intro")?.scrollIntoView({ behavior: "smooth" });
       return false;
     }
-    if (!fileData.coverImage) {
+    if (!fileData.coverImage && !bookData.coverImageUrl) {
       showError(t("writingPage.uploadCover"));
       document.getElementById("cover")?.scrollIntoView({ behavior: "smooth" });
       return false;
@@ -167,6 +166,8 @@ const WritingPage: React.FC = () => {
   };
 
   const saveOrPublishBook = async (publishStatus: "draft" | "published") => {
+    console.log("Starting saveOrPublishBook function", { publishStatus });
+
     if (validateForm()) {
       try {
         if (!user) {
@@ -178,10 +179,16 @@ const WritingPage: React.FC = () => {
           throw new Error("未找到认证token");
         }
 
+        let coverImageFile: File | null = null;
+        if (fileData.coverImage) {
+          coverImageFile = fileData.coverImage;
+        } else if (!bookData.coverImageUrl) {
+          throw new Error(t("writingPage.uploadCover"));
+        }
+
         const bookDataToSave: Omit<
           BookInfo,
           | "id"
-          | "coverImageUrl"
           | "lastSaved"
           | "createdAt"
           | "latestChapterNumber"
@@ -196,8 +203,11 @@ const WritingPage: React.FC = () => {
           | "donationIncome"
           | "adIncome"
           | "monthlyIncome"
+          | "wordCount"
+          | "tags"
+          | "authorIntroduction"
         > = {
-          title: bookData.title!,
+          title: bookData.title || "",
           description: bookData.description || "",
           category: bookData.category!,
           ageRating: bookData.ageRating!,
@@ -205,80 +215,55 @@ const WritingPage: React.FC = () => {
           publishStatus,
           authorName: user.displayName || "",
           authorId: user.id,
-          wordCount: bookData.wordCount,
-          tags: bookData.tags,
-          chapters: bookData.chapters
+          chapters: bookData.chapters,
+          coverImageUrl: bookData.coverImageUrl
         };
 
         const saveFunction =
           publishStatus === "draft" ? uploadBookDraft : publishBook;
         const response = await saveFunction(
-          fileData.coverImage!,
+          coverImageFile,
           bookDataToSave,
           token
         );
 
-        if (response.code === 200 || response.msg === "成功") {
+        if (response.code === 200) {
           setBookData((prev) => ({
             ...prev,
             ...response.data,
             publishStatus
           }));
-          showSuccess(publishStatus === "draft" ? "草稿已保存" : "内容已发布");
+          showSuccess(
+            publishStatus === "draft"
+              ? t("writingPage.draftSaved")
+              : t("writingPage.contentPublished")
+          );
           setTimeout(() => {
             router.push(`/studio/${user.id}`);
           }, 2000);
         } else {
           throw new Error(
-            response.msg ||
-              `${publishStatus === "draft" ? "保存草稿" : "发布内容"}失败`
+            publishStatus === "draft"
+              ? t("writingPage.saveDraftFailed")
+              : t("writingPage.publishContentFailed")
           );
         }
       } catch (error) {
+        // 总是使用国际化的错误消息
         showError(
-          error instanceof Error
-            ? error.message
-            : `${
-                publishStatus === "draft" ? "保存草稿" : "发布内容"
-              }失败，请重试`
+          publishStatus === "draft"
+            ? t("writingPage.saveDraftFailed")
+            : t("writingPage.publishContentFailed")
         );
+
+        // 可以在这里记录实际的错误，以便于调试
+        console.error("Error in saveOrPublishBook:", error);
       }
     }
   };
 
   const handleSaveDraft = () => saveOrPublishBook("draft");
   const handlePublish = () => saveOrPublishBook("published");
-
-  const handleUserTypeChange = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error(t("writingPage.authTokenNotFound"));
-      }
-
-      if (!user) {
-        throw new Error(t("writingPage.userNotLoggedIn"));
-      }
-
-      const response = await updateUserType(user.id, token);
-
-      if (response.data.userType === "creator") {
-        const updatedUser: UserInfo = {
-          ...user,
-          userType: "creator",
-          articlesCount: 0,
-          followersCount: 0,
-          followingCount: 0,
-          favoritesCount: 0
-        };
-        updateUser(updatedUser);
-      }
-
-      showSuccess(t("writingPage.becomeCreatorSuccess"));
-    } catch (error) {
-      showError(t("writingPage.updateUserTypeFailed"));
-    }
-  };
 
   const handleStatusChange = (status: BookInfo["status"]) => {
     handleBookDataChange("status", status);
@@ -297,86 +282,84 @@ const WritingPage: React.FC = () => {
   }
   return (
     <div className="font-sans">
-      {user.userType === "regular" ? (
-        <NewUserView user={user} onUserTypeChange={handleUserTypeChange} />
-      ) : (
-        <div className="flex  bg-white">
-          <WritingSidebar
-            onSaveDraft={handleSaveDraft}
-            onPublish={handlePublish}
-            publishStatus={bookData.publishStatus as BookInfo["publishStatus"]}
-          />
-          <div className="w-full px-20 flex justify-center  ">
-            <form className="" onSubmit={(e) => e.preventDefault()}>
-              <div id="intro" className="py-16  ">
-                <BookIntro
-                  book={{
-                    title: bookData.title || "",
-                    description: bookData.description || ""
-                  }}
-                  onBookChange={(updates) =>
-                    setBookData((prev) => ({ ...prev, ...updates }))
+      <div className="flex  bg-white">
+        <WritingSidebar
+          onSaveDraft={handleSaveDraft}
+          onPublish={handlePublish}
+          publishStatus={bookData.publishStatus as BookInfo["publishStatus"]}
+        />
+        <div className="w-full px-20 flex justify-center  ">
+          <form className="" onSubmit={(e) => e.preventDefault()}>
+            <div id="intro" className="py-16  ">
+              <BookIntro
+                book={{
+                  title: bookData.title || "",
+                  description: bookData.description || ""
+                }}
+                onBookChange={(updates) =>
+                  setBookData((prev) => ({ ...prev, ...updates }))
+                }
+              />
+            </div>
+            <div id="cover" className="pt-16">
+              <CoverUpload
+                bookTitle={bookData.title || ""}
+                coverImage={fileData.coverImage || undefined}
+                coverImageUrl={bookData.coverImageUrl || ""}
+                onCoverChange={(file, url) => {
+                  setFileData((prev) => ({ ...prev, coverImage: file }));
+                  setBookData((prev) => ({ ...prev, coverImageUrl: url }));
+                }}
+              />
+              <div className="py-16">
+                <CategorySelect
+                  value={bookData.category || "female-story"}
+                  onChange={(category) =>
+                    handleBookDataChange("category", category)
                   }
                 />
               </div>
-              <div id="cover" className="pt-16">
-                <CoverUpload
-                  coverImage={fileData.coverImage || undefined}
-                  coverImageUrl={bookData.coverImageUrl!}
-                  onCoverChange={(file, url) => {
-                    setFileData((prev) => ({ ...prev, coverImage: file }));
-                    setBookData((prev) => ({ ...prev, coverImageUrl: url }));
-                  }}
-                />
-                <div className="py-16">
-                  <CategorySelect
-                    value={bookData.category || "female-story"}
-                    onChange={(category) =>
-                      handleBookDataChange("category", category)
-                    }
-                  />
-                </div>
-                <BookStatusSelector
-                  status={bookData.status || "ongoing"}
-                  onStatusChange={handleStatusChange}
-                />
-                <div className="py-6">
-                  <AgeRating
-                    value={bookData.ageRating || "allAges"}
-                    onChange={(ageRating) =>
-                      handleBookDataChange("ageRating", ageRating)
-                    }
-                  />
-                </div>
-              </div>
-              <div id="content" className="pt-16">
-                <ContentEditor
-                  chapter={
-                    bookData.chapters?.[0] ??
-                    ({
-                      bookId: bookData.id!,
-                      title: "",
-                      content: ""
-                    } as ChapterInfo)
-                  }
-                  onContentChange={handleChapterUpdate}
-                />
-              </div>
-              <div id="authornote" className="h-screen pt-16">
-                <AuthorNote
-                  authorNote={bookData.chapters?.[0]?.authorNote || ""}
-                  onAuthorNoteChange={(newNote) =>
-                    handleChapterUpdate({
-                      ...bookData.chapters?.[0],
-                      authorNote: newNote
-                    })
+              <BookStatusSelector
+                status={bookData.status || "ongoing"}
+                onStatusChange={handleStatusChange}
+              />
+              <div className="py-6">
+                <AgeRating
+                  value={bookData.ageRating || "allAges"}
+                  onChange={(ageRating) =>
+                    handleBookDataChange("ageRating", ageRating)
                   }
                 />
               </div>
-            </form>
-          </div>
+            </div>
+            <div id="content" className="pt-16">
+              <ContentEditor
+                chapter={
+                  bookData.chapters?.[0] ??
+                  ({
+                    bookId: bookData.id!,
+                    title: "",
+                    content: ""
+                  } as ChapterInfo)
+                }
+                onContentChange={handleChapterUpdate}
+              />
+            </div>
+            <div id="authornote" className="h-screen pt-16">
+              <AuthorNote
+                authorNote={bookData.chapters?.[0]?.authorNote || ""}
+                onAuthorNoteChange={(newNote) =>
+                  handleChapterUpdate({
+                    ...bookData.chapters?.[0],
+                    authorNote: newNote
+                  })
+                }
+              />
+            </div>
+          </form>
         </div>
-      )}
+      </div>
+
       {showAlert && (
         <Alert
           message={alertMessage}

@@ -289,61 +289,6 @@ export const changePassword = async (
   }
 };
 
-export const uploadBookDraft = async (
-  coverImage: File,
-  bookData: Omit<
-    BookInfo,
-    | "id"
-    | "coverImageUrl"
-    | "createdAt"
-    | "lastSaved"
-    | "latestChapterNumber"
-    | "latestChapterTitle"
-    | "followersCount"
-    | "commentsCount"
-    | "authorAvatarUrl"
-    | "income24h"
-    | "totalIncome"
-    | "donationIncome"
-    | "adIncome"
-    | "monthlyIncome"
-  >,
-  token: string
-): Promise<ApiResponse<BookInfo>> => {
-  try {
-    const formData = new FormData();
-    formData.append("coverImage", coverImage);
-
-    const bookDataWithStatus = {
-      ...bookData,
-      publishStatus: "draft"
-    };
-
-    formData.append("bookData", JSON.stringify(bookDataWithStatus));
-
-    const response = await api.post<ApiResponse<BookInfo>>(
-      "/book/draft",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
-        }
-      }
-    );
-
-    if (response.data.code === 200 && response.data.msg === "成功") {
-      return response.data;
-    } else {
-      // 如果code不是200，或者没有data，才抛出错误
-      throw new Error(response.data.msg || "服务器返回的数据无效");
-    }
-  } catch (error) {
-    console.error("Error uploading book draft:", error);
-    throw error;
-  }
-};
-
 export const updateUserType = async (
   userId: UserInfo["id"], // 使用 UserInfo['id'] 来确保类型一致性
   token: string
@@ -371,12 +316,10 @@ export const updateUserType = async (
   }
 };
 
-export const publishBook = async (
-  coverImage: File,
-  bookData: Omit<
+interface BookUploadData
+  extends Omit<
     BookInfo,
     | "id"
-    | "coverImageUrl"
     | "createdAt"
     | "lastSaved"
     | "latestChapterNumber"
@@ -389,17 +332,72 @@ export const publishBook = async (
     | "donationIncome"
     | "adIncome"
     | "monthlyIncome"
-  >,
+    | "wordCount"
+    | "tags"
+    | "authorIntroduction"
+  > {
+  coverImageUrl?: string;
+}
+
+export const uploadBookDraft = async (
+  coverImage: File | null,
+  bookData: BookUploadData,
   token: string
 ): Promise<ApiResponse<BookInfo>> => {
   try {
     const formData = new FormData();
-    formData.append("coverImage", coverImage);
+    const bookDataWithStatus = {
+      ...bookData,
+      publishStatus: "draft"
+    };
 
+    if (coverImage) {
+      formData.append("coverImage", coverImage);
+    } else if (bookData.coverImageUrl) {
+      bookDataWithStatus.coverImageUrl = bookData.coverImageUrl;
+    }
+
+    formData.append("bookData", JSON.stringify(bookDataWithStatus));
+
+    const response = await api.post<ApiResponse<BookInfo>>(
+      "/book/draft",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code === 200) {
+      return response.data;
+    } else {
+      throw new Error(response.data.msg || "服务器返回的数据无效");
+    }
+  } catch (error) {
+    console.error("Error uploading book draft:", error);
+    throw error;
+  }
+};
+
+export const publishBook = async (
+  coverImage: File | null,
+  bookData: BookUploadData,
+  token: string
+): Promise<ApiResponse<BookInfo>> => {
+  try {
+    const formData = new FormData();
     const bookDataWithStatus = {
       ...bookData,
       publishStatus: "published"
     };
+
+    if (coverImage) {
+      formData.append("coverImage", coverImage);
+    } else if (bookData.coverImageUrl) {
+      bookDataWithStatus.coverImageUrl = bookData.coverImageUrl;
+    }
 
     formData.append("bookData", JSON.stringify(bookDataWithStatus));
 
@@ -414,14 +412,13 @@ export const publishBook = async (
       }
     );
 
-    if (response.data.code === 200 && response.data.msg === "���功") {
+    if (response.data.code === 200) {
       return response.data;
     } else {
-      // 如果code不是200，或者没有data，才抛出错误
       throw new Error(response.data.msg || "服务器返回的数据无效");
     }
   } catch (error) {
-    console.error("Error uploading book draft:", error);
+    console.error("Error publishing book:", error);
     throw error;
   }
 };

@@ -67,7 +67,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
         <div className="group/profiles flex-shrink-0" ref={menuRef}>
           <Image
             src={getAvatarUrl(user.avatarUrl || "")}
-            alt={user.displayName!}
+            alt={user.displayName || "avatar"}
             width={200}
             height={200}
             onClick={handleAvatarClick}

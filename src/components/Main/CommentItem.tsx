@@ -98,7 +98,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
     <div className="flex justify-start py-5 gap-2">
       <Image
         src={getAvatarUrl(comment.avatarUrl)}
-        alt={comment.username}
+        alt={comment.username || "username"}
         width={200}
         height={200}
         className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all duration-200"

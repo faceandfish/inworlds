@@ -19,7 +19,7 @@ interface HomePageProps {
 }
 
 export default function HomePage({ initialBooks }: HomePageProps) {
-  const [books, setBooks] = useState<BookInfo[]>(initialBooks);
+  const [books, setBooks] = useState<BookInfo[]>(initialBooks || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(2); // Start from page 2 since we already have initial books
@@ -64,6 +64,10 @@ export default function HomePage({ initialBooks }: HomePageProps) {
 
     fetchMoreBooks();
   }, [page]);
+
+  if (!memoizedBooks) {
+    return <BookPreviewCardSkeleton />;
+  }
 
   return (
     <div className="w-10/12 mx-auto">

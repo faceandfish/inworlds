@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { BookInfo, FileUploadData } from "@/app/lib/definitions";
 import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
+import Image from "next/image";
 
 interface ExistingCoverUploadProps {
   currentCoverUrl: string;
@@ -53,9 +54,11 @@ const ExistingCoverUpload: React.FC<ExistingCoverUploadProps> = ({
       <div className="flex items-start gap-10">
         <div className="flex flex-col items-center">
           <div className="relative w-64 h-80 border-2 border-gray-300 rounded-lg overflow-hidden">
-            <img
+            <Image
               src={previewUrl}
               alt="Book cover"
+              width={400}
+              height={600}
               className="w-full h-full object-cover"
             />
           </div>

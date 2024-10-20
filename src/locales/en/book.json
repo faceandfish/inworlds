@@ -118,6 +118,7 @@
   "contentEditor": {
     "chapterTitle": "Chapter Title",
     "chapterContent": "Chapter Content",
+    "contentPlaceholder": "Enter your chapter content here...",
     "wordCount": "Word count:",
     "titlePlaceholder": "Enter chapter title",
     "firstChapter": "Chapter 1",
@@ -126,6 +127,7 @@
   "coverUpload": {
     "title": "Cover Image",
     "selectFile": "Select File",
+    "defaultCovers": "Default Covers",
     "editImage": "Edit Image",
     "guideTitle": "Book Cover Upload Guide",
     "recommendedSize": "Recommended size:",

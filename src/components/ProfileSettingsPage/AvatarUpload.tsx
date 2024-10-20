@@ -74,7 +74,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
         <div className="relative">
           <Image
             src={avatarPreview || getAvatarUrl(user.avatarUrl!)}
-            alt={user.displayName || "用户头像"}
+            alt={user.displayName || "avatar"}
             width={160}
             height={160}
             className="rounded-full object-cover w-40 h-40"

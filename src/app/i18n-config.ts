@@ -28,6 +28,9 @@ export const i18n = {
 
 export type Locale = (typeof i18n)["locales"][number];
 export type Namespace = (typeof i18n)["namespaces"][number];
+export type Dictionary = {
+  [key: string]: string | Dictionary;
+};
 
 export function mapLanguage(lang: string): Locale {
   lang = lang.toLowerCase();

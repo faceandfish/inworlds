@@ -116,6 +116,7 @@
   "contentEditor": {
     "chapterTitle": "チャプタータイトル",
     "chapterContent": "チャプター内容",
+    "contentPlaceholder": "ここに章の内容を入力してください...",
     "wordCount": "文字数：",
     "titlePlaceholder": "チャプタータイトルを入力",
     "firstChapter": "第1章",
@@ -124,6 +125,7 @@
   "coverUpload": {
     "title": "表紙画像",
     "selectFile": "ファイルを選択",
+    "defaultCovers": "デフォルトカバー",
     "editImage": "画像を編集",
     "guideTitle": "本の表紙アップロードガイド",
     "recommendedSize": "推奨サイズ：",

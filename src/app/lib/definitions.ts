@@ -2,8 +2,8 @@ import { Locale } from "../i18n-config";
 
 // 文件上传接口
 export interface FileUploadData {
-  coverImage?: File;
-  avatarImage?: File;
+  coverImage?: File | null;
+  avatarImage?: File | null;
 }
 
 // 可公开的用户信息
@@ -157,17 +157,17 @@ export interface BookInfo {
     | "literature-story"
     | "personal-story";
   ageRating: "under18" | "adult" | "allAges";
-  coverImageUrl: string;
+  coverImageUrl?: string;
 
   wordCount?: number;
   lastSaved?: string;
   createdAt?: string;
-  latestChapterNumber: number; //最新章节的编号
-  latestChapterTitle: string; //最新章节的标题
+  latestChapterNumber?: number; //最新章节的编号
+  latestChapterTitle?: string; //最新章节的标题
 
   tags?: string; // 可选的标签
   favoritesCount?: number; //收藏本书的人数
-  commentsCount: number; //新增评论数总数
+  commentsCount?: number; //新增评论数总数
   chapters?: ChapterInfo[];
 
   status: "ongoing" | "completed"; // 书籍的连载状态：连载中或已完结

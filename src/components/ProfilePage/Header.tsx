@@ -60,7 +60,7 @@ const Header: React.FC = () => {
           <div className="absolute -bottom-12 sm:-bottom-16 left-1/2 transform -translate-x-1/2  ">
             <Image
               src={getAvatarUrl(user.avatarUrl!)}
-              alt={user.displayName!}
+              alt={user.displayName || "username"}
               width={200}
               height={200}
               className="rounded-full w-28 h-28 sm:w-40 sm:h-40 border-4 border-white shadow-md"

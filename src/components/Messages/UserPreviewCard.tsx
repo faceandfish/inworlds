@@ -19,7 +19,7 @@ export const UserPreviewCard: React.FC<UserPreviewCardProps> = ({ user }) => {
       >
         <Image
           src={getAvatarUrl(user.avatarUrl!)}
-          alt={user.displayName || user.username}
+          alt={user.displayName || "username"}
           width={200}
           height={200}
           className="rounded-full w-16 h-16"

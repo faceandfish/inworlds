@@ -117,12 +117,14 @@
     "chapterContent": "章節內容",
     "wordCount": "字數：",
     "titlePlaceholder": "輸入章節標題",
+    "contentPlaceholder": "在這裡輸入章節內容...",
     "firstChapter": "第一章",
     "chapter": "第"
   },
   "coverUpload": {
     "title": "封面圖片",
     "selectFile": "選擇文件",
+    "defaultCovers": "默認封面",
     "editImage": "編輯圖片",
     "guideTitle": "書籍封面上傳指南",
     "recommendedSize": "推薦尺寸：",

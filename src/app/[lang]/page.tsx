@@ -1,34 +1,42 @@
 import { fetchHomepageBooks } from "@/app/lib/action";
 import { Metadata } from "next";
 import { getDictionary } from "../dictionaries";
-import { Locale, Namespace } from "../i18n-config"; // 更新导入
-
-import { Suspense } from "react";
+import { Locale, Namespace, Dictionary } from "../i18n-config";
 import HomePage from "@/components/Main/HomePage";
+import { GetServerSideProps } from "next";
+import { BookInfo } from "../lib/definitions";
 
 type Props = {
   params: { lang: Locale };
+  initialBooks: BookInfo[]; // 使用适当的类型替换 any[]
+  dict: Dictionary; // 使用适当的类型替换 any
 };
 
-export default async function Home({ params: { lang } }: Props) {
-  const dict = await getDictionary(lang, "navbar" as Namespace); // 使用 'navbar' 作为示例
+export default function Home({ initialBooks, dict }: Props) {
+  return <HomePage initialBooks={initialBooks} />;
+}
+
+export const getServerSideProps: GetServerSideProps = async ({ params }) => {
+  const lang = params?.lang as Locale;
+  const dict = await getDictionary(lang, "navbar" as Namespace);
 
   const initialBooksResponse = await fetchHomepageBooks(1);
   const initialBooks = initialBooksResponse.data.dataList;
 
-  return <HomePage initialBooks={initialBooks} />;
-}
+  return {
+    props: {
+      initialBooks,
+      dict,
+      params: { lang }
+    }
+  };
+};
 
-export async function generateStaticParams() {
-  return [{ lang: "en" }, { lang: "cn" }, { lang: "tw" }, { lang: "ja" }];
-}
-
-export async function generateMetadata({
-  params: { lang }
-}: Props): Promise<Metadata> {
-  const dict = await getDictionary(lang, "seo" as Namespace); // 使用 'seo' 命名空间
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const lang = params.lang;
+  const dict = await getDictionary(lang, "seo" as Namespace);
   return {
     title: lang === "en" ? "InWorlds" : `InWorlds - ${lang.toUpperCase()}`,
-    description: dict.description // 假设 description 直接在 dict 对象中
+    description: dict.description
   };
 }

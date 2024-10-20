@@ -184,10 +184,10 @@ const Comments: React.FC = () => {
               {book && (
                 <div className="w-1/3 flex items-center gap-10">
                   <Image
-                    src={getImageUrl(book.coverImageUrl)}
+                    src={getImageUrl(book.coverImageUrl || "")}
                     width={400}
                     height={600}
-                    alt={`${book.title} cover`}
+                    alt={`${book.title} cover` || "cover"}
                     className="w-16 h-20 object-cover"
                     onError={(e) => {
                       console.error(`图片加载失败: ${book.coverImageUrl}`);

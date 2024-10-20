@@ -1,6 +1,7 @@
 import React from "react";
 import { BookInfo } from "@/app/lib/definitions";
 import { useTranslation } from "../useTranslation";
+import { useWordCount } from "./useWordCount";
 
 interface BookIntroProps {
   book: Pick<BookInfo, "title" | "description">;
@@ -19,14 +20,28 @@ const BookIntro: React.FC<BookIntroProps> = ({
   descriptionRows = 14,
   className = ""
 }) => {
-  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onBookChange({ title: e.target.value });
-  };
   const { t } = useTranslation("book");
 
-  const handleDescriptionChange = (
+  const {
+    text: title,
+    wordCount: titleCount,
+    handleTextChange: handleTitleChange
+  } = useWordCount(book.title, 100);
+  const {
+    text: description,
+    wordCount: descriptionCount,
+    handleTextChange: handleDescriptionChange
+  } = useWordCount(book.description, 1000);
+
+  const handleTitleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    handleTitleChange(e.target.value);
+    onBookChange({ title: e.target.value });
+  };
+
+  const handleDescriptionInputChange = (
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
+    handleDescriptionChange(e.target.value);
     onBookChange({ description: e.target.value });
   };
 
@@ -44,14 +59,14 @@ const BookIntro: React.FC<BookIntroProps> = ({
           id="book-title"
           name="title"
           value={book.title}
-          onChange={handleTitleChange}
+          onChange={handleTitleInputChange}
           className="w-full h-20 border rounded border-gray-400 py-6 px-3 pt-8 text-gray-700 leading-tight focus:outline-none focus:border-orange-400"
           placeholder={t("bookIntro.titlePlaceholder")}
           required
           maxLength={100}
         />
         <span className="text-sm text-gray-500 absolute right-3 bottom-2">
-          {book.title.length}/100
+          {titleCount}/100
         </span>
       </div>
 
@@ -66,15 +81,15 @@ const BookIntro: React.FC<BookIntroProps> = ({
           id="book-brief"
           name="description"
           value={book.description}
-          onChange={handleDescriptionChange}
+          onChange={handleDescriptionInputChange}
           rows={descriptionRows}
-          className="w-full  border rounded border-neutral-400 py-8 px-3 text-neutral-700 leading-tight focus:outline-none focus:border-orange-400"
+          className="w-full border rounded border-neutral-400 py-8 px-3 text-neutral-700 leading-tight focus:outline-none focus:border-orange-400"
           placeholder={t("bookIntro.descriptionPlaceholder")}
           required
           maxLength={1000}
         />
         <span className="text-sm text-neutral-500 absolute right-3 bottom-2">
-          {book.description.length}/1000
+          {descriptionCount}/1000
         </span>
       </div>
     </div>

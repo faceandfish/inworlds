@@ -114,6 +114,7 @@
   "contentEditor": {
     "chapterTitle": "章节标题",
     "chapterContent": "章节内容",
+    "contentPlaceholder": "在这里输入章节内容...",
     "wordCount": "字数：",
     "titlePlaceholder": "输入章节标题",
     "firstChapter": "第一章",
@@ -123,6 +124,7 @@
     "title": "封面图片",
     "selectFile": "选择文件",
     "editImage": "编辑图片",
+    "defaultCovers": "默认封面",
     "guideTitle": "书籍封面上传指南",
     "recommendedSize": "推荐尺寸：",
     "sizeRange": "尺寸范围：",

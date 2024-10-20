@@ -16,8 +16,8 @@ export const FavoriteBookPreviewCard: React.FC<
   return (
     <div className="flex items-center space-x-4 p-4 bg-white shadow rounded-lg">
       <Image
-        src={getImageUrl(book.coverImageUrl)}
-        alt={`Cover of ${book.title}`}
+        src={getImageUrl(book.coverImageUrl || "")}
+        alt={`Cover of ${book.title}` || "booktitle"}
         width={80}
         height={80}
         className="object-cover rounded"
