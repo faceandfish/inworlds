@@ -162,8 +162,8 @@ export interface BookInfo {
   wordCount?: number;
   lastSaved?: string;
   createdAt?: string;
-  latestChapterNumber?: number; //最新章节的编号
-  latestChapterTitle?: string; //最新章节的标题
+  latestChapterNumber: number; //最新章节的编号
+  latestChapterTitle: string; //最新章节的标题
 
   tags?: string; // 可选的标签
   favoritesCount?: number; //收藏本书的人数

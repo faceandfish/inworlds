@@ -18,7 +18,7 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
   const { t } = useTranslation("bookedit");
   const [newChapter, setNewChapter] = useState<Partial<ChapterInfo>>({
     bookId,
-    chapterNumber: book!.latestChapterNumber + 1,
+    chapterNumber: book?.latestChapterNumber ? book.latestChapterNumber + 1 : 1,
     title: "",
     content: "",
     publishStatus: "draft"
@@ -30,7 +30,7 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
   const router = useRouter();
 
   useEffect(() => {
-    if (book) {
+    if (book?.latestChapterNumber !== undefined) {
       setNewChapter((prev) => ({
         ...prev,
         chapterNumber: book.latestChapterNumber + 1
