@@ -1,7 +1,7 @@
 {
   "comments": {
     "title": "コメント管理",
-    "noCommentsAvailable": "コメントはありません。",
+    "noComments": "コメントはまだありません",
     "likeSuccess": "いいね成功！",
     "likeFail": "いいねに失敗しました。後でもう一度お試しください",
     "replySuccess": "返信成功！",
@@ -43,6 +43,7 @@
   },
   "dataAnalysis": {
     "title": "コンテンツ詳細",
+    "noData": "データなし",
     "columns": {
       "title": "タイトル",
       "type": "タイプ",

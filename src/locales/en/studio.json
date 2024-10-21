@@ -1,7 +1,7 @@
 {
   "comments": {
     "title": "Comment Management",
-    "noCommentsAvailable": "No comments available.",
+    "noComments": "No comments yet",
     "likeSuccess": "Like successful!",
     "likeFail": "Like failed, please try again later",
     "replySuccess": "Reply successful!",
@@ -43,6 +43,7 @@
   },
   "dataAnalysis": {
     "title": "Content Details",
+    "noData": "No data available",
     "columns": {
       "title": "Title",
       "type": "Type",
@@ -63,7 +64,7 @@
     "title": "Income Details",
     "monthlyIncome": "Total Monthly Income",
     "withdraw": "Withdraw",
-    "currency": "Ink Coins",
+    "currency": "InkCoin",
     "columns": {
       "title": "Title",
       "type": "Type",

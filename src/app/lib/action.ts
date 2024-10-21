@@ -450,8 +450,6 @@ export const fetchBooksList = async (
       }
     });
 
-    console.log("API 原始响应:", response);
-
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "获取作品列表失败");
     }
@@ -503,7 +501,7 @@ export const deleteBook = async (
   }
 };
 
-// 获取书籍详情
+// 需要token的获取书籍详情函数
 export const getBookDetails = async (
   bookId: number
 ): Promise<ApiResponse<BookInfo>> => {
@@ -522,6 +520,30 @@ export const getBookDetails = async (
 };
 
 // 获取章节列表
+export const getPublicChapterList = async (
+  bookId: number,
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<ApiResponse<PaginatedData<ChapterInfo>>> => {
+  try {
+    const response = await api.get<ApiResponse<PaginatedData<ChapterInfo>>>(
+      `/book/public/${bookId}/chapters`,
+      {
+        params: { currentPage, pageSize }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取章节列表失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取章节列表时出错:", error);
+    throw error;
+  }
+};
+
 export const getChapterList = async (
   bookId: number,
   currentPage: number = 1,
@@ -531,9 +553,13 @@ export const getChapterList = async (
     const response = await api.get<ApiResponse<PaginatedData<ChapterInfo>>>(
       `/book/${bookId}/chapters`,
       {
-        params: { currentPage, pageSize }
+        params: { currentPage, pageSize },
+        headers: {
+          Authorization: `Bearer ${getToken()}`
+        }
       }
     );
+    console.log("list", response);
 
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "获取章节列表失败");
@@ -974,12 +1000,6 @@ export const updateBookDetails = async (
   updateData: Partial<BookInfo>
 ): Promise<ApiResponse<BookInfo>> => {
   try {
-    console.log(
-      "Updating book details. BookId:",
-      bookId,
-      "UpdateData:",
-      updateData
-    );
     const token = getToken();
     if (!token) {
       throw new Error("Token 不可用，请重新登录");
@@ -1045,7 +1065,7 @@ export const updateBookCover = async (
 // 更新章节内容
 export const updateChapter = async (
   bookId: number,
-  chapterId: number,
+  chapterNumber: number,
   chapterData: Partial<ChapterInfo>
 ): Promise<ApiResponse<ChapterInfo>> => {
   try {
@@ -1055,11 +1075,12 @@ export const updateChapter = async (
     }
 
     const response = await api.put<ApiResponse<ChapterInfo>>(
-      `/book/${bookId}/chapter/${chapterId}`,
+      `/book/${bookId}/chapter/${chapterNumber}`,
       chapterData,
       {
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
       }
     );
@@ -1105,7 +1126,6 @@ export const addNewChapter = async (
       }
     );
 
-    console.log("[addNewChapter] Response received:", response);
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "Failed to add new chapter");
     }

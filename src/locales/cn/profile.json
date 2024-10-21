@@ -19,7 +19,10 @@
   },
   "sponsorList": {
     "title": "赞助者名单",
-    "donationTime": "赞助时间"
+    "donationTime": "赞助时间",
+    "loading": "加载中...",
+    "error": "加载失败",
+    "noSponsors": "暂无赞助者"
   },
   "userActions": {
     "editProfile": "编辑资料",

@@ -1,7 +1,6 @@
 {
   "comments": {
     "title": "评论管理",
-    "noCommentsAvailable": "暂无评论。",
     "likeSuccess": "点赞成功！",
     "likeFail": "点赞失败，请稍后重试",
     "replySuccess": "回复成功！",
@@ -9,7 +8,8 @@
     "deleteSuccess": "评论已删除！",
     "deleteFail": "删除失败，请稍后重试",
     "blockSuccess": "用户已被屏蔽！",
-    "blockFail": "屏蔽用户失败，请稍后重试"
+    "blockFail": "屏蔽用户失败，请稍后重试",
+    "noComments": "暂无评论"
   },
   "mobileStudio": {
     "title": "创作者工作室",
@@ -43,6 +43,7 @@
   },
   "dataAnalysis": {
     "title": "内容详情",
+    "noData": "暂无数据",
     "columns": {
       "title": "标题",
       "type": "类型",

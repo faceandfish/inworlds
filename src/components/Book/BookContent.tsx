@@ -5,7 +5,7 @@ import React, { useEffect, useState } from "react";
 import CommentSection from "@/components/Book/CommentSection";
 import { BookInfo, ChapterInfo, PaginatedData } from "@/app/lib/definitions";
 import Pagination from "../Main/Pagination";
-import { getChapterList } from "@/app/lib/action";
+import { getPublicChapterList } from "@/app/lib/action";
 import { useUser } from "../UserContextProvider";
 import { useRouter } from "next/navigation";
 import { useTranslation } from "../useTranslation";
@@ -38,7 +38,7 @@ export function BookContent({ book }: BookContentProps) {
   const fetchChapters = async (page: number) => {
     setIsLoading(true);
     try {
-      const response = await getChapterList(book.id, page, 21);
+      const response = await getPublicChapterList(book.id, page, 21);
       setChapters(response.data.dataList);
       setTotalPages(response.data.totalPage);
     } catch (error) {

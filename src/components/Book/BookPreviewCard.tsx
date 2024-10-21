@@ -80,7 +80,9 @@ export const BookPreviewCard = React.memo(
               )}
             </div>
             <div className="flex flex-col mx-5 justify-around">
-              <div className="text-xl font-bold">{book.title}</div>
+              <div className="text-xl font-bold truncate max-w-full">
+                {book.title}
+              </div>
               <div className="line-clamp-4 text-sm text-gray-600">
                 {book.description}
               </div>

@@ -41,7 +41,6 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
   const router = useRouter();
   const { isChapterPurchased, fetchPurchasedChapters, addPurchasedChapter } =
     usePurchasedChapters();
-  const contentRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [chapters, setChapters] = useState<ChapterInfo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -68,12 +67,6 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
   }, [book.id, chapter.id, fetchPurchasedChapters, isChapterPurchased]);
 
   useEffect(() => {
-    if (contentRef.current) {
-      contentRef.current.innerHTML = chapter.content;
-    }
-  }, [chapter.content, isPurchased]);
-
-  useEffect(() => {
     fetchChapters(currentPage);
   }, [currentPage, book.id]);
 
@@ -84,6 +77,16 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
       setShowLoginAlert(true);
       setShowInsufficientBalanceAlert(false);
     }
+  };
+
+  const formatContent = (content: string) => {
+    // 将换行符替换为 <br> 标签，保留空行
+    return content.split("\n").map((line, index) => (
+      <React.Fragment key={index}>
+        {line}
+        <br />
+      </React.Fragment>
+    ));
   };
 
   const handleLogin = () => {
@@ -245,10 +248,9 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
               </div>
             ) : (
               <>
-                <div
-                  ref={contentRef}
-                  className="w-full h-full text-neutral-800 text-lg leading-10"
-                />
+                <div className="w-full h-full text-neutral-800 text-lg leading-10">
+                  {formatContent(chapter.content)}
+                </div>
                 {chapter.authorNote && (
                   <div className="w-full px-6 md:px-20 text-neutral-500 pt-10 border-t mt-10">
                     <p>{t("authorNoteTitle")}</p>

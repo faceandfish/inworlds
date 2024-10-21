@@ -19,9 +19,10 @@
   },
   "sponsorList": {
     "title": "Sponsor List",
-    "loading": "Loading sponsors...",
-    "error": "Error: ",
-    "noSponsors": "No sponsors found"
+    "donationTime": "Donation Time",
+    "loading": "Loading...",
+    "error": "Failed to load",
+    "noSponsors": "No sponsors yet"
   },
   "userActions": {
     "editProfile": "Edit Profile",

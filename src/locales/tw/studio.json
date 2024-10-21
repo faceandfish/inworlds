@@ -1,7 +1,7 @@
 {
   "comments": {
     "title": "評論管理",
-    "noCommentsAvailable": "暫無評論。",
+    "noComments": "暫無評論",
     "likeSuccess": "點讚成功！",
     "likeFail": "點讚失敗，請稍後重試",
     "replySuccess": "回覆成功！",
@@ -43,6 +43,7 @@
   },
   "dataAnalysis": {
     "title": "內容詳情",
+    "noData": "暫無資料",
     "columns": {
       "title": "標題",
       "type": "類型",

@@ -19,7 +19,10 @@
   },
   "sponsorList": {
     "title": "贊助者名單",
-    "donationTime": "贊助時間"
+    "donationTime": "贊助時間",
+    "loading": "載入中...",
+    "error": "載入失敗",
+    "noSponsors": "暫無贊助者"
   },
   "userActions": {
     "editProfile": "編輯資料",

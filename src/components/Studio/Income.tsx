@@ -22,6 +22,15 @@ const Income: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [monthlyIncome, setMonthlyIncome] = useState(0);
 
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString(lang, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    });
+  };
+
   useEffect(() => {
     const loadIncomeData = async () => {
       setIsLoading(true);
@@ -125,7 +134,7 @@ const Income: React.FC = () => {
                 {book.totalIncome.toLocaleString()} {t("income.currency")}
               </span>
               <span className="text-sm text-center text-neutral-500">
-                {book.createdAt}
+                {formatDate(book.createdAt)}
               </span>
             </li>
           ))}

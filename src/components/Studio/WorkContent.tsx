@@ -254,7 +254,7 @@ const WorkContent: React.FC = () => {
   );
 
   const BookListItem = React.memo(({ book }: { book: BookInfo }) => (
-    <li className="grid grid-cols-8 items-center border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150">
+    <li className="grid grid-cols-9 items-center border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150">
       <Link
         href={`/book/${book.id}`}
         className="col-span-6 grid grid-cols-6  items-center py-3 px-3"
@@ -275,7 +275,7 @@ const WorkContent: React.FC = () => {
           ) : null}
         </span>
       </Link>
-      <div className="col-span-2  text-center space-x-10 ">
+      <div className="col-span-3  text-center space-x-10 ">
         <button
           className="text-orange-400 hover:text-orange-500 transition-colors duration-150"
           onClick={(e) => {
@@ -344,7 +344,7 @@ const WorkContent: React.FC = () => {
         ))}
       </ul>
       <div className="mt-6">
-        <div className="grid grid-cols-8  text-neutral-600 bg-neutral-50 font-semibold">
+        <div className="grid grid-cols-9  text-neutral-600 bg-neutral-50 font-semibold">
           <div className="p-3 col-span-3">
             {t("studio.workContent.columns.title")}
           </div>
@@ -354,7 +354,7 @@ const WorkContent: React.FC = () => {
           <div className="p-3 text-center col-span-2">
             {t("studio.workContent.columns.lastUpdated")}
           </div>
-          <div className="p-3 text-center col-span-2">
+          <div className="p-3 text-center col-span-3">
             {t("studio.workContent.columns.actions")}
           </div>
         </div>

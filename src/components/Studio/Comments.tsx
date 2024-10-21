@@ -152,8 +152,8 @@ const Comments: React.FC = () => {
     );
   }
 
-  if (!commentsData) {
-    return <div>t("comments.noCommentsAvailable")</div>;
+  if (!commentsData || commentsData.comments.length === 0) {
+    return <div className="text-center py-10">{t("comments.noComments")}</div>;
   }
 
   return (
@@ -161,54 +161,60 @@ const Comments: React.FC = () => {
       <h1 className="text-2xl font-bold pb-6 border-b">
         {t("comments.title")}
       </h1>
-      <ul className="divide-y divide-gray-200 ">
-        {paginatedComments.map((comment: CommentInfo) => {
-          const book = commentsData.books.find(
-            (b: BookInfo) => b.id === comment.bookId
-          );
-          return (
-            <li key={comment.id} className="flex ">
-              <div className="w-2/3">
-                <CommentItem
-                  comment={comment}
-                  actions={{
-                    onLike: handleLike,
-                    onReply: handleReply,
-                    onDelete: handleDelete,
-                    onBlock: handleBlock
-                  }}
-                  showDeleteButton={true}
-                  showBlockButton={true}
-                />
-              </div>
-              {book && (
-                <div className="w-1/3 flex items-center gap-10">
-                  <Image
-                    src={getImageUrl(book.coverImageUrl || "")}
-                    width={400}
-                    height={600}
-                    alt={`${book.title} cover` || "cover"}
-                    className="w-16 h-20 object-cover"
-                    onError={(e) => {
-                      console.error(`图片加载失败: ${book.coverImageUrl}`);
-                    }}
-                  />
-                  <p className="text-sm line-clamp-1 font-semibold mt-2">
-                    {book.title}
-                  </p>
-                </div>
-              )}
-            </li>
-          );
-        })}
-      </ul>
-      <div className="my-20">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
-      </div>
+      {commentsData.comments.length > 0 ? (
+        <>
+          <ul className="divide-y divide-gray-200 ">
+            {paginatedComments.map((comment: CommentInfo) => {
+              const book = commentsData.books.find(
+                (b: BookInfo) => b.id === comment.bookId
+              );
+              return (
+                <li key={comment.id} className="flex ">
+                  <div className="w-2/3">
+                    <CommentItem
+                      comment={comment}
+                      actions={{
+                        onLike: handleLike,
+                        onReply: handleReply,
+                        onDelete: handleDelete,
+                        onBlock: handleBlock
+                      }}
+                      showDeleteButton={true}
+                      showBlockButton={true}
+                    />
+                  </div>
+                  {book && (
+                    <div className="w-1/3 flex items-center gap-10">
+                      <Image
+                        src={getImageUrl(book.coverImageUrl || "")}
+                        width={400}
+                        height={600}
+                        alt={`${book.title} cover` || "cover"}
+                        className="w-16 h-20 object-cover"
+                        onError={(e) => {
+                          console.error(`图片加载失败: ${book.coverImageUrl}`);
+                        }}
+                      />
+                      <p className="text-sm line-clamp-1 font-semibold mt-2">
+                        {book.title}
+                      </p>
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <div className="my-20">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-10">{t("comments.noComments")}</div>
+      )}
       {alertInfo && (
         <Alert
           message={alertInfo.message}

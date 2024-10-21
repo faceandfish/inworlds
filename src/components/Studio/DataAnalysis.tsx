@@ -175,9 +175,17 @@ const DataAnalysis: React.FC = () => {
                   {item.label}
                 </label>
                 <p className="text-3xl flex justify-center items-center font-bold text-orange-600 text-center">
-                  {analyticsData[item.key as keyof AnalyticsData]}
-                  {item.unit && (
-                    <span className="text-sm ml-1">{item.unit}</span>
+                  {analyticsData[item.key as keyof AnalyticsData] !== null &&
+                  analyticsData[item.key as keyof AnalyticsData] !==
+                    undefined ? (
+                    <>
+                      {analyticsData[item.key as keyof AnalyticsData]}
+                      {item.unit && (
+                        <span className="text-sm ml-1">{item.unit}</span>
+                      )}
+                    </>
+                  ) : (
+                    t("dataAnalysis.noData")
                   )}
                 </p>
               </div>

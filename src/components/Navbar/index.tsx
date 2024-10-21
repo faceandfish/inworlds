@@ -32,9 +32,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
   }, [isSearchPage]);
 
   // 如果是章节页面，不渲染 Navbar
-  if (isChapterPage) {
-    return null;
-  }
 
   const handleSearchClose = () => {
     setIsSearchExpanded(false);
@@ -45,7 +42,11 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
   };
 
   return (
-    <nav className={`bg-white border-b ${className}`}>
+    <nav
+      className={`bg-white border-b ${className} ${
+        isChapterPage ? "md:block hidden" : ""
+      }`}
+    >
       {isSearchExpanded || isSearchPage ? (
         <div className="h-16">
           <SearchBar isExpanded={true} onClose={handleSearchClose} />
@@ -75,7 +76,11 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
               </button>
             </div>
           </div>
-          <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t">
+          <div
+            className={`md:hidden fixed bottom-0 left-0 right-0 bg-white border-t ${
+              isChapterPage ? "hidden" : ""
+            }`}
+          >
             <div className="flex justify-center h-16">
               {loading ? (
                 <UserMenuSkeleton />

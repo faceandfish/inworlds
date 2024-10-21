@@ -60,6 +60,8 @@ const BookEditPage: React.FC = () => {
         }
 
         const chapterResponse = await getChapterList(bookId, currentPage);
+        console.log("zhangjie:", chapterResponse);
+
         if (chapterResponse.code === 200 && chapterResponse.data) {
           setChapters(chapterResponse.data.dataList);
           setTotalPages(chapterResponse.data.totalPage);
@@ -219,15 +221,15 @@ const BookEditPage: React.FC = () => {
   };
 
   const handleUpdateChapter = async (
-    chapterId: number,
+    chapterNumber: number,
     updates: Partial<ChapterInfo>
   ): Promise<boolean> => {
     try {
-      const response = await updateChapter(bookId, chapterId, updates);
+      const response = await updateChapter(bookId, chapterNumber, updates);
       if (response.code === 200) {
         setChapters(
           chapters.map((chapter) =>
-            chapter.id === chapterId
+            chapter.chapterNumber === chapterNumber
               ? { ...chapter, ...response.data }
               : chapter
           )
@@ -235,7 +237,7 @@ const BookEditPage: React.FC = () => {
 
         // 如果更新影响了书籍的最新章节信息，也更新书籍状态
         if (updates.publishStatus === "published" && book) {
-          const updatedChapter = chapters.find((c) => c.id === chapterId);
+          const updatedChapter = chapters.find((c) => c.id === chapterNumber);
           if (
             updatedChapter &&
             (!book.latestChapterNumber ||

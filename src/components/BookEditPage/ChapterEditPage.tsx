@@ -15,7 +15,7 @@ const ChapterEditPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const bookId = Number(params.bookId as string);
-  const chapterId = Number(params.chapterId as string);
+  const chapterNumber = Number(params.chapterNumber as string);
   const { t } = useTranslation("bookedit");
 
   const [book, setBook] = useState<BookInfo | null>(null);
@@ -33,7 +33,7 @@ const ChapterEditPage: React.FC = () => {
       try {
         const [bookResponse, chapterResponse] = await Promise.all([
           getBookDetails(bookId),
-          getChapterContent(bookId, chapterId)
+          getChapterContent(bookId, chapterNumber)
         ]);
 
         if (bookResponse.code === 200 && bookResponse.data) {
@@ -54,7 +54,7 @@ const ChapterEditPage: React.FC = () => {
     };
 
     fetchData();
-  }, [bookId, chapterId]);
+  }, [bookId, chapterNumber]);
 
   const handleContentChange = (updatedFields: Partial<ChapterInfo>) => {
     if (localChapter) {
@@ -70,11 +70,15 @@ const ChapterEditPage: React.FC = () => {
         ? { ...localChapter, publishStatus }
         : localChapter;
 
-      const response = await updateChapter(bookId, chapterId, updatedChapter);
+      const response = await updateChapter(
+        bookId,
+        chapterNumber,
+        updatedChapter
+      );
       if (response.code === 200) {
         setChapter(response.data);
         setLocalChapter(response.data);
-        setAlert({ message: t("chapterEdit.updateFail"), type: "success" });
+        setAlert({ message: t("chapterEdit.updateSuccess"), type: "success" });
 
         if (publishStatus === "published") {
           // 设置一个短暂的延迟，以确保用户能看到成功消息
@@ -106,14 +110,15 @@ const ChapterEditPage: React.FC = () => {
   if (!book || !localChapter) return null;
   return (
     <div className="container mx-auto bg-white px-20 py-20">
-      <h1 className="text-2xl text-neutral-600 font-bold mb-4">{book.title}</h1>
+      <h1 className="text-2xl bg-orange-100 py-2 text-center text-neutral-600 font-bold mb-4">
+        {book.title}
+      </h1>
       <div className="py-6">
         <ContentEditor
           chapter={localChapter}
           onContentChange={handleContentChange}
         />
       </div>
-
       <div className="my-10 flex justify-between items-center">
         <button
           onClick={handleReturn}

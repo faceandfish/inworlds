@@ -41,7 +41,7 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
     <div className="w-full h-screen">
       <h1 className="text-2xl font-medium text-neutral-700 mb-6">
         {chapter.chapterNumber
-          ? `${t("contentEditor.chapter")} ${chapter.chapterNumber}`
+          ? t("chapterNumber", { number: chapter.chapterNumber })
           : t("contentEditor.firstChapter")}
       </h1>
 

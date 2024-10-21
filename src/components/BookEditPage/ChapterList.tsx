@@ -15,7 +15,7 @@ interface ChapterListProps {
   chapters: ChapterInfo[];
   book: BookInfo;
   onUpdateChapter: (
-    chapterId: number,
+    chapterNumber: number,
     updates: Partial<ChapterInfo>
   ) => Promise<boolean>;
 }
@@ -25,7 +25,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   book,
   onUpdateChapter
 }) => {
-  const { t } = useTranslation("bookedit");
+  const { t, lang } = useTranslation("bookedit");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [chapters, setChapters] = useState(initialChapters);
   const [selectedChapter, setSelectedChapter] = useState<ChapterInfo | null>(
@@ -116,7 +116,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
     return date
-      .toLocaleString("zh-CN", {
+      .toLocaleString(lang, {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -132,7 +132,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   const formatDateForDisplay = (dateString: string) => {
     const date = new Date(dateString.replace(/-/g, "/"));
     return date
-      .toLocaleString("zh-CN", {
+      .toLocaleString(lang, {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -171,7 +171,10 @@ const ChapterList: React.FC<ChapterListProps> = ({
       if (newStatus === "scheduled" && newDate) {
         updates.publishDate = newDate; // newDate is already in the correct format with ":00" for seconds
       }
-      const success = await onUpdateChapter(selectedChapter.id!, updates);
+      const success = await onUpdateChapter(
+        selectedChapter.chapterNumber!,
+        updates
+      );
       if (success) {
         setChapters(
           chapters.map((ch) =>
@@ -303,10 +306,11 @@ const ChapterList: React.FC<ChapterListProps> = ({
           >
             <div className="flex-col justify-between ">
               <Link
-                href={`/writing/${book.id}/chapter/${chapter.id}`}
+                href={`/writing/${book.id}/chapter/${chapter.chapterNumber}`}
                 className="w-2/3  text-lg text-neutral-600 font-medium hover:text-orange-500"
               >
-                {t("chapterList.chapter")} {chapter.chapterNumber}:
+                {t("chapterList.chapter")}
+                {chapter.chapterNumber} : {""}
                 {chapter.title}
               </Link>
               <div className="space-x-5 text-neutral-400 text-sm">
@@ -315,7 +319,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
                 </span>
                 <span>
                   {t("chapterList.lastModified")}
-                  {formatDate(chapter.lastModified!)}
+                  {chapter.lastModified}
                 </span>
               </div>
             </div>

@@ -129,8 +129,8 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
             </button>
           )}
         </div>
-        <div className="flex flex-col lg:flex-row  gap-8">
-          <div className="bg-gray-50 p-4 rounded-lg shadow-md">
+        <div className="flex flex-col  lg:flex-row  gap-8">
+          <div className="bg-gray-50 p-4 w-72 rounded-lg shadow-md">
             <h3 className="font-bold text-lg mb-2 text-neutral-600">
               {t("coverUpload.defaultCovers")}
             </h3>
