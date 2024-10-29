@@ -7,17 +7,31 @@ import { setToken } from "@/app/lib/token";
 import Image from "next/image";
 import { useTranslation } from "../useTranslation";
 import GoogleLogo from "../../../public/google.png";
+import { useUser } from "../UserContextProvider";
 
 export const GoogleLoginButtonInner = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [error, setError] = useState<string | null>(null);
   const { t } = useTranslation("navbar");
+  const { refetch } = useUser();
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
-    if (status === "authenticated" && session?.user) {
-      handleAuthentication(session.user);
-    }
+    const handleSession = async () => {
+      if (status === "authenticated" && session?.user && !isProcessing) {
+        setIsProcessing(true); // 防止重复处理
+        try {
+          await handleAuthentication(session.user);
+        } catch (error) {
+          console.error("Authentication error:", error);
+          setError(t("unexpectedError"));
+        }
+        setIsProcessing(false);
+      }
+    };
+
+    handleSession();
   }, [status, session]);
 
   const handleAuthentication = async (user: any) => {
@@ -30,7 +44,10 @@ export const GoogleLoginButtonInner = () => {
 
       if (response.code === 200 && response.data) {
         setToken(response.data);
-        router.push("/"); // 重定向到主页
+        await refetch();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        router.refresh();
+        await router.replace("/");
       } else {
         setError("Failed to authenticate with our server. Please try again.");
       }
@@ -42,7 +59,7 @@ export const GoogleLoginButtonInner = () => {
   };
 
   const handleGoogleLoginClick = () => {
-    signIn("google");
+    signIn("google", { redirect: false });
   };
 
   return (

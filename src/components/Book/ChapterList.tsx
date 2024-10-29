@@ -16,7 +16,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
     <div className="w-full">
       <div className={`${className}`}>
         {chapters.map((chapter) => {
-          const isPaid = chapter.price && chapter.price > 0;
+          const isPaid = Boolean(chapter.price) && chapter.price > 0;
           return (
             <Link
               href={`/book/${book.id}/chapter/${chapter.chapterNumber}`}

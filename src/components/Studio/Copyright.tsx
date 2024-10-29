@@ -18,10 +18,6 @@ const Copyright: React.FC = () => {
           <p>{t("copyright.content.copyrightComplaints")}</p>
         </Section>
 
-        <Section title={t("copyright.sections.nonCommercialUse")}>
-          <p>{t("copyright.content.nonCommercialUse")}</p>
-        </Section>
-
         <Section title={t("copyright.sections.platformRights")}>
           <p className="bg-orange-100 p-3 rounded-md font-medium">
             {t("copyright.content.platformRights")}

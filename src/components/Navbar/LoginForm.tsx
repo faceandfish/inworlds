@@ -49,7 +49,7 @@ export function LoginForm() {
   if (isLoading) {
     return (
       <div className="text-center">
-        <LoginFormSkeleton />;
+        <LoginFormSkeleton />
       </div>
     );
   }

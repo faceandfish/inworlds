@@ -28,7 +28,8 @@ import {
   TipResponse,
   ChapterPaymentResponse,
   PurchasedChapterInfo,
-  IncomeBookInfo
+  IncomeBookInfo,
+  SearchHistoryItem
 } from "./definitions";
 import { getToken, removeToken, setToken } from "./token";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -580,6 +581,25 @@ export const getChapterContent = async (
   try {
     const response = await api.get<ApiResponse<ChapterInfo>>(
       `/book/${bookId}/chapter/${chapterNumber}`
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "获取章节内容失败");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("获取章节内容时出错:", error);
+    throw error;
+  }
+};
+export const getPublicChapterContent = async (
+  bookId: number,
+  chapterNumber: number
+): Promise<ApiResponse<ChapterInfo>> => {
+  try {
+    const response = await api.get<ApiResponse<ChapterInfo>>(
+      `/book/public/${bookId}/chapter/${chapterNumber}`
     );
 
     if (response.data.code !== 200) {
@@ -1297,11 +1317,11 @@ export const checkBookFavoriteStatus = async (
 };
 
 // 搜索
-export const searchBooks = async (
+export const publicSearchBooks = async (
   query: string
 ): Promise<ApiResponse<SearchResult>> => {
   try {
-    const response = await api.get<ApiResponse<SearchResult>>(`/search`, {
+    const response = await api.get<ApiResponse<SearchResult>>("/search", {
       params: { query }
     });
 
@@ -1316,18 +1336,50 @@ export const searchBooks = async (
   }
 };
 
-export const getSearchHistory = async (): Promise<ApiResponse<string[]>> => {
+export const searchBooks = async (
+  query: string
+): Promise<ApiResponse<SearchResult>> => {
   try {
     const token = getToken();
     if (!token) {
       throw new Error("Token not available. Please log in again.");
     }
 
-    const response = await api.get<ApiResponse<string[]>>("/search/history", {
+    const response = await api.get<ApiResponse<SearchResult>>("/user/search", {
+      params: { query },
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "找不到相关内容");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("搜索书籍时出错:", error);
+    throw error;
+  }
+};
+
+export const getSearchHistory = async (): Promise<
+  ApiResponse<SearchHistoryItem[]>
+> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.get<ApiResponse<SearchHistoryItem[]>>(
+      "/search/history",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
 
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "Failed to fetch search history");
@@ -1572,8 +1624,6 @@ export const tipAuthor = async (
       chapterId
     };
 
-    console.log("Sending tip request:", { authorId, ...tipData });
-
     const response = await api.post<ApiResponse<TipResponse>>(
       `/user/${authorId}/tip`,
       tipData,
@@ -1585,13 +1635,14 @@ export const tipAuthor = async (
       }
     );
 
-    console.log("Raw API response:", response);
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to tip author");
+    switch (response.data.code) {
+      case 200:
+        return response.data; // 付费成功
+      case 602:
+        return response.data;
+      default:
+        return response.data;
     }
-
-    return response.data;
   } catch (error) {
     console.error("Error tipping author:", error);
     throw error;

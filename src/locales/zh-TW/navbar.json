@@ -41,5 +41,11 @@
   "enter_email": "輸入您的電子郵箱",
   "enter_password": "輸入您的密碼",
   "confirm_password": "確認密碼",
-  "registration_success_message": "註冊成功！\n我們已經向您的郵箱發送了一個驗證連結，請查看您的郵箱並點擊連結以完成註冊。"
+  "registration_success_message": "註冊成功！\n我們已經向您的郵箱發送了一個驗證連結，請查看您的郵箱並點擊連結以完成註冊。",
+  "username_format_error": "用戶名只能包含英文字母、數字、@、_(底線)和-(連字符)",
+  "password_format_error": "密碼至少需要6個字符，可以是純英文字母、純數字或字母、數字、@的任意組合",
+  "username_requirements": "只能使用英文字母、數字、@、_(底線)和-(連字符)",
+  "password_requirements": "至少6個字符。可以使用：純英文字母、純數字，或字母、數字、@的任意組合",
+  "logoutConfirmMessage": "確定要退出登錄嗎？",
+  "confirm": "確認"
 }

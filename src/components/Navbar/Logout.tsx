@@ -13,45 +13,54 @@ interface LogoutButtonProps {
 }
 
 const LogoutButton: React.FC<LogoutButtonProps> = ({ onClick }) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState<"success" | "error">("success");
+  const [showConfirmAlert, setShowConfirmAlert] = useState(false);
+  const [showStatusAlert, setShowStatusAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState<"success" | "error">("success");
+
   const router = useRouter();
   const { logoutUser } = useUser();
   const { t } = useTranslation("navbar");
 
-  const handleLogout = useCallback(async () => {
-    console.log("handleLogout called");
-    setIsLoading(true);
-    setShowAlert(true);
+  const handleLogoutClick = () => {
+    setShowConfirmAlert(true);
+    setAlertMessage(t("logoutConfirmMessage"));
+  };
+
+  const handleLogoutConfirm = useCallback(async () => {
+    setShowConfirmAlert(false);
+    setShowStatusAlert(true);
     setAlertType("success");
     setAlertMessage(t("loggingOut"));
 
     try {
       await signOut({ redirect: false });
       await logoutUser();
+
       setAlertMessage(t("logoutSuccess"));
 
       if (onClick) {
         onClick();
       }
 
+      // 2秒后跳转到登录页
       setTimeout(() => {
-        setShowAlert(false);
+        setShowStatusAlert(false);
         router.push("/login");
       }, 2000);
     } catch (error) {
       console.error(t("logoutError"), error);
       setAlertType("error");
       setAlertMessage(t("logoutError"));
-    } finally {
-      setIsLoading(false);
     }
-  }, [router, logoutUser, t]);
+  }, [router, logoutUser, t, onClick]);
 
-  const closeAlert = () => {
-    setShowAlert(false);
+  const handleConfirmClose = () => {
+    setShowConfirmAlert(false);
+  };
+
+  const handleStatusClose = () => {
+    setShowStatusAlert(false);
     if (alertType === "success") {
       router.push("/login");
     }
@@ -61,18 +70,33 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onClick }) => {
     <>
       <button
         className="flex items-center group/item hover:bg-gray-100 w-full px-4 py-2 rounded"
-        onClick={handleLogout}
-        disabled={isLoading}
+        onClick={handleLogoutClick}
       >
         <AiOutlineLogout className="text-2xl mr-5" />
         <div className="text-base mr-32">{t("logoutAccount")}</div>
         <FaChevronRight className="invisible group-hover/item:visible transition-opacity duration-1000 ease-in-out ml-auto" />
       </button>
-      {showAlert && (
+
+      {/* 确认退出的 Alert */}
+      {showConfirmAlert && (
+        <Alert
+          message={alertMessage}
+          type="success"
+          onClose={handleConfirmClose}
+          autoClose={false}
+          customButton={{
+            text: t("confirm"),
+            onClick: handleLogoutConfirm
+          }}
+        />
+      )}
+
+      {/* 退出状态的 Alert */}
+      {showStatusAlert && (
         <Alert
           message={alertMessage}
           type={alertType}
-          onClose={closeAlert}
+          onClose={handleStatusClose}
           autoClose={alertType === "success"}
         />
       )}

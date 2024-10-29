@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { tipAuthor } from "@/app/lib/action";
 import { useTranslation } from "../useTranslation";
-import Alert from "./Alert";
+import { useUser } from "../UserContextProvider";
 
 interface TipButtonProps {
   authorId: number;
@@ -9,6 +9,8 @@ interface TipButtonProps {
   chapterId?: number;
   onTipComplete?: (success: boolean) => void;
   className?: string;
+  onError?: (message: string) => void; // 添加这行
+  onSuccess?: (message: string) => void;
 }
 
 interface TipAmountButtonProps {
@@ -42,17 +44,15 @@ const TipButton: React.FC<TipButtonProps> = ({
   bookId,
   chapterId,
   onTipComplete,
+  onError, // 添加这个
+  onSuccess, // 添加这个
   className = ""
 }) => {
   const [showTipDialog, setShowTipDialog] = useState(false);
   const [customCoins, setCustomCoins] = useState<string>("");
   const [selectedCoins, setSelectedCoins] = useState<number>(0);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertData, setAlertData] = useState<{
-    coins: number;
-    newBalance: number;
-  } | null>(null);
   const { t } = useTranslation("book");
+  const { user } = useUser();
 
   const handleSelectAmount = (coins: number) => {
     setSelectedCoins(coins);
@@ -60,29 +60,42 @@ const TipButton: React.FC<TipButtonProps> = ({
 
   const handleConfirmTip = async () => {
     try {
-      const response = await tipAuthor(authorId, selectedCoins);
-      console.log(response.data);
-
-      if (response.code === 200) {
-        setAlertData({
-          coins: response.data.coins,
-          newBalance: response.data.newBalance
-        });
-        setShowAlert(true);
+      if (!user) {
+        onError?.("loginRequired");
         setShowTipDialog(false);
-        setCustomCoins("");
-        if (onTipComplete) onTipComplete(true);
-      } else {
-        console.error("Tip failed:", response.msg);
-        if (onTipComplete) onTipComplete(false);
+        return;
+      }
+
+      const response = await tipAuthor(authorId, selectedCoins);
+
+      switch (response.code) {
+        case 200:
+          // 打赏成功
+          onSuccess?.(
+            t("tipSuccessMessage", {
+              coins: response.data.coins,
+              newBalance: response.data.newBalance
+            })
+          );
+          setShowTipDialog(false);
+          setCustomCoins("");
+          setSelectedCoins(0);
+          break;
+        case 602:
+          onError?.("insufficientBalance");
+          setShowTipDialog(false);
+          break;
+
+        default:
+          onError?.(t("tipError"));
+
+          setShowTipDialog(false);
       }
     } catch (error) {
-      console.error("Error in handleTip:", error);
-      if (error instanceof Error) {
-        console.error("Error message:", error.message);
-        console.error("Error stack:", error.stack);
-      }
-      if (onTipComplete) onTipComplete(false);
+      onError?.(t("tipError"));
+      setShowTipDialog(false);
+      setCustomCoins(""); // 添加这行
+      setSelectedCoins(0); // 添加这行
     }
   };
 
@@ -97,10 +110,18 @@ const TipButton: React.FC<TipButtonProps> = ({
 
   const isCustomAmountValid = customCoins !== "" && Number(customCoins) > 0;
 
+  const handleTipClick = () => {
+    if (!user) {
+      onError?.("loginRequired");
+      return;
+    }
+    setShowTipDialog(true);
+  };
+
   return (
     <>
       <button
-        onClick={() => setShowTipDialog(true)}
+        onClick={handleTipClick}
         className={`px-5 py-2 rounded text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out ${className}`}
       >
         {t("reward")}
@@ -160,21 +181,6 @@ const TipButton: React.FC<TipButtonProps> = ({
             </div>
           </div>
         </div>
-      )}
-      {showAlert && alertData && (
-        <Alert
-          message={t("tipSuccessMessage", {
-            coins: alertData.coins,
-            newBalance: alertData.newBalance
-          })}
-          type="success"
-          onClose={() => setShowAlert(false)}
-          customButton={{
-            text: t("ok"),
-            onClick: () => setShowAlert(false)
-          }}
-          autoClose={false}
-        />
       )}
     </>
   );

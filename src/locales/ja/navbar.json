@@ -41,5 +41,11 @@
   "enter_email": "メールアドレスを入力してください",
   "enter_password": "パスワードを入力してください",
   "confirm_password": "パスワードの確認",
-  "registration_success_message": "登録が完了しました！\nご登録のメールアドレスに確認リンクを送信しました。メールをご確認の上、リンクをクリックして登録を完了してください。"
+  "registration_success_message": "登録が完了しました！\nご登録のメールアドレスに確認リンクを送信しました。メールをご確認の上、リンクをクリックして登録を完了してください。",
+  "username_format_error": "ユーザー名は英字、数字、@、_(アンダースコア)、-(ハイフン)のみ使用可能です",
+  "password_format_error": "パスワードは6文字以上で、英字のみ、数字のみ、または英字・数字・@を組み合わせて設定してください",
+  "username_requirements": "英字、数字、@、_(アンダースコア)、-(ハイフン)のみ使用可能",
+  "password_requirements": "6文字以上必要。使用可能：英字のみ、数字のみ、または英字・数字・@の組み合わせ",
+  "logoutConfirmMessage": "ログアウトしてもよろしいですか？",
+  "confirm": "確認"
 }

@@ -203,6 +203,7 @@ export interface IncomeBookInfo {
   donationIncome: number;
   totalIncome: number;
   createdAt: string;
+  chapterIncome: number;
 }
 // 定义分析数据接口
 export interface AnalyticsData {
@@ -402,6 +403,9 @@ export interface PurchasedChapterInfo {
   coins: number;
 }
 
-export interface SearchHistoryResponse {
-  history: string[];
+export interface SearchHistoryItem {
+  id: number;
+  userId: number;
+  keyword: string;
+  createAt: string;
 }

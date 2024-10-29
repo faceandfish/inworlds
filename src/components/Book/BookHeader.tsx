@@ -24,6 +24,7 @@ interface BookHeaderProps {
 
 export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
   const [isFavorited, setIsFavorited] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState<{
     message: string;
     type: "success" | "error";
@@ -33,6 +34,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
   const { t, isLoaded } = useTranslation("book");
 
   const isLoggedIn = !!user;
+  console.log("kk:", book.favoritesCount);
 
   // 格式化日期函数
   const formatDate = useCallback((dateString: string) => {
@@ -57,31 +59,43 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
     checkFavoriteStatus();
   }, [book.id, isLoggedIn]);
 
-  // 处理收藏
+  // 处理收藏/取消收藏
   const handleFavorite = async () => {
-    if (isFavorited) return;
+    if (isLoading) return;
 
     if (!isLoggedIn) {
       setAlert({
-        message: "请登录后再进行收藏",
+        message: t("pleaseLoginToFavorite"),
         type: "error"
       });
       return;
     }
 
+    setIsLoading(true);
     try {
-      await favoriteBook(book.id);
-      setIsFavorited(true);
-      setAlert({
-        message: "收藏成功！",
-        type: "success"
-      });
+      if (isFavorited) {
+        await unfavoriteBook(book.id);
+        setIsFavorited(false);
+        setAlert({
+          message: t("unfavoriteSuccess"),
+          type: "success"
+        });
+      } else {
+        await favoriteBook(book.id);
+        setIsFavorited(true);
+        setAlert({
+          message: t("favoriteSuccess"),
+          type: "success"
+        });
+      }
     } catch (error) {
       console.error("收藏操作失败:", error);
       setAlert({
-        message: "收藏失败，请稍后重试",
+        message: t("favoriteFailed"),
         type: "error"
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -131,15 +145,23 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
 
             <div className="flex items-center justify-between">
               <button
-                className={`px-5 py-2 rounded hover:bg-orange-500 bg-orange-400 text-white`}
+                className={`px-5 py-2 rounded ${
+                  isFavorited
+                    ? "bg-neutral-400 hover:bg-neutral-500"
+                    : "bg-orange-400 hover:bg-orange-500"
+                } text-white transition-all duration-200`}
                 onClick={handleFavorite}
-                disabled={isFavorited}
+                disabled={isLoading}
               >
-                {isFavorited ? t("alreadyFavorited") : t("favoriteBook")}
+                {isLoading
+                  ? t("loading")
+                  : isFavorited
+                  ? t("unfavoriteBook")
+                  : t("favoriteBook")}
               </button>
               <Link
                 href={`/user/${book.authorId}`}
-                className="md:hidden text-sm flex gap-2 items-center text-neutral-600 "
+                className="md:hidden text-sm flex gap-2 items-center text-neutral-600"
               >
                 <Image
                   src={getAvatarUrl(book.authorAvatarUrl)}
@@ -150,9 +172,9 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
                 />
                 <p>{book.authorName}</p>
               </Link>
-              <div className="flex ">
+              <div className="flex">
                 <FireIcon className="w-5 text-red-500 ml-5" />
-                <p className="text-red-500 ">{book.favoritesCount}</p>
+                <p className="text-red-500">{book.favoritesCount}</p>
               </div>
             </div>
           </div>
@@ -166,11 +188,11 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
 
       {alert && (
         <Alert
-          message={t(alert.message)}
+          message={alert.message}
           type={alert.type}
           onClose={() => setAlert(null)}
           customButton={
-            alert.message === "请登录后再进行收藏"
+            alert.message === t("pleaseLoginToFavorite")
               ? {
                   text: t("goToLogin"),
                   onClick: handleLogin

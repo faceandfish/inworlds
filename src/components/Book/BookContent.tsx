@@ -27,7 +27,7 @@ export function BookContent({ book }: BookContentProps) {
   const { user } = useUser(); // 使用 useUser 钩子获取用户信息
   const router = useRouter(); // 使用 useRouter 钩子
   const { t } = useTranslation("book");
-
+  const [totalRecord, setTotalRecord] = useState(0);
   const isLoggedIn = !!user; // 根据 user 是否存在来判断登录状态
 
   const handleLogin = () => {
@@ -39,8 +39,10 @@ export function BookContent({ book }: BookContentProps) {
     setIsLoading(true);
     try {
       const response = await getPublicChapterList(book.id, page, 21);
+
       setChapters(response.data.dataList);
       setTotalPages(response.data.totalPage);
+      setTotalRecord(response.data.totalRecord);
     } catch (error) {
       console.error("Error fetching chapters:", error);
     } finally {
@@ -62,6 +64,7 @@ export function BookContent({ book }: BookContentProps) {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         book={book}
+        totalRecord={totalRecord}
       />
 
       {activeTab === "comments" && (

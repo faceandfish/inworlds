@@ -8,13 +8,14 @@ import { useUser } from "../UserContextProvider";
 import UserMenuSkeleton from "./Skeleton/UserMenuSkeleton";
 import { IoIosSearch } from "react-icons/io";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
+import { getToken } from "@/app/lib/token";
 
 interface NavbarProps {
   className?: string;
 }
 
 const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
-  const { user, loading } = useUser();
+  const { user, loading, refetch } = useUser();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -24,21 +25,19 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
   const isChapterPage = /^\/[a-z]{2}\/book\/\d+\/chapter\/\d+$/.test(pathname);
 
   // 检查是否为搜索页面
-  const isSearchPage = pathname.endsWith("/search") && searchParams.has("q");
+  const isSearchPage = pathname?.includes("/search") && searchParams?.has("q");
 
   useEffect(() => {
     // 如果是搜索页面，自动展开搜索栏
-    setIsSearchExpanded(isSearchPage);
+    if (isSearchPage) {
+      setIsSearchExpanded(false);
+    }
   }, [isSearchPage]);
 
   // 如果是章节页面，不渲染 Navbar
 
   const handleSearchClose = () => {
     setIsSearchExpanded(false);
-    if (isSearchPage) {
-      // 如果在搜索页面，关闭搜索栏时返回上一页
-      router.push("/");
-    }
   };
 
   return (
@@ -47,11 +46,14 @@ const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
         isChapterPage ? "md:block hidden" : ""
       }`}
     >
-      {isSearchExpanded || isSearchPage ? (
-        <div className="h-16">
+      {isSearchExpanded && (
+        <div className="h-16 md:hidden">
+          {" "}
+          {/* 添加 md:hidden 确保只在移动端显示 */}
           <SearchBar isExpanded={true} onClose={handleSearchClose} />
         </div>
-      ) : (
+      )}
+      {!isSearchExpanded && (
         <>
           <div className="flex items-center justify-between px-4 md:px-16 h-16">
             <Logo />

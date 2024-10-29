@@ -1,9 +1,8 @@
 export const i18n = {
   defaultLocale: "en",
-  locales: ["en", "cn", "tw", "ja"],
+  locales: ["en", "zh-CN", "zh-TW", "ja"],
   namespaces: [
     "navbar",
-    "seo",
     "alert",
     "book",
     "bookedit",
@@ -13,17 +12,7 @@ export const i18n = {
     "wallet",
     "authorArea",
     "help"
-  ],
-  languageMapping: {
-    "zh-cn": "cn",
-    "zh-tw": "tw",
-    "zh-hk": "tw", // 假设香港使用繁体中文
-    ja: "ja",
-    en: "en",
-    cn: "cn",
-    tw: "tw"
-    // 可以根据需要添加更多映射
-  }
+  ]
 } as const;
 
 export type Locale = (typeof i18n)["locales"][number];
@@ -33,24 +22,23 @@ export type Dictionary = {
 };
 
 export function mapLanguage(lang: string): Locale {
-  lang = lang.toLowerCase();
+  // 转换输入的语言代码为标准格式
+  const normalizedLang = lang
+    .split("-")
+    .map((part, index) =>
+      index === 0 ? part.toLowerCase() : part.toUpperCase()
+    )
+    .join("-");
 
-  // 检查完整的语言代码（例如 "zh-cn"）
-  if (lang in i18n.languageMapping) {
-    return i18n.languageMapping[
-      lang as keyof typeof i18n.languageMapping
-    ] as Locale;
+  // 直接检查是否在支持的语言列表中
+  if (i18n.locales.includes(normalizedLang as Locale)) {
+    return normalizedLang as Locale;
   }
 
-  // 检查主要语言代码（例如 "zh"）
-  const mainLang = lang.split("-")[0];
-  const mappedLang = Object.keys(i18n.languageMapping).find((key) =>
-    key.startsWith(mainLang)
-  );
-  if (mappedLang) {
-    return i18n.languageMapping[
-      mappedLang as keyof typeof i18n.languageMapping
-    ] as Locale;
+  // 处理简化的中文代码情况（如 'zh'）
+  if (normalizedLang.startsWith("zh")) {
+    // 默认使用简体中文
+    return "zh-CN";
   }
 
   // 如果没有匹配的语言，返回默认语言

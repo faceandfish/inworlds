@@ -65,13 +65,15 @@
     "monthlyIncome": "月總收入",
     "withdraw": "提現",
     "currency": "墨幣",
+    "revenueExplanation": "收入明細說明：到賬金額為實際金額的70%\n• 平台將收取30%服務費用於維護運營和服務升級",
     "columns": {
       "title": "標題",
       "type": "類型",
       "income24h": "24小時收入",
       "donationIncome": "打賞收入",
       "totalIncome": "總收入",
-      "creationTime": "創建時間"
+      "creationTime": "創建時間",
+      "chapterIncome": "章節收入"
     }
   },
   "studio": {

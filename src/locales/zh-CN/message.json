@@ -8,7 +8,12 @@
     "errorFetchingData": "获取数据时发生错误。请稍后再试。",
     "favoriteBooks": "收藏的书籍",
     "followedUsers": "关注的用户",
-    "systemNotifications": "系统通知"
+    "systemNotifications": "系统通知",
+    "noFavoriteBooks": "暂无收藏的书",
+    "noFollowedAuthors": "暂无关注的作者",
+    "noNotifications": "暂无系统消息",
+    "exploreBooks": "去看看有什么好书",
+    "exploreAuthors": "去发现更多作者"
   },
   "sidebar": {
     "messageCenter": "消息中心",
@@ -17,7 +22,7 @@
     "systemNotifications": "系统通知"
   },
   "userPreviewCard": {
-    "followers": "关注者：",
+    "followers": "粉丝：",
     "mysteriousUser": "这个用户很神秘，还没有提供介绍。"
   }
 }

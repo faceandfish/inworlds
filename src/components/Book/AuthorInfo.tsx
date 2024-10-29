@@ -13,10 +13,10 @@ interface AuthorInfoProps {
 }
 
 export const AuthorInfo: React.FC<AuthorInfoProps> = ({ book }) => {
-  const { t, isLoaded } = useTranslation("book");
+  const { t } = useTranslation("book");
 
   return (
-    <div className="w-full md:w-80 border-t md:border-l border-gray-100 pt-6 md:pt-0 mt-6 md:mt-0 flex flex-col items-center justify-around space-y-4  pb-6 md:pb-0">
+    <div className="w-full md:w-80 px-10 border-t md:border-l border-gray-100 pt-6 md:pt-0 mt-6 md:mt-0 flex flex-col items-center justify-around space-y-4  pb-6 md:pb-0">
       <Link href={`/user/${book.authorId}`}>
         <Image
           src={getAvatarUrl(book.authorAvatarUrl)}
@@ -27,7 +27,7 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({ book }) => {
         />
       </Link>
       <p>{book.authorName || t("author")}</p>
-      <p className="text-sm text-neutral-600">
+      <p className="text-sm text-neutral-600 line-clamp-2">
         {book.authorIntroduction || t("userLazy")}
       </p>
       <div className="flex gap-5 items-center">

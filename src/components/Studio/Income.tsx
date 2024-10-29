@@ -3,6 +3,7 @@ import Link from "next/link";
 import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
 import { fetchIncomeData } from "@/app/lib/action";
+import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import {
   IncomeBookInfo,
   PaginatedData,
@@ -73,11 +74,8 @@ const Income: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full mx-auto px-10">
+    <div className="min-h-screen mb-10 w-full mx-auto px-10">
       <div className="bg-white py-4">
-        <h2 className="text-2xl font-semibold text-neutral-600 mb-4">
-          {t("income.title")}
-        </h2>
         {/* 月总收入卡片 */}
         <div className="bg-orange-100 rounded-lg p-4 mb-6">
           <h2 className="text-xl font-semibold text-orange-800 mb-2">
@@ -97,11 +95,28 @@ const Income: React.FC = () => {
           </div>
         </div>
 
+        <div className="bg-orange-50 border-l-4 border-orange-400 p-4 mb-6">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              {" "}
+              <InformationCircleIcon className="h-5 w-5 text-orange-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-orange-700">
+                {t("income.revenueExplanation")}
+              </p>
+            </div>
+          </div>
+        </div>
+
         {/* 作品收入列表 */}
         <div className="grid grid-cols-7 text-neutral-600 bg-neutral-100 font-semibold">
           <div className="p-3 col-span-2">{t("income.columns.title")}</div>
-          <div className="p-3 text-center">{t("income.columns.type")}</div>
+
           <div className="p-3 text-center">{t("income.columns.income24h")}</div>
+          <div className="p-3 text-center">
+            {t("income.columns.chapterIncome")}
+          </div>
           <div className="p-3 text-center">
             {t("income.columns.donationIncome")}
           </div>
@@ -121,13 +136,13 @@ const Income: React.FC = () => {
               <span className="col-span-2 font-medium text-neutral-600 truncate">
                 {book.title}
               </span>
-              <span className="text-sm text-center text-neutral-500">
-                {book.category}
-              </span>
-              <span className="text-sm text-center text-orange-400">
+              <span className="text-sm text-orange-400 text-center ">
                 {book.income24h.toLocaleString()} {t("income.currency")}
               </span>
-              <span className="text-sm text-center text-orange-400">
+              <span className="text-sm text-center text-neutral-500 ">
+                {book.chapterIncome} {t("income.currency")}
+              </span>
+              <span className="text-sm text-center text-neutral-500">
                 {book.donationIncome.toLocaleString()} {t("income.currency")}
               </span>
               <span className="text-sm text-center text-orange-400">
@@ -141,11 +156,13 @@ const Income: React.FC = () => {
         </ul>
 
         <div className="py-10">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={incomeData?.totalPage || 1}
-            onPageChange={setCurrentPage}
-          />
+          {(incomeData?.totalPage || 1) > 1 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={incomeData?.totalPage || 1}
+              onPageChange={setCurrentPage}
+            />
+          )}
         </div>
       </div>
     </div>

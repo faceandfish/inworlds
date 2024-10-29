@@ -22,6 +22,24 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
 
+  // 验证用户名格式
+  const validateUsername = (username: string) => {
+    const usernameRegex = /^[a-zA-Z0-9@_-]+$/;
+    return usernameRegex.test(username);
+  };
+
+  const validatePassword = (password: string) => {
+    return (
+      password.length >= 6 &&
+      (/^[a-zA-Z]{6,}$/.test(password) || // 纯英文字母
+        /^\d{6,}$/.test(password) || // 纯数字
+        /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$/.test(password) || // 英文字母+数字
+        /^(?=.*[A-Za-z])(?=.*[@])[A-Za-z@]{6,}$/.test(password) || // 英文字母+@
+        /^(?=.*\d)(?=.*[@])[\d@]{6,}$/.test(password) || // 数字+@
+        /^[A-Za-z\d@]{6,}$/.test(password)) // 英文字母+数字+@
+    );
+  };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = e.target;
     setFormData((prevData) => ({
@@ -37,7 +55,21 @@ const Register = () => {
 
     // Basic validation
     if (formData.password !== formData.rePassword) {
-      setError("Passwords do not match");
+      setError(t("passwords_do_not_match"));
+      setIsLoading(false);
+      return;
+    }
+
+    // 验证用户名格式
+    if (!validateUsername(formData.username)) {
+      setError(t("username_format_error"));
+      setIsLoading(false);
+      return;
+    }
+
+    // 验证密码格式
+    if (!validatePassword(formData.password)) {
+      setError(t("password_format_error"));
       setIsLoading(false);
       return;
     }
@@ -62,31 +94,22 @@ const Register = () => {
   };
 
   return (
-    <div className="relative h-screen bg-black">
-      <div className="absolute left-5 hidden md:block">
-        <Image
-          src={RegisterImage}
-          alt="Background"
-          width={900}
-          height={1325}
-          quality={100}
-          style={{ objectFit: "cover" }}
-        />
-      </div>
-
-      <div className="absolute top-0 left-0 right-0 md:top-1/2 md:right-32 md:left-auto md:transform md:-translate-y-1/2 rounded-none md:rounded-2xl z-10 bg-white px-4 py-8 md:px-10 min-h-screen md:min-h-0">
-        <h2 className="text-2xl font-bold mb-6 text-center">{t("register")}</h2>
+    <div className="py-5 md:py-10 px-4 md:px-0 bg-orange-100  ">
+      <div className="mx-auto  w-full  py-10 md:w-2/4 rounded-none md:rounded-2xl  bg-white px-4  md:px-10 min-h-screen ">
+        <h2 className="text-2xl text-neutral-700 font-bold mb-6 text-center">
+          {t("register")}
+        </h2>
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label
-              className="block text-gray-700 text-sm font-bold mb-2"
+              className="block text-neutral-600 text-sm font-bold mb-2"
               htmlFor="username"
             >
               {t("username")}
             </label>
             <input
-              className="shadow appearance-none border rounded md:w-96 w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded  w-full py-2 px-3 text-neutral-600 leading-tight focus:outline-none focus:shadow-outline"
               id="username"
               type="text"
               placeholder={t("enter_username")}
@@ -94,16 +117,19 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            <p className="text-xs text-neutral-400 mt-1">
+              {t("username_requirements")}
+            </p>
           </div>
           <div className="mb-4">
             <label
-              className="block text-gray-700 text-sm font-bold mb-2"
+              className="block text-neutral-600 text-sm font-bold mb-2"
               htmlFor="email"
             >
               {t("email")}
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-neutral-600 leading-tight focus:outline-none focus:shadow-outline"
               id="email"
               type="email"
               placeholder={t("enter_email")}
@@ -114,13 +140,13 @@ const Register = () => {
           </div>
           <div className="mb-4">
             <label
-              className="block text-gray-700 text-sm font-bold mb-2"
+              className="block text-neutral-600 text-sm font-bold mb-2"
               htmlFor="loginPwd"
             >
               {t("password")}
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-neutral-600 leading-tight focus:outline-none focus:shadow-outline"
               id="password"
               type="password"
               placeholder={t("enter_password")}
@@ -128,16 +154,19 @@ const Register = () => {
               onChange={handleChange}
               required
             />
+            <p className="text-xs text-neutral-400 mt-1">
+              {t("password_requirements")}
+            </p>
           </div>
           <div className="mb-4">
             <label
-              className="block text-gray-700 text-sm font-bold mb-2"
+              className="block text-neutral-600 text-sm font-bold mb-2"
               htmlFor="rePassword"
             >
               {t("confirm_password")}
             </label>
             <input
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-neutralneutral-600 leading-tight focus:outline-none focus:shadow-outline"
               id="rePassword"
               type="password"
               placeholder={t("confirm_password")}

@@ -1,4 +1,4 @@
-import { BookInfo } from "@/app/lib/definitions";
+import { BookInfo, ChapterInfo } from "@/app/lib/definitions";
 import React from "react";
 import { useTranslation } from "../useTranslation";
 
@@ -8,14 +8,17 @@ interface ContentTabsProps {
   activeTab: TabType;
   setActiveTab: (tab: TabType) => void;
   book: BookInfo;
+  totalRecord: number;
 }
 
 export const ContentTabs: React.FC<ContentTabsProps> = ({
   activeTab,
   setActiveTab,
-  book
+  book,
+  totalRecord
 }) => {
   const { t } = useTranslation("book");
+
   return (
     <div className="flex  border-b">
       <div
@@ -40,9 +43,7 @@ export const ContentTabs: React.FC<ContentTabsProps> = ({
         onClick={() => setActiveTab("chapters")}
       >
         {t("chapters")}
-        <span className="ml-2 text-neutral-400 text-xs">
-          {book.latestChapterNumber}
-        </span>
+        <span className="ml-2 text-neutral-400 text-xs">{totalRecord}</span>
       </div>
     </div>
   );

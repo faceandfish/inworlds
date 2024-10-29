@@ -65,13 +65,15 @@
     "monthlyIncome": "月总收入",
     "currency": "墨币",
     "withdraw": "提现",
+    "revenueExplanation": "收入明细说明：到账金额为实际金额的70%\n• 平台将收取30%服务费用于维护运营和服务升级",
     "columns": {
       "title": "标题",
       "type": "类型",
       "income24h": "24小时收入",
       "donationIncome": "打赏收入",
       "totalIncome": "总收入",
-      "creationTime": "创建时间"
+      "creationTime": "创建时间",
+      "chapterIncome": "章节收入"
     }
   },
   "studio": {

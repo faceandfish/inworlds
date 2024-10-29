@@ -1,12 +1,11 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   ChapterInfo,
   BookInfo,
   PurchasedChapterInfo
 } from "@/app/lib/definitions";
 import {
-  ChevronLeftIcon,
   ChevronRightIcon,
   BookOpenIcon,
   UserCircleIcon,
@@ -16,17 +15,14 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChapterList } from "./ChapterList";
-import {
-  getBookPurchasedChapters,
-  getChapterList,
-  payForChapter
-} from "@/app/lib/action";
+import { getChapterList, payForChapter } from "@/app/lib/action";
 import Pagination from "../Main/Pagination";
 import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 import TipButton from "../Main/TipButton";
 import { useUser } from "../UserContextProvider";
 import { usePurchasedChapters } from "../PurchasedChaptersProvider.tsx";
+import ChapterNavigation from "./NavigationButton";
 
 interface ChapterContentPageProps {
   chapter: ChapterInfo;
@@ -97,6 +93,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
   const handleChapterPayment = async () => {
     try {
       const response = await payForChapter(book.id, chapter.id);
+      console.log(response);
 
       switch (response.code) {
         case 200:
@@ -265,43 +262,32 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
                     bookId={book.id}
                     chapterId={chapter.id}
                     className="bg-red-500 hover:bg-red-600 text-white md:text-xl text-md px-14 md:py-5 py-2 rounded-full transition duration-300"
+                    onError={(message) => {
+                      // 使用已有的错误处理机制
+                      if (message === "insufficientBalance") {
+                        setShowInsufficientBalanceAlert(true);
+                      } else if (message === "loginRequired") {
+                        setShowLoginAlert(true);
+                      } else {
+                        setAlertMessage(message);
+                        setShowPaymentAlert(true);
+                      }
+                    }}
+                    onSuccess={(message) => {
+                      setAlertMessage(message);
+                      setShowPaymentAlert(true);
+                    }}
                   />
                 </div>
               </>
             )}
-
-            <div className="space-x-4 md:space-x-10 pb-16 md:pb-28 pt-6 md:pt-10 flex justify-center">
-              {isFirstChapter ? (
-                <button
-                  className="bg-neutral-400 text-white px-8 md:px-20 py-2 rounded-full cursor-not-allowed text-sm md:text-base"
-                  disabled
-                >
-                  {t("firstChapter")}
-                </button>
-              ) : (
-                <button
-                  onClick={handlePreviousChapter}
-                  className="bg-neutral-200 hover:bg-neutral-300 text-neutral-600 px-8 md:px-20 py-2 rounded-full transition duration-300 text-sm md:text-base"
-                >
-                  {t("previousChapter")}
-                </button>
-              )}
-              {isLastChapter ? (
-                <button
-                  className="bg-neutral-400 text-white px-8 md:px-20 py-2 rounded-full cursor-not-allowed text-sm md:text-base"
-                  disabled
-                >
-                  {t("lastChapter")}
-                </button>
-              ) : (
-                <button
-                  onClick={handleNextChapter}
-                  className="bg-orange-400 hover:bg-orange-500 text-white px-8 md:px-20 py-2 rounded-full transition duration-300 text-sm md:text-base"
-                >
-                  {t("nextChapter")}
-                </button>
-              )}
-            </div>
+            <ChapterNavigation
+              isFirstChapter={isFirstChapter}
+              isLastChapter={isLastChapter}
+              handlePreviousChapter={handlePreviousChapter}
+              handleNextChapter={handleNextChapter}
+              t={t}
+            />
           </div>
         </div>
       </div>
