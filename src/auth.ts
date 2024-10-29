@@ -12,6 +12,17 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   pages: {
     signIn: "/login" // 指定登录页面
   },
+  logger: {
+    error(error: Error) {
+      console.error("Auth Error:", error.message);
+    },
+    warn(message: string) {
+      console.warn("Auth Warning:", message);
+    },
+    debug(message: string, metadata?: unknown) {
+      console.debug("Auth Debug:", message, metadata);
+    }
+  },
   callbacks: {
     async session({ session, token }) {
       // 可以在这里自定义 session
