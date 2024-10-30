@@ -258,7 +258,6 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
                 )}
                 <div className="flex justify-center py-6 md:py-24">
                   <TipButton
-                    authorId={book.authorId}
                     bookId={book.id}
                     chapterId={chapter.id}
                     className="bg-red-500 hover:bg-red-600 text-white md:text-xl text-md px-14 md:py-5 py-2 rounded-full transition duration-300"

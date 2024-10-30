@@ -39,7 +39,11 @@ const Income: React.FC = () => {
       try {
         const response: ApiResponse<PaginatedData<IncomeBookInfo>> =
           await fetchIncomeData(currentPage, ITEMS_PER_PAGE);
+
+        console.log("shouru:", response);
+
         setIncomeData(response.data);
+
         // Calculate monthly income (this is a simplification, you might want to adjust based on your actual data)
         const totalIncome = response.data.dataList.reduce(
           (sum, book) => sum + book.totalIncome,

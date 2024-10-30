@@ -1,189 +1,248 @@
-import React, { useState } from "react";
-import { tipAuthor } from "@/app/lib/action";
+import React, { useState, useCallback } from "react";
+import { tipAuthor, tipChapter } from "@/app/lib/action";
 import { useTranslation } from "../useTranslation";
 import { useUser } from "../UserContextProvider";
+import { ApiResponse, TipResponse } from "@/app/lib/definitions";
+import Alert from "./Alert";
 
 interface TipButtonProps {
-  authorId: number;
+  authorId?: number;
   bookId?: number;
   chapterId?: number;
-  onTipComplete?: (success: boolean) => void;
   className?: string;
-  onError?: (message: string) => void; // 添加这行
-  onSuccess?: (message: string) => void;
 }
 
 interface TipAmountButtonProps {
-  coins: number | string;
+  amount: number;
   onClick: (amount: number) => void;
   isSelected: boolean;
 }
 
-const TipAmountButton: React.FC<TipAmountButtonProps> = ({
-  coins,
-  onClick,
-  isSelected
-}) => {
-  const { t } = useTranslation("book");
-  return (
-    <button
-      onClick={() => onClick(Number(coins))}
-      className={` text-neutral-500 flex-shrink-0 px-4 py-2 rounded transition duration-300 ease-in-out ${
-        isSelected
-          ? "bg-orange-400 text-white"
-          : "bg-white border border-neutral-500 hover:bg-neutral-200"
-      }`}
-    >
-      {coins} {t("coins")}
-    </button>
-  );
-};
+interface AlertState {
+  show: boolean;
+  message: string;
+  type: "success" | "error";
+}
+
+// Separate TipAmountButton component with memoization
+const TipAmountButton: React.FC<TipAmountButtonProps> = React.memo(
+  ({ amount, onClick, isSelected }) => {
+    const { t } = useTranslation("book");
+
+    return (
+      <button
+        onClick={() => onClick(amount)}
+        className={`text-neutral-500 flex-shrink-0 px-4 py-2 rounded transition duration-300 ease-in-out ${
+          isSelected
+            ? "bg-orange-400 text-white"
+            : "bg-white border border-neutral-500 hover:bg-neutral-200"
+        }`}
+      >
+        {amount} {t("coins")}
+      </button>
+    );
+  }
+);
+
+TipAmountButton.displayName = "TipAmountButton";
 
 const TipButton: React.FC<TipButtonProps> = ({
   authorId,
   bookId,
   chapterId,
-  onTipComplete,
-  onError, // 添加这个
-  onSuccess, // 添加这个
   className = ""
 }) => {
-  const [showTipDialog, setShowTipDialog] = useState(false);
-  const [customCoins, setCustomCoins] = useState<string>("");
-  const [selectedCoins, setSelectedCoins] = useState<number>(0);
+  // State
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedAmount, setSelectedAmount] = useState<number>(0);
+  const [customAmount, setCustomAmount] = useState<string>("");
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [alert, setAlert] = useState<AlertState>({
+    show: false,
+    message: "",
+    type: "success"
+  });
+
+  // Hooks
   const { t } = useTranslation("book");
   const { user } = useUser();
 
-  const handleSelectAmount = (coins: number) => {
-    setSelectedCoins(coins);
+  // Constants
+  const PREDEFINED_AMOUNTS = [10, 50, 100];
+
+  // Alert handlers
+  const showAlert = (message: string, type: "success" | "error") => {
+    setAlert({
+      show: true,
+      message,
+      type
+    });
   };
 
-  const handleConfirmTip = async () => {
+  const handleCloseAlert = useCallback(() => {
+    setAlert((prev) => ({ ...prev, show: false }));
+  }, []);
+
+  // Dialog handlers
+  const handleOpenDialog = useCallback(() => {
+    if (!user) {
+      showAlert(t("loginRequired"), "error");
+      return;
+    }
+    setIsDialogOpen(true);
+  }, [user, t]);
+
+  const handleCloseDialog = useCallback(() => {
+    setIsDialogOpen(false);
+    setSelectedAmount(0);
+    setCustomAmount("");
+    setIsProcessing(false);
+  }, []);
+
+  const handleAmountSelect = useCallback((amount: number) => {
+    setSelectedAmount(amount);
+  }, []);
+
+  const handleCustomAmountChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const value = e.target.value;
+      if (/^\d*$/.test(value)) {
+        setCustomAmount(value);
+        if (value) {
+          setSelectedAmount(Number(value));
+        } else {
+          setSelectedAmount(0);
+        }
+      }
+    },
+    []
+  );
+
+  const handleConfirmTip = useCallback(async () => {
+    if (!user || selectedAmount <= 0 || isProcessing) {
+      return;
+    }
+
+    setIsProcessing(true);
+
     try {
-      if (!user) {
-        onError?.("loginRequired");
-        setShowTipDialog(false);
-        return;
+      let response: ApiResponse<TipResponse> | undefined;
+
+      if (bookId && chapterId) {
+        response = await tipChapter(selectedAmount, bookId, chapterId);
+      } else if (authorId) {
+        response = await tipAuthor(authorId, selectedAmount);
       }
 
-      const response = await tipAuthor(authorId, selectedCoins);
+      if (!response) {
+        throw new Error("No response from server");
+      }
 
       switch (response.code) {
         case 200:
-          // 打赏成功
-          onSuccess?.(
+          handleCloseDialog();
+          showAlert(
             t("tipSuccessMessage", {
               coins: response.data.coins,
               newBalance: response.data.newBalance
-            })
+            }),
+            "success"
           );
-          setShowTipDialog(false);
-          setCustomCoins("");
-          setSelectedCoins(0);
           break;
         case 602:
-          onError?.("insufficientBalance");
-          setShowTipDialog(false);
+          showAlert(t("insufficientBalance"), "error");
           break;
-
         default:
-          onError?.(t("tipError"));
-
-          setShowTipDialog(false);
+          showAlert(t("tipError"), "error");
       }
     } catch (error) {
-      onError?.(t("tipError"));
-      setShowTipDialog(false);
-      setCustomCoins(""); // 添加这行
-      setSelectedCoins(0); // 添加这行
+      console.error("Tip error:", error);
+      showAlert(t("tipError"), "error");
+    } finally {
+      setIsProcessing(false);
     }
-  };
-
-  const tipAmounts = [10, 50, 100];
-
-  const handleCustomAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (/^\d*$/.test(value)) {
-      setCustomCoins(value);
-    }
-  };
-
-  const isCustomAmountValid = customCoins !== "" && Number(customCoins) > 0;
-
-  const handleTipClick = () => {
-    if (!user) {
-      onError?.("loginRequired");
-      return;
-    }
-    setShowTipDialog(true);
-  };
+  }, [user, selectedAmount, bookId, chapterId, authorId, t, handleCloseDialog]);
 
   return (
     <>
       <button
-        onClick={handleTipClick}
+        onClick={handleOpenDialog}
         className={`px-5 py-2 rounded text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out ${className}`}
+        disabled={isProcessing}
       >
         {t("reward")}
       </button>
-      {showTipDialog && (
-        <div className="fixed px-6 md:px-0 inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg">
-            <h2 className="text-xl mb-4">{t("selectTipAmount")}</h2>
+
+      {isDialogOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-40"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              handleCloseDialog();
+            }
+          }}
+        >
+          <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+            <h2 className="text-xl font-semibold mb-4">
+              {t("selectTipAmount")}
+            </h2>
+
             <div className="flex flex-wrap gap-4 mb-4">
-              {tipAmounts.map((amount) => (
+              {PREDEFINED_AMOUNTS.map((amount) => (
                 <TipAmountButton
                   key={amount}
-                  coins={amount}
-                  onClick={() => handleSelectAmount(amount)}
-                  isSelected={selectedCoins === amount}
+                  amount={amount}
+                  onClick={handleAmountSelect}
+                  isSelected={selectedAmount === amount}
                 />
               ))}
             </div>
-            <div className="flex items-center justify-between gap-4  mb-4">
+
+            <div className="flex items-center gap-4 mb-6">
               <input
                 type="text"
-                value={customCoins}
+                value={customAmount}
                 onChange={handleCustomAmountChange}
                 placeholder={t("enterCustomAmount")}
-                className="border rounded px-3 py-2 w-full "
-              />
-              <TipAmountButton
-                coins={customCoins || t("custom")}
-                onClick={() => handleSelectAmount(Number(customCoins))}
-                isSelected={
-                  isCustomAmountValid && selectedCoins === Number(customCoins)
-                }
+                className="border rounded px-3 py-2 flex-1"
+                disabled={isProcessing}
               />
             </div>
-            <div className="flex gap-5">
+
+            <div className="flex justify-end gap-4">
               <button
-                onClick={() => {
-                  setShowTipDialog(false);
-                  setCustomCoins("");
-                  setSelectedCoins(0);
-                }}
-                className="text-white bg-neutral-400 px-3 py-2 rounded hover:bg-neutral-500 transition duration-300 ease-in-out"
+                onClick={handleCloseDialog}
+                className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                disabled={isProcessing}
               >
                 {t("cancel")}
               </button>
               <button
                 onClick={handleConfirmTip}
-                disabled={selectedCoins === null}
-                className={`text-white px-3 py-2 rounded transition duration-300 ease-in-out ${
-                  selectedCoins === 0
-                    ? "bg-neutral-400 cursor-not-allowed"
+                disabled={selectedAmount <= 0 || isProcessing}
+                className={`px-4 py-2 rounded text-white transition-colors ${
+                  selectedAmount <= 0 || isProcessing
+                    ? "bg-gray-400 cursor-not-allowed"
                     : "bg-orange-400 hover:bg-orange-500"
                 }`}
               >
-                {t("confirmPay")}
+                {isProcessing ? t("processing") : t("confirmPay")}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      {alert.show && (
+        <Alert
+          message={alert.message}
+          type={alert.type}
+          onClose={handleCloseAlert}
+          autoClose={true}
+        />
+      )}
     </>
   );
 };
 
-export default TipButton;
+export default React.memo(TipButton);

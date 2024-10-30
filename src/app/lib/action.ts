@@ -1608,9 +1608,7 @@ export const payForChapter = async (
 // Tip (donate to) an author
 export const tipAuthor = async (
   authorId: number,
-  coins: number,
-  bookId?: number,
-  chapterId?: number
+  coins: number
 ): Promise<ApiResponse<TipResponse>> => {
   try {
     const token = getToken();
@@ -1618,15 +1616,9 @@ export const tipAuthor = async (
       throw new Error("Token not available. Please log in again.");
     }
 
-    const tipData = {
-      coins,
-      bookId,
-      chapterId
-    };
-
     const response = await api.post<ApiResponse<TipResponse>>(
-      `/user/${authorId}/tip`,
-      tipData,
+      `/user/${authorId}/donation`,
+      { coins },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1634,6 +1626,44 @@ export const tipAuthor = async (
         }
       }
     );
+
+    switch (response.data.code) {
+      case 200:
+        return response.data; // 付费成功
+      case 602:
+        return response.data;
+      default:
+        return response.data;
+    }
+  } catch (error) {
+    console.error("Error tipping author:", error);
+    throw error;
+  }
+};
+
+export const tipChapter = async (
+  coins: number,
+  bookId: number,
+  chapterId: number
+): Promise<ApiResponse<TipResponse>> => {
+  console.log("tipChapter called with:", { coins, bookId, chapterId });
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available. Please log in again.");
+    }
+
+    const response = await api.post<ApiResponse<TipResponse>>(
+      `/book/${bookId}/${chapterId}/donation`,
+      { coins },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+    console.log("tipChapter response:", response);
 
     switch (response.data.code) {
       case 200:

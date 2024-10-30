@@ -204,6 +204,7 @@ export interface IncomeBookInfo {
   totalIncome: number;
   createdAt: string;
   chapterIncome: number;
+  bookTotalIncome: number;
 }
 // 定义分析数据接口
 export interface AnalyticsData {

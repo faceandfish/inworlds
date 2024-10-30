@@ -212,13 +212,13 @@ const ChapterList: React.FC<ChapterListProps> = ({
 
   // 新增: 处理收费设置确认的函数
   const handlePricingConfirm = async () => {
-    if (selectedChapterForPricing) {
+    if (selectedChapterForPricing?.chapterNumber) {
       const updates: Partial<ChapterInfo> = {
         isPaid: isPaid,
         price: isPaid ? price : 0
       };
       const success = await onUpdateChapter(
-        selectedChapterForPricing.id,
+        selectedChapterForPricing.chapterNumber,
         updates
       );
       if (success) {
@@ -240,9 +240,12 @@ const ChapterList: React.FC<ChapterListProps> = ({
   };
 
   const handleSaveAuthorNote = async () => {
-    if (selectedChapter) {
+    if (selectedChapter?.chapterNumber) {
       const updates: Partial<ChapterInfo> = { authorNote: currentAuthorNote };
-      const success = await onUpdateChapter(selectedChapter.id!, updates);
+      const success = await onUpdateChapter(
+        selectedChapter.chapterNumber,
+        updates
+      );
       if (success) {
         setChapters(
           chapters.map((ch) =>
