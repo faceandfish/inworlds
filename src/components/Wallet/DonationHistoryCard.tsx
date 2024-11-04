@@ -46,9 +46,9 @@ export const DonationHistoryCard: React.FC<DonationHistoryCardProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {donationHistory.dataList.map((item) => (
+                {donationHistory.dataList.map((item, index) => (
                   <tr
-                    key={item.id}
+                    key={index}
                     className="border-t text-sm text-neutral-400 border-orange-100"
                   >
                     <td className="p-2">

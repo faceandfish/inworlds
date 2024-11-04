@@ -1,25 +1,19 @@
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect } from "react";
 import { BookInfo, AnalyticsData } from "@/app/lib/definitions";
 import { fetchBooksList, fetchSingleBookAnalytics } from "@/app/lib/action";
-import Pagination from "../Main/Pagination";
-import Link from "next/link";
 import DataAnalysisSkeleton from "./Skeleton/DataAnalysisSkeleton";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
 
-const ITEMS_PER_PAGE = 5;
-
 const DataAnalysis: React.FC = () => {
   const { t } = useTranslation("studio");
+  const [isOpen, setIsOpen] = useState(false);
   const { user } = useUser();
   const [books, setBooks] = useState<BookInfo[]>([]);
   const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(
     null
   );
-  const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
 
   const analyticsItems = [
@@ -28,7 +22,10 @@ const DataAnalysis: React.FC = () => {
       label: t("dataAnalysis.analyticsItems.viewsLast24h"),
       key: "viewsLast24h"
     },
-    { label: t("dataAnalysis.analyticsItems.likes"), key: "likes" },
+    {
+      label: t("dataAnalysis.analyticsItems.favorites"),
+      key: "favorites"
+    },
     {
       label: t("dataAnalysis.analyticsItems.totalIncome"),
       key: "totalIncome",
@@ -36,20 +33,18 @@ const DataAnalysis: React.FC = () => {
     },
     { label: t("dataAnalysis.analyticsItems.comments"), key: "comments" },
     {
-      label: t("dataAnalysis.analyticsItems.incomeLast24h"),
-      key: "incomeLast24h",
-      unit: t("income.currency")
+      label: t("dataAnalysis.analyticsItems.readingRate"),
+      key: "readingRate"
     }
   ];
 
   useEffect(() => {
     if (user?.id) {
       setIsLoading(true);
-      fetchBooksList(user.id, currentPage, ITEMS_PER_PAGE, "published")
+      fetchBooksList(user.id, 1, 999, "published")
         .then((response) => {
           if (response.code === 200) {
             setBooks(response.data.dataList);
-            setTotalPages(response.data.totalPage);
             if (response.data.dataList.length > 0 && !selectedBookId) {
               setSelectedBookId(response.data.dataList[0].id);
             }
@@ -61,7 +56,7 @@ const DataAnalysis: React.FC = () => {
           setIsLoading(false);
         });
     }
-  }, [user, currentPage]);
+  }, [user]);
 
   useEffect(() => {
     if (selectedBookId) {
@@ -81,19 +76,11 @@ const DataAnalysis: React.FC = () => {
   }, [selectedBookId]);
 
   const handleBookSelect = (bookId: number) => {
-    startTransition(() => {
-      setSelectedBookId(bookId);
-      setTimeout(() => {
-        const element = document.getElementById(`details-${bookId}`);
-        element?.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    });
-  };
-
-  const handlePageChange = (newPage: number) => {
-    startTransition(() => {
-      setCurrentPage(newPage);
-    });
+    setSelectedBookId(bookId);
+    setTimeout(() => {
+      const element = document.getElementById(`details-${bookId}`);
+      element?.scrollIntoView({ behavior: "smooth" });
+    }, 100);
   };
 
   if (isLoading) {
@@ -106,56 +93,54 @@ const DataAnalysis: React.FC = () => {
         <h2 className="text-2xl font-semibold text-neutral-600 mb-4">
           {t("dataAnalysis.title")}
         </h2>
-        <div className="grid grid-cols-7 text-neutral-600 bg-neutral-100 font-semibold">
-          <div className="p-3 col-span-3">
-            {t("dataAnalysis.columns.title")}
-          </div>
-          <div className="p-3 text-center col-span-1">
-            {t("dataAnalysis.columns.type")}
-          </div>
-          <div className="p-3 text-center col-span-1">
-            {t("dataAnalysis.columns.wordCount")}
-          </div>
-          <div className="p-3 text-center col-span-2">
-            {t("dataAnalysis.columns.creationTime")}
-          </div>
-        </div>
-        <ul className="h-64">
-          {books.map((book) => (
-            <li
-              key={book.id}
-              className={`grid grid-cols-7 py-3 px-3 items-center border-b border-neutral-100 hover:bg-neutral-100 transition-colors duration-150 ${
-                selectedBookId === book.id
+
+        <div className=" relative">
+          <label className="block text-sm font-medium text-neutral-600 mb-2">
+            {t("dataAnalysis.selectBook")}
+          </label>
+          <div
+            className="w-full px-4 py-2 border border-neutral-200 rounded-lg 
+               bg-white text-neutral-700 cursor-pointer flex justify-between items-center"
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            <span>
+              {books.find((book) => book.id === selectedBookId)?.title ||
+                t("dataAnalysis.selectBookPlaceholder")}
+            </span>
+            <svg
+              className={`w-4 h-4 transition-transform ${
+                isOpen ? "rotate-180" : ""
               }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
             >
-              <Link
-                href={`#details-${book.id}`}
-                className="col-span-3 cursor-pointer font-medium hover:text-orange-400 text-neutral-600 truncate"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleBookSelect(book.id);
-                }}
-              >
-                {book.title}
-              </Link>
-              <span className="text-sm col-span-1 text-center text-neutral-500">
-                {book.category}
-              </span>
-              <span className="text-sm col-span-1 text-center text-neutral-500">
-                {book.wordCount}
-              </span>
-              <span className="text-sm col-span-2 text-center text-neutral-500">
-                {book.createdAt}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <div className="pt-10">
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={handlePageChange}
-          />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </div>
+
+          {isOpen && (
+            <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-sm max-h-60 overflow-auto">
+              {books.map((book) => (
+                <div
+                  key={book.id}
+                  className={`px-4 py-2 cursor-pointer hover:bg-neutral-50
+            ${selectedBookId === book.id ? "bg-neutral-100" : ""}`}
+                  onClick={() => {
+                    handleBookSelect(book.id);
+                    setIsOpen(false);
+                  }}
+                >
+                  {book.title}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

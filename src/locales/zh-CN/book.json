@@ -62,6 +62,8 @@
   "buyCoins": "购买墨币",
   "loginRequired": "请先登录",
   "alreadyPurchased": "您已购买过此章节",
+  "processing": "处理中",
+  "purchaseError": "购买失败",
   "mobileWriting": {
     "title": "推荐使用电脑端进行创作",
     "message": "为了获得最佳的创作体验，我们建议使用台式电脑或笔记本电脑来创作和发布您的作品。",

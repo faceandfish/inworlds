@@ -51,27 +51,35 @@
       "creationTime": "作成時間"
     },
     "detailedData": "詳細データ",
+    "selectBook": "書籍を選択",
+    "selectBookPlaceholder": "書籍を選択してください...",
     "analyticsItems": {
       "views": "総閲覧数",
       "viewsLast24h": "過去24時間の閲覧数",
       "likes": "総いいね数",
       "totalIncome": "総収入",
       "comments": "総コメント数",
+      "favorites": "お気に入り総数",
+      "readingRate": "完読率",
       "incomeLast24h": "過去24時間の収入"
     }
   },
   "income": {
     "title": "収入詳細",
-    "monthlyIncome": "月間総収入",
+    "totalIncome": "総収入",
     "withdraw": "出金",
     "currency": "インクコイン",
     "revenueExplanation": "収入の詳細：実際の入金額は表示金額の70%です\n• プラットフォームは運営維持とサービス向上のため30%のサービス料を頂戴します",
+    "booksIncome": "作品収入",
+    "donations": "投げ銭収入",
+    "noDonations": "まだ投げ銭はありません",
+    "noIncome": "収入記録なし",
     "columns": {
       "title": "タイトル",
       "type": "タイプ",
       "income24h": "24時間の収入",
       "donationIncome": "寄付収入",
-      "totalIncome": "総収入",
+      "bookTotalIncome": "総収入",
       "creationTime": "作成時間",
       "chapterIncome": "チャプター収入"
     }

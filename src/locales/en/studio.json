@@ -51,27 +51,35 @@
       "creationTime": "Creation Time"
     },
     "detailedData": "Detailed Data",
+    "selectBook": "Select Book",
+    "selectBookPlaceholder": "Please select a book...",
     "analyticsItems": {
       "views": "Total Views",
       "viewsLast24h": "Views in Last 24h",
       "likes": "Total Likes",
       "totalIncome": "Total Income",
       "comments": "Total Comments",
-      "incomeLast24h": "Income in Last 24h"
+      "incomeLast24h": "Income in Last 24h",
+      "favorites": "Total Favorites",
+      "readingRate": "Completion Rate"
     }
   },
   "income": {
     "title": "Income Details",
-    "monthlyIncome": "Total Monthly Income",
+    "totalIncome": "Total Income",
     "withdraw": "Withdraw",
     "currency": "InkCoin",
     "revenueExplanation": "Income Details: The actual amount received is 70% of the displayed amount\n• Platform charges 30% service fee for maintenance and service improvements",
+    "booksIncome": "Books Income",
+    "donations": "Donations",
+    "noDonations": "No donations yet",
+    "noIncome": "No income records",
     "columns": {
       "title": "Title",
       "type": "Type",
       "income24h": "24h Income",
       "donationIncome": "Donation Income",
-      "totalIncome": "Total Income",
+      "bookTotalIncome": "Total Income",
       "creationTime": "Creation Time",
       "chapterIncome": "Chapter Revenue"
     }

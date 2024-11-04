@@ -52,6 +52,8 @@
   "selectTipAmount": "チップ金額を選択",
   "enterCustomAmount": "カスタム金額を入力",
   "custom": "カスタム",
+  "processing": "処理中",
+  "purchaseError": "購入に失敗しました",
   "cancel": "キャンセル",
   "noCommentsYet": "コメントはまだありません",
   "loadMore": "もっと読み込む",

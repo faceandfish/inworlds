@@ -50,6 +50,8 @@
       "wordCount": "字数",
       "creationTime": "创建时间"
     },
+    "selectBook": "选择书籍",
+    "selectBookPlaceholder": "请选择一本书籍...",
     "detailedData": "详细数据",
     "analyticsItems": {
       "views": "总浏览量",
@@ -57,21 +59,27 @@
       "likes": "总点赞数",
       "totalIncome": "总收入",
       "comments": "总评论数",
-      "incomeLast24h": "过去24小时收入"
+      "incomeLast24h": "过去24小时收入",
+      "favorites": "总收藏",
+      "readingRate": "完读率"
     }
   },
   "income": {
     "title": "收入详情",
-    "monthlyIncome": "月总收入",
+    "totalIncome": "总收入",
     "currency": "墨币",
     "withdraw": "提现",
     "revenueExplanation": "收入明细说明：到账金额为实际金额的70%\n• 平台将收取30%服务费用于维护运营和服务升级",
+    "booksIncome": "作品收入",
+    "donations": "打赏收入",
+    "noDonations": "暂无打赏",
+    "noIncome": "暂无收入记录",
     "columns": {
       "title": "标题",
       "type": "类型",
       "income24h": "24小时收入",
       "donationIncome": "打赏收入",
-      "totalIncome": "总收入",
+      "bookTotalIncome": "总收入",
       "creationTime": "创建时间",
       "chapterIncome": "章节收入"
     }

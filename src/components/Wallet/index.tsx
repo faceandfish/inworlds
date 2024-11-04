@@ -285,18 +285,21 @@ const Wallet: React.FC = () => {
             <p>Error: {historyError}</p>
           ) : (
             <>
-              <PurchasedChaptersCard
-                purchasedChapters={purchasedChapters!}
-                onPageChange={handlePurchasedChaptersPageChange}
-              />
               <PurchaseHistoryCard
                 purchaseHistory={purchaseHistory!}
                 onPageChange={handlePurchaseHistoryPageChange}
               />
-              <DonationHistoryCard
-                donationHistory={donationHistory!}
-                onPageChange={handleDonationHistoryPageChange}
+              <PurchasedChaptersCard
+                purchasedChapters={purchasedChapters!}
+                onPageChange={handlePurchasedChaptersPageChange}
               />
+
+              {donationHistory && ( // 添加空值检查
+                <DonationHistoryCard
+                  donationHistory={donationHistory} // 移除 ! 操作符
+                  onPageChange={handleDonationHistoryPageChange}
+                />
+              )}
             </>
           )}
         </div>

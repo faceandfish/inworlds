@@ -1,4 +1,6 @@
 {
+  "processing": "Processing",
+  "purchaseError": "Purchase failed",
   "ageConfirmation": "Age Confirmation",
   "adultContentWarning": "contains adult content. Are you sure you want to continue?",
   "author": "Author",

@@ -71,6 +71,8 @@
   "goBack": "返回",
   "updateBirthdayMessage": "如果您的生日資訊不正確，請前往設定頁面進行更新。",
   "goToSettings": "前往設定",
+  "processing": "處理中",
+  "purchaseError": "購買失敗",
   "setBirthdayMessage": "請在設定頁面中設置您的生日資訊，以便我們驗證您的年齡。",
   "mobileWriting": {
     "title": "推薦使用電腦端進行創作",

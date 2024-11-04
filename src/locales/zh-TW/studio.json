@@ -51,27 +51,36 @@
       "creationTime": "創建時間"
     },
     "detailedData": "詳細數據",
+    "selectBook": "選擇書籍",
+    "selectBookPlaceholder": "請選擇一本書籍...",
+
     "analyticsItems": {
       "views": "總瀏覽量",
       "viewsLast24h": "過去24小時瀏覽量",
       "likes": "總點讚數",
       "totalIncome": "總收入",
       "comments": "總評論數",
-      "incomeLast24h": "過去24小時收入"
+      "incomeLast24h": "過去24小時收入",
+      "favorites": "總收藏數",
+      "readingRate": "完讀率"
     }
   },
   "income": {
     "title": "收入詳情",
-    "monthlyIncome": "月總收入",
+    "totalIncome": "總收入",
     "withdraw": "提現",
     "currency": "墨幣",
     "revenueExplanation": "收入明細說明：到賬金額為實際金額的70%\n• 平台將收取30%服務費用於維護運營和服務升級",
+    "booksIncome": "作品收入",
+    "donations": "打賞收入",
+    "noDonations": "暫無打賞",
+    "noIncome": "暫無收入記錄",
     "columns": {
       "title": "標題",
       "type": "類型",
       "income24h": "24小時收入",
       "donationIncome": "打賞收入",
-      "totalIncome": "總收入",
+      "bookTotalIncome": "總收入",
       "creationTime": "創建時間",
       "chapterIncome": "章節收入"
     }

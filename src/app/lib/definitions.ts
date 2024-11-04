@@ -41,6 +41,7 @@ export interface UserInfo {
   userType: "regular" | "creator";
   articlesCount?: number; // 只有当 userType 为 'creator' 时才有意义
   booksCount?: number; // 只有当 userType 为 'creator' 时才有意义
+  totalIncome?: number;
 }
 
 // 用于创建新用户的接口
@@ -201,7 +202,6 @@ export interface IncomeBookInfo {
   category: string;
   income24h: number;
   donationIncome: number;
-  totalIncome: number;
   createdAt: string;
   chapterIncome: number;
   bookTotalIncome: number;
@@ -310,6 +310,7 @@ export interface SponsorInfo {
   avatarUrl: string;
   createAt: string;
   coins: number;
+  offCoins: number;
 }
 
 //打赏
@@ -409,4 +410,15 @@ export interface SearchHistoryItem {
   userId: number;
   keyword: string;
   createAt: string;
+}
+
+export interface ReadingStats {
+  bookId: number; // 添加 bookId
+  chapterId: number;
+  startTime: number; // 开始阅读时间
+  activeTime: number; // 有效阅读时间(累计)
+  readingProgress: number; // 阅读进度(0-100)
+  totalWords: number; // 总字数
+  isActive: boolean; // 是否正在阅读
+  isValidReading?: boolean; // 新增字段,表示阅读时间是否在合理范围内
 }

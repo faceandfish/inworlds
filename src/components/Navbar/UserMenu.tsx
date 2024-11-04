@@ -9,12 +9,16 @@ import { UserInfo } from "@/app/lib/definitions";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { useTranslation } from "../useTranslation";
 import UserOptionsMenu from "./UserOptionsMenu";
+import { useRouter } from "next/navigation";
+import { BecomeCreatorModal } from "../Main/NewUserView";
 
 const UserMenu = ({ user }: { user: UserInfo }) => {
   const [optionMenu, setOptionMenu] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [showCreatorModal, setShowCreatorModal] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation("navbar");
+  const router = useRouter();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -48,15 +52,24 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
     };
   }, [isMobile]);
 
+  const handleWriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (user.userType === "regular") {
+      setShowCreatorModal(true);
+    } else {
+      router.push("/writing");
+    }
+  };
+
   return (
     <>
       <div className="flex md:justify-center justify-around items-center w-full md:w-auto md:gap-10 relative">
-        <Link href="/writing" className="group/write">
+        <div onClick={handleWriteClick} className="group/write">
           <PiNotePencilLight className="text-4xl" />
           <div className="absolute left-0 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/write:visible group-hover/write:opacity-100 transition-opacity duration-300 md:block hidden">
             {t("startWriting")}
           </div>
-        </Link>
+        </div>
         <Link href="/messages" className="group/message">
           <GoBell className="text-3xl" />
           <div className="absolute left-16 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/message:visible group-hover/message:opacity-100 transition-opacity duration-300 md:block hidden">
@@ -87,6 +100,14 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
           </div>
         </div>
       )}
+
+      <BecomeCreatorModal
+        isOpen={showCreatorModal}
+        onClose={() => setShowCreatorModal(false)}
+        onSuccess={() => {
+          router.push("/writing");
+        }}
+      />
     </>
   );
 };

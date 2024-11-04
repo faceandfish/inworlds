@@ -29,7 +29,8 @@ import {
   ChapterPaymentResponse,
   PurchasedChapterInfo,
   IncomeBookInfo,
-  SearchHistoryItem
+  SearchHistoryItem,
+  ReadingStats
 } from "./definitions";
 import { getToken, removeToken, setToken } from "./token";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -292,13 +293,18 @@ export const changePassword = async (
 };
 
 export const updateUserType = async (
-  userId: UserInfo["id"], // 使用 UserInfo['id'] 来确保类型一致性
-  token: string
+  userId: UserInfo["id"],
+  type: string
 ): Promise<ApiResponse<UserInfo>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+
     const response = await api.put<ApiResponse<UserInfo>>(
       `/user/${userId}/type`,
-      { userType: "creator" },
+      { userType: type }, // 发送正确的请求体
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -1552,7 +1558,7 @@ export const getSponsorList = async (
 ): Promise<ApiResponse<PaginatedData<SponsorInfo>>> => {
   try {
     const response: AxiosResponse<ApiResponse<PaginatedData<SponsorInfo>>> =
-      await api.get(`/user/${userId}/sponsors`, {
+      await api.get(`/user/${userId}/donation/list`, {
         params: { currentPage, pageSize }
       });
 
@@ -1709,6 +1715,72 @@ export const getBookPurchasedChapters = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching purchased chapters:", error);
+    throw error;
+  }
+};
+
+// 更新/完成阅读进度
+export const updateReadingStats = async (
+  data: ReadingStats & { isValidReading: boolean }
+): Promise<ApiResponse<any>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+
+    // 如果阅读进度大于 95%，自动标记为已完成
+    const isCompleted = data.isValidReading && data.readingProgress >= 95;
+
+    const response = await api.post<ApiResponse<any>>(
+      `/reading/progress`,
+      {
+        ...data,
+        isCompleted
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to update reading stats");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error updating reading stats:", error);
+    throw error;
+  }
+};
+
+// 获取历史阅读进度
+export const getReadingProgress = async (
+  bookId: number,
+  chapterId: number
+): Promise<ApiResponse<ReadingStats>> => {
+  try {
+    const token = getToken();
+
+    const response = await api.get<ApiResponse<ReadingStats>>(
+      `/reading/progress`,
+      {
+        params: { bookId, chapterId },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to get reading progress");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error getting reading progress:", error);
     throw error;
   }
 };
