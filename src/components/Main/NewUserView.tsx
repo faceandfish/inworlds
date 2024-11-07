@@ -23,7 +23,7 @@ export const BecomeCreatorModal: React.FC<BecomeCreatorModalProps> = ({
   onSuccess
 }) => {
   const { t } = useTranslation("book");
-  const { user } = useUser();
+  const { user, refetch } = useUser();
   const [isLoading, setIsLoading] = useState(false);
   const [alert, setAlert] = useState<{
     message: string;
@@ -44,22 +44,21 @@ export const BecomeCreatorModal: React.FC<BecomeCreatorModalProps> = ({
     try {
       const response = await updateUserType(user.id, "creator"); // 直接传入 "creator" 作为新的类型
       if (response.code === 200) {
+        await refetch();
+
         setAlert({
           message: t("newUserView.congratulations"),
           type: "success"
         });
 
-        // 调用成功回调
         if (onSuccess) {
-          setTimeout(() => {
-            onSuccess();
-          }, 1500);
+          onSuccess();
         }
 
         // 延迟关闭modal
         setTimeout(() => {
           onClose();
-        }, 2000);
+        }, 1000);
       }
     } catch (error) {
       console.error("Failed to become a creator:", error);

@@ -69,12 +69,25 @@
     "title": "收入詳情",
     "totalIncome": "總收入",
     "withdraw": "提現",
+    "wallet": "轉入錢包",
+    "transferTitle": "轉入錢包",
+    "amountPlaceholder": "請輸入轉賬金額",
+    "invalidAmount": "請輸入有效金額",
+    "transferFailed": "轉賬失敗，請稍後重試",
+    "cancel": "取消",
+    "confirm": "確認",
+    "processing": "處理中...",
+    "transferSuccess": "轉賬成功！",
+    "autoClose": "窗口將自動關閉...",
     "currency": "墨幣",
+    "transferRecords": "轉賬記錄",
+    "noTransferRecords": "暫無轉賬記錄",
     "revenueExplanation": "收入明細說明：到賬金額為實際金額的70%\n• 平台將收取30%服務費用於維護運營和服務升級",
     "booksIncome": "作品收入",
     "donations": "打賞收入",
     "noDonations": "暫無打賞",
     "noIncome": "暫無收入記錄",
+    "transferNotice": "轉入錢包後的墨幣僅可用於平台消費，將無法提現",
     "columns": {
       "title": "標題",
       "type": "類型",
@@ -82,7 +95,20 @@
       "donationIncome": "打賞收入",
       "bookTotalIncome": "總收入",
       "creationTime": "創建時間",
-      "chapterIncome": "章節收入"
+      "chapterIncome": "章節收入",
+      "transferType": "類型",
+      "amount": "金額",
+      "status": "狀態",
+      "time": "時間"
+    },
+    "transferType": {
+      "wallet": "轉入錢包",
+      "withdraw": "提現"
+    },
+    "transferStatus": {
+      "success": "成功",
+      "failed": "失敗",
+      "pending": "處理中"
     }
   },
   "studio": {

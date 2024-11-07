@@ -4,7 +4,12 @@ import Link from "next/link";
 import Image from "next/image";
 import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
-import { fetchIncomeData, getSponsorList } from "@/app/lib/action";
+import {
+  fetchIncomeData,
+  getSponsorList,
+  transferToWallet,
+  getTransferRecords
+} from "@/app/lib/action";
 import {
   InformationCircleIcon,
   ChevronDownIcon,
@@ -14,7 +19,9 @@ import {
   IncomeBookInfo,
   PaginatedData,
   ApiResponse,
-  SponsorInfo
+  SponsorInfo,
+  TransferRecord,
+  PaginatedTransferRecords
 } from "@/app/lib/definitions";
 import { useUser } from "../UserContextProvider";
 
@@ -33,6 +40,15 @@ const Income: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showBooksIncome, setShowBooksIncome] = useState(true);
   const [showDonations, setShowDonations] = useState(true);
+  const [showTransferModal, setShowTransferModal] = useState(false);
+  const [transferAmount, setTransferAmount] = useState<string>("");
+  const [isTransferring, setIsTransferring] = useState(false);
+  const [transferError, setTransferError] = useState<string | null>(null);
+  const [transferSuccess, setTransferSuccess] = useState(false);
+  const [transferRecords, setTransferRecords] =
+    useState<PaginatedTransferRecords | null>(null);
+  const [currentTransferPage, setCurrentTransferPage] = useState(1);
+  const [showTransferRecords, setShowTransferRecords] = useState(true);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -47,20 +63,22 @@ const Income: React.FC = () => {
       setIsLoading(true);
       setError(null);
       try {
-        // 并行加载两种数据
-        const [incomeResponse, sponsorResponse] = await Promise.all([
-          fetchIncomeData(currentPage, ITEMS_PER_PAGE),
-          getSponsorList(
-            user?.id.toString() || "",
-            currentSponsorPage,
-            ITEMS_PER_PAGE
-          )
-        ]);
+        const [incomeResponse, sponsorResponse, transferResponse] =
+          await Promise.all([
+            fetchIncomeData(currentPage, ITEMS_PER_PAGE),
+            getSponsorList(
+              user?.id.toString() || "",
+              currentSponsorPage,
+              ITEMS_PER_PAGE
+            ),
+            getTransferRecords(currentTransferPage, ITEMS_PER_PAGE)
+          ]);
 
         setIncomeData(incomeResponse.data);
         setSponsorData(sponsorResponse.data);
+        setTransferRecords(transferResponse.data);
       } catch (err) {
-        setError(t("income.errors.fetchFailed"));
+        setError(t("income.fetchFailed"));
         console.error("Failed to fetch data:", err);
       } finally {
         setIsLoading(false);
@@ -70,7 +88,34 @@ const Income: React.FC = () => {
     if (user?.id) {
       loadData();
     }
-  }, [currentPage, currentSponsorPage, user?.id, t]);
+  }, [currentPage, currentSponsorPage, currentTransferPage, user?.id, t]);
+
+  const handleTransfer = async () => {
+    if (!transferAmount || isNaN(Number(transferAmount))) {
+      setTransferError(t("income.invalidAmount"));
+      return;
+    }
+
+    setIsTransferring(true);
+    setTransferError(null);
+
+    try {
+      const response = await transferToWallet(Number(transferAmount));
+      if (response.code === 200) {
+        setTransferSuccess(true);
+        // 2秒后关闭对话框
+        setTimeout(() => {
+          setShowTransferModal(false);
+          setTransferAmount("");
+          setTransferSuccess(false);
+        }, 2000);
+      }
+    } catch (error) {
+      setTransferError(t("income.transferFailed"));
+    } finally {
+      setIsTransferring(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -107,6 +152,78 @@ const Income: React.FC = () => {
                 </span>
               </Link>
             )}
+
+            <div>
+              <span
+                onClick={() => setShowTransferModal(true)}
+                className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 cursor-pointer"
+              >
+                {t("income.wallet")}
+              </span>
+
+              {/* 添加转账模态框 */}
+              {showTransferModal && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="bg-white rounded-lg p-6 w-96">
+                    <div className="mb-6">
+                      <h3 className="text-lg font-semibold mb-2">
+                        {t("income.transferTitle")}
+                      </h3>
+                      <div className="flex items-start gap-2 text-sm text-gray-500">
+                        <InformationCircleIcon className="h-5 w-5 flex-shrink-0 text-orange-400" />
+                        <p>{t("income.transferNotice")}</p>
+                      </div>
+                    </div>
+                    {transferSuccess ? (
+                      // 成功状态显示
+                      <div className="text-center">
+                        <div className="text-green-500 text-lg mb-2">
+                          {t("income.transferSuccess")}
+                        </div>
+                        <div className="text-gray-500">
+                          {t("income.autoClose")}
+                        </div>
+                      </div>
+                    ) : (
+                      // 转账表单
+                      <div className="space-y-4">
+                        <input
+                          type="number"
+                          value={transferAmount}
+                          onChange={(e) => setTransferAmount(e.target.value)}
+                          className="w-full px-3 py-2 border rounded-lg"
+                          placeholder={t("income.amountPlaceholder")}
+                        />
+
+                        {transferError && (
+                          <p className="text-red-500 text-sm">
+                            {transferError}
+                          </p>
+                        )}
+
+                        <div className="flex justify-end gap-4">
+                          <button
+                            onClick={() => setShowTransferModal(false)}
+                            className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
+                          >
+                            {t("income.cancel")}
+                          </button>
+                          <button
+                            onClick={handleTransfer}
+                            disabled={isTransferring}
+                            className="px-4 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-lg disabled:opacity-50"
+                          >
+                            {isTransferring
+                              ? t("income.processing")
+                              : t("income.confirm")}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -264,6 +381,86 @@ const Income: React.FC = () => {
                     currentPage={currentPage}
                     totalPages={incomeData?.totalPage || 1}
                     onPageChange={setCurrentPage}
+                  />
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 转账记录部分 */}
+        <div className="mb-6 bg-white rounded-lg shadow-sm border">
+          <div
+            className="flex justify-between items-center p-4 cursor-pointer bg-neutral-50"
+            onClick={() => setShowTransferRecords(!showTransferRecords)}
+          >
+            <h3 className="text-lg font-semibold text-neutral-700">
+              {t("income.transferRecords")}
+            </h3>
+            {showTransferRecords ? (
+              <ChevronUpIcon className="w-5 h-5" />
+            ) : (
+              <ChevronDownIcon className="w-5 h-5" />
+            )}
+          </div>
+
+          {showTransferRecords && (
+            <div className="p-4">
+              <div className="grid grid-cols-4 text-neutral-600 bg-neutral-100 font-semibold">
+                <div className="p-3">{t("income.columns.transferType")}</div>
+                <div className="p-3 text-center">
+                  {t("income.columns.amount")}
+                </div>
+                <div className="p-3 text-center">
+                  {t("income.columns.status")}
+                </div>
+                <div className="p-3 text-center">
+                  {t("income.columns.time")}
+                </div>
+              </div>
+
+              {!transferRecords?.dataList.length ? (
+                <div className="flex justify-center items-center py-8 text-neutral-500">
+                  {t("income.noTransferRecords")}
+                </div>
+              ) : (
+                <ul className="max-h-96 overflow-y-auto">
+                  {transferRecords.dataList.map((record) => (
+                    <li
+                      key={record.id}
+                      className="grid grid-cols-4 py-3 px-3 items-center border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150"
+                    >
+                      <span className="font-medium text-neutral-600">
+                        {t(`income.transferType.${record.type}`)}
+                      </span>
+                      <span className="text-sm text-orange-400 text-center">
+                        {record.amount} {t("income.currency")}
+                      </span>
+                      <span
+                        className={`text-sm text-center ${
+                          record.status === "success"
+                            ? "text-green-500"
+                            : record.status === "failed"
+                            ? "text-red-500"
+                            : "text-yellow-500"
+                        }`}
+                      >
+                        {t(`income.transferStatus.${record.status}`)}
+                      </span>
+                      <span className="text-sm text-center text-neutral-500">
+                        {formatDate(record.createAt)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              <div className="py-4">
+                {(transferRecords?.totalPage || 1) > 1 && (
+                  <Pagination
+                    currentPage={currentTransferPage}
+                    totalPages={transferRecords?.totalPage || 1}
+                    onPageChange={setCurrentTransferPage}
                   />
                 )}
               </div>

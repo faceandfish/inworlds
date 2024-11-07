@@ -68,12 +68,35 @@
     "title": "Income Details",
     "totalIncome": "Total Income",
     "withdraw": "Withdraw",
+    "wallet": "Transfer to Wallet",
     "currency": "InkCoin",
     "revenueExplanation": "Income Details: The actual amount received is 70% of the displayed amount\n• Platform charges 30% service fee for maintenance and service improvements",
     "booksIncome": "Books Income",
     "donations": "Donations",
     "noDonations": "No donations yet",
+    "transferTitle": "Transfer to Wallet",
+    "amountPlaceholder": "Please enter transfer amount",
+    "invalidAmount": "Please enter a valid amount",
+    "transferFailed": "Transfer failed, please try again",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "processing": "Processing...",
+    "transferSuccess": "Transfer successful!",
+    "autoClose": "Window will close automatically...",
+    "transferRecords": "Transfer Records",
+    "noTransferRecords": "No transfer records",
+    "transferNotice": "Ink Coins transferred to wallet can only be used for platform consumption and cannot be withdrawn",
+
     "noIncome": "No income records",
+    "transferType": {
+      "wallet": "To Wallet",
+      "withdraw": "Withdraw"
+    },
+    "transferStatus": {
+      "success": "Success",
+      "failed": "Failed",
+      "pending": "Processing"
+    },
     "columns": {
       "title": "Title",
       "type": "Type",
@@ -81,7 +104,11 @@
       "donationIncome": "Donation Income",
       "bookTotalIncome": "Total Income",
       "creationTime": "Creation Time",
-      "chapterIncome": "Chapter Revenue"
+      "chapterIncome": "Chapter Revenue",
+      "transferType": "Type",
+      "amount": "Amount",
+      "status": "Status",
+      "time": "Time"
     }
   },
   "studio": {

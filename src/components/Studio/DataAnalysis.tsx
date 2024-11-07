@@ -34,7 +34,8 @@ const DataAnalysis: React.FC = () => {
     { label: t("dataAnalysis.analyticsItems.comments"), key: "comments" },
     {
       label: t("dataAnalysis.analyticsItems.readingRate"),
-      key: "readingRate"
+      key: "readingRate",
+      format: (value: number) => `${(value * 100).toFixed(2)}%`
     }
   ];
 
@@ -164,8 +165,13 @@ const DataAnalysis: React.FC = () => {
                   analyticsData[item.key as keyof AnalyticsData] !==
                     undefined ? (
                     <>
-                      {analyticsData[item.key as keyof AnalyticsData]}
-                      {item.unit && (
+                      {item.format
+                        ? item.format(
+                            analyticsData[item.key as keyof AnalyticsData]
+                          )
+                        : analyticsData[item.key as keyof AnalyticsData]}
+
+                      {!item.format && item.unit && (
                         <span className="text-sm ml-1">{item.unit}</span>
                       )}
                     </>

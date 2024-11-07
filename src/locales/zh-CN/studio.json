@@ -69,11 +69,35 @@
     "totalIncome": "总收入",
     "currency": "墨币",
     "withdraw": "提现",
+    "wallet": "转入钱包",
+    "transferRecords": "转账记录",
+    "noTransferRecords": "暂无转账记录",
+
+    "transferTitle": "转入钱包",
+    "amountPlaceholder": "请输入转账金额",
+    "invalidAmount": "请输入有效金额",
+    "transferFailed": "转账失败，请重试",
+    "cancel": "取消",
+    "confirm": "确认",
+    "processing": "处理中...",
+    "transferSuccess": "转账成功！",
+    "autoClose": "窗口将自动关闭...",
+
     "revenueExplanation": "收入明细说明：到账金额为实际金额的70%\n• 平台将收取30%服务费用于维护运营和服务升级",
     "booksIncome": "作品收入",
     "donations": "打赏收入",
     "noDonations": "暂无打赏",
     "noIncome": "暂无收入记录",
+    "transferNotice": "转入钱包后的墨币仅可用于平台消费，将无法提现",
+    "transferType": {
+      "wallet": "转入钱包",
+      "withdraw": "提现"
+    },
+    "transferStatus": {
+      "success": "成功",
+      "failed": "失败",
+      "pending": "处理中"
+    },
     "columns": {
       "title": "标题",
       "type": "类型",
@@ -81,7 +105,11 @@
       "donationIncome": "打赏收入",
       "bookTotalIncome": "总收入",
       "creationTime": "创建时间",
-      "chapterIncome": "章节收入"
+      "chapterIncome": "章节收入",
+      "transferType": "类型",
+      "amount": "金额",
+      "status": "状态",
+      "time": "时间"
     }
   },
   "studio": {
@@ -94,6 +122,7 @@
       "copyright": "版权",
       "income": "收入"
     },
+
     "workContent": {
       "tabs": {
         "published": "已发布内容",
@@ -107,6 +136,7 @@
         "lastUpdated": "最后更新",
         "actions": "操作"
       },
+
       "status": {
         "ongoing": "连载中",
         "completed": "已完结",

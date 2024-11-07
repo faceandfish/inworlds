@@ -12,7 +12,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChapterList } from "./ChapterList";
-import { getChapterList } from "@/app/lib/action";
+import { getChapterList, getPublicChapterList } from "@/app/lib/action";
 import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
 import TipButton from "../Main/TipButton";
@@ -101,7 +101,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
 
   const fetchChapters = async (page: number) => {
     try {
-      const response = await getChapterList(book.id, page, itemsPerPage);
+      const response = await getPublicChapterList(book.id, page, itemsPerPage);
       setChapters(response.data.dataList);
       setTotalPages(response.data.totalPage);
     } catch (error) {

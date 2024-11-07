@@ -30,7 +30,9 @@ import {
   PurchasedChapterInfo,
   IncomeBookInfo,
   SearchHistoryItem,
-  ReadingStats
+  ReadingStats,
+  TransferToWalletResponse,
+  PaginatedTransferRecords
 } from "./definitions";
 import { getToken, removeToken, setToken } from "./token";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -39,21 +41,38 @@ let token: string | null = null;
 
 // 创建 axios 实例
 const api = axios.create({
-  baseURL: "https://api.inworlds.xyz:8088/inworlds/api",
+  baseURL:
+    process.env.NODE_ENV === "development"
+      ? "http://192.168.0.103:8088/inworlds/api"
+      : "https://api.inworlds.xyz:8088/inworlds/api",
   headers: {
     "Content-Type": "application/json"
-  }
+  },
+  timeout: 10000,
+  withCredentials: true
 });
 
-// 设置认证 token
-export const setAuthToken = (token: string) => {
-  api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-};
+api.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    // 检查是否在浏览器环境
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
 
-// 移除认证 token
-export const removeAuthToken = () => {
-  delete api.defaults.headers.common["Authorization"];
-};
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (typeof window !== "undefined" && error.response?.status === 401) {
+      // 检查是否在浏览器环境
+      removeToken();
+    }
+    return Promise.reject(error);
+  }
+);
 
 // 登录函数
 export const login = async (
@@ -748,8 +767,6 @@ export const fetchSingleBookAnalytics = async (
         Authorization: `Bearer ${token}`
       }
     });
-
-    console.log("API 原始响应:", response);
 
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "获取书籍分析数据失败");
@@ -1720,20 +1737,60 @@ export const getBookPurchasedChapters = async (
 };
 
 // 更新/完成阅读进度
-export const updateReadingStats = async (
+// 1. 匿名统计API - 记录所有用户的阅读行为
+const updateAnonymousReadingStats = async (
   data: ReadingStats & { isValidReading: boolean }
 ): Promise<ApiResponse<any>> => {
+  const isCompleted = data.isValidReading && data.readingProgress >= 95;
+
   try {
-    const token = getToken();
-    if (!token) {
-      throw new Error("Token not available");
-    }
+    const response = await api.post<ApiResponse<any>>("/reading/stats", {
+      bookId: data.bookId,
+      chapterId: data.chapterId,
+      startTime: data.startTime,
+      activeTime: data.activeTime,
+      readingProgress: data.readingProgress,
+      totalWords: data.totalWords,
+      isActive: data.isActive,
+      isValidReading: data.isValidReading,
+      isCompleted
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Error updating anonymous reading stats:", error);
+    throw error;
+  }
+};
 
-    // 如果阅读进度大于 95%，自动标记为已完成
-    const isCompleted = data.isValidReading && data.readingProgress >= 95;
+// 2. 个人化进度API - 保存用户的阅读进度
+const updateUserReadingProgress = async (
+  data: ReadingStats & { isValidReading: boolean }
+): Promise<ApiResponse<any>> => {
+  const token = getToken();
+  const isCompleted = data.isValidReading && data.readingProgress >= 95;
 
+  // 未登录用户使用localStorage
+  if (!token) {
+    const storageKey = `reading_progress_${data.bookId}_${data.chapterId}`;
+    localStorage.setItem(
+      storageKey,
+      JSON.stringify({
+        ...data,
+        isCompleted,
+        timestamp: Date.now()
+      })
+    );
+    return {
+      code: 200,
+      msg: "Reading progress saved locally",
+      data: null
+    };
+  }
+
+  // 已登录用户使用API
+  try {
     const response = await api.post<ApiResponse<any>>(
-      `/reading/progress`,
+      "/reading/progress",
       {
         ...data,
         isCompleted
@@ -1744,32 +1801,56 @@ export const updateReadingStats = async (
         }
       }
     );
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to update reading stats");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error updating reading stats:", error);
+    console.error("Error updating user reading progress:", error);
     throw error;
   }
 };
 
-// 获取历史阅读进度
-export const getReadingProgress = async (
+// 获取用户阅读进度
+export const getUserReadingProgress = async (
   bookId: number,
   chapterId: number
 ): Promise<ApiResponse<ReadingStats>> => {
-  try {
-    const token = getToken();
+  const token = getToken();
 
+  // 未登录用户从localStorage获取
+  if (!token) {
+    const storageKey = `reading_progress_${bookId}_${chapterId}`;
+    const savedProgress = localStorage.getItem(storageKey);
+    if (savedProgress) {
+      return {
+        code: 200,
+        msg: "Reading progress retrieved from local storage",
+        data: JSON.parse(savedProgress)
+      };
+    }
+    return {
+      code: 200,
+      msg: "No reading progress found",
+      data: {
+        bookId,
+        chapterId,
+        startTime: 0,
+        activeTime: 0,
+        readingProgress: 0,
+        totalWords: 0,
+        isActive: false,
+        isValidReading: false
+      }
+    };
+  }
+
+  // 已登录用户使用API
+  try {
     const response = await api.get<ApiResponse<ReadingStats>>(
       `/reading/progress`,
       {
         params: { bookId, chapterId },
         headers: {
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         }
       }
     );
@@ -1781,6 +1862,83 @@ export const getReadingProgress = async (
     return response.data;
   } catch (error) {
     console.error("Error getting reading progress:", error);
+    throw error;
+  }
+};
+
+// 组合使用这两个API的函数
+const updateReadingStats = async (
+  data: ReadingStats & { isValidReading: boolean }
+): Promise<ApiResponse<any>> => {
+  try {
+    // 1. 更新匿名统计数据
+    await updateAnonymousReadingStats(data);
+
+    // 2. 更新用户阅读进度
+    const response = await updateUserReadingProgress(data);
+
+    return response;
+  } catch (error) {
+    console.error("Error updating reading stats:", error);
+    throw error;
+  }
+};
+
+export {
+  updateReadingStats,
+  updateAnonymousReadingStats,
+  updateUserReadingProgress
+};
+
+export const transferToWallet = async (
+  amount: number
+): Promise<ApiResponse<TransferToWalletResponse>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.post<ApiResponse<TransferToWalletResponse>>(
+      "/user/transfer/wallet",
+      { amount },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Transfer failed");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("Error transferring to wallet:", error);
+    throw error;
+  }
+};
+
+export const getTransferRecords = async (
+  page: number,
+  pageSize: number
+): Promise<ApiResponse<PaginatedTransferRecords>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.get<ApiResponse<PaginatedTransferRecords>>(
+      `/user/transfer/records?page=${page}&pageSize=${pageSize}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching transfer records:", error);
     throw error;
   }
 };

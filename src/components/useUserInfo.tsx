@@ -17,7 +17,9 @@ export function useUserInfo() {
       setError(null);
       const token = getToken();
       if (!token) {
-        throw new Error("No authentication token available");
+        setUser(null);
+        setLoading(false);
+        return;
       }
       const response = await getUserInfo(token);
       if (response.code === 200 && response.data) {

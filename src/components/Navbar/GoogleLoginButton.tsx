@@ -42,6 +42,8 @@ export const GoogleLoginButtonInner = () => {
         user.image as string
       );
 
+      console.log("Server response:", response);
+
       if (response.code === 200 && response.data) {
         setToken(response.data);
         await refetch();

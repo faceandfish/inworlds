@@ -422,3 +422,22 @@ export interface ReadingStats {
   isActive: boolean; // 是否正在阅读
   isValidReading?: boolean; // 新增字段,表示阅读时间是否在合理范围内
 }
+
+export interface TransferToWalletResponse {
+  newBalance: number; // 更新后的工作室余额
+  newWalletBalance: number; // 更新后的钱包余额
+}
+
+export interface TransferRecord {
+  id: number;
+  amount: number;
+  status: "success" | "failed" | "pending";
+  createAt: string;
+  type: "wallet" | "withdraw"; // wallet表示转入钱包，withdraw表示提现
+}
+
+export interface PaginatedTransferRecords {
+  dataList: TransferRecord[];
+  totalPage: number;
+  currentPage: number;
+}

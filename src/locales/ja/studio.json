@@ -67,13 +67,35 @@
   "income": {
     "title": "収入詳細",
     "totalIncome": "総収入",
+    "wallet": "ウォレットに振込",
     "withdraw": "出金",
     "currency": "インクコイン",
     "revenueExplanation": "収入の詳細：実際の入金額は表示金額の70%です\n• プラットフォームは運営維持とサービス向上のため30%のサービス料を頂戴します",
     "booksIncome": "作品収入",
     "donations": "投げ銭収入",
     "noDonations": "まだ投げ銭はありません",
+    "transferTitle": "ウォレットに転送",
+    "amountPlaceholder": "転送金額を入力してください",
+    "invalidAmount": "有効な金額を入力してください",
+    "transferFailed": "転送に失敗しました。もう一度お試しください",
+    "cancel": "キャンセル",
+    "confirm": "確認",
+    "processing": "処理中...",
+    "transferSuccess": "転送が完了しました！",
+    "autoClose": "ウィンドウは自動的に閉じられます...",
+    "transferRecords": "取引履歴",
+    "noTransferRecords": "取引履歴がありません",
+    "transferNotice": "ウォレットに転送された墨コインはプラットフォームでの消費のみ可能で、出金することはできません",
     "noIncome": "収入記録なし",
+    "transferType": {
+      "wallet": "ウォレットへ",
+      "withdraw": "出金"
+    },
+    "transferStatus": {
+      "success": "完了",
+      "failed": "失敗",
+      "pending": "処理中"
+    },
     "columns": {
       "title": "タイトル",
       "type": "タイプ",
@@ -81,7 +103,11 @@
       "donationIncome": "寄付収入",
       "bookTotalIncome": "総収入",
       "creationTime": "作成時間",
-      "chapterIncome": "チャプター収入"
+      "chapterIncome": "チャプター収入",
+      "transferType": "種類",
+      "amount": "金額",
+      "status": "状態",
+      "time": "日時"
     }
   },
   "studio": {

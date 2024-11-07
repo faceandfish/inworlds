@@ -1,7 +1,7 @@
-// hooks/useReadingStats.ts
-import { ReadingStats } from "@/app/lib/definitions";
+// hooks/Main/useReadingStats.ts
 import { useState, useEffect, useCallback, useRef } from "react";
-import { updateReadingStats, getReadingProgress } from "@/app/lib/action";
+import type { ReadingStats } from "@/app/lib/definitions";
+import { updateReadingStats } from "@/app/lib/action";
 
 interface UseReadingStatsProps {
   bookId: number;
@@ -11,17 +11,18 @@ interface UseReadingStatsProps {
   onReachProgressThreshold?: () => void;
 }
 
-const MAX_READ_SPEED = 1000; // 最快每分钟1000字
-const MIN_READ_SPEED = 200; // 最慢每分钟200字
+const TIME_THRESHOLD = 3 * 60;
+const PROGRESS_THRESHOLD = 30;
+const UPDATE_INTERVAL = 10000;
 
-const useReadingStats = ({
+export default function useReadingStats({
   bookId,
   chapterId,
   totalWords,
   onReachTimeThreshold,
   onReachProgressThreshold
-}: UseReadingStatsProps) => {
-  const [stats, setStats] = useState<ReadingStats>({
+}: UseReadingStatsProps) {
+  const statsRef = useRef<ReadingStats>({
     bookId,
     chapterId,
     startTime: Date.now(),
@@ -31,177 +32,147 @@ const useReadingStats = ({
     isActive: true
   });
 
-  const lastUpdateRef = useRef<number>(Date.now());
-  const thresholdsRef = useRef({
-    timeThresholdReached: false,
-    progressThresholdReached: false
-  });
+  const [stats, setStats] = useState<ReadingStats>(statsRef.current);
 
-  const statsRef = useRef(stats);
-  statsRef.current = stats;
+  const timer = useRef<NodeJS.Timeout | null>(null);
+  const lastUpdateTime = useRef<number>(Date.now());
+  const reachedTimeThreshold = useRef<boolean>(false);
+  const reachedProgressThreshold = useRef<boolean>(false);
+  const isMounted = useRef<boolean>(true);
+  const isActiveRef = useRef(true);
 
-  const callbacksRef = useRef({
-    onReachTimeThreshold,
-    onReachProgressThreshold
-  });
+  // 更新统计数据到服务器
+  const syncToServer = useCallback(async () => {
+    if (!isMounted.current) return;
 
-  useEffect(() => {
-    callbacksRef.current = {
-      onReachTimeThreshold,
-      onReachProgressThreshold
-    };
-  }, [onReachTimeThreshold, onReachProgressThreshold]);
+    const currentTime = Date.now();
+    const timeElapsed = Math.floor(
+      (currentTime - lastUpdateTime.current) / 1000
+    );
 
-  // 获取历史阅读进度
-  useEffect(() => {
-    const fetchReadingProgress = async () => {
-      try {
-        const response = await getReadingProgress(bookId, chapterId);
-        if (response.data) {
-          setStats((prev) => ({
-            ...prev,
-            activeTime: response.data.activeTime,
-            readingProgress: response.data.readingProgress
-          }));
+    // 如果时间间隔太短，跳过更新
+    if (timeElapsed < 1) return;
 
-          // 如果有历史阅读记录，更新阈值状态
-          if (response.data.activeTime >= 3 * 60 * 1000) {
-            thresholdsRef.current.timeThresholdReached = true;
-          }
-          if (response.data.readingProgress >= 30) {
-            thresholdsRef.current.progressThresholdReached = true;
-          }
-        }
-      } catch (error) {
-        console.error("Failed to fetch reading progress:", error);
-      }
-    };
-
-    fetchReadingProgress();
-  }, [bookId, chapterId]);
-
-  // 同步数据到后端
-  const syncStats = useCallback(async () => {
     const currentStats = statsRef.current;
-    if (currentStats.activeTime > 0 || currentStats.readingProgress > 0) {
-      const minValidTime =
-        (currentStats.totalWords / MAX_READ_SPEED) * 60 * 1000;
-      const maxValidTime =
-        (currentStats.totalWords / MIN_READ_SPEED) * 60 * 1000;
 
-      const isValidReadingTime =
-        currentStats.activeTime >= minValidTime &&
-        (currentStats.activeTime <= maxValidTime ||
-          currentStats.readingProgress < 95);
+    const isValidReading =
+      currentStats.activeTime >= TIME_THRESHOLD ||
+      currentStats.readingProgress >= PROGRESS_THRESHOLD;
 
-      try {
-        await updateReadingStats({
-          ...currentStats,
-          isValidReading: isValidReadingTime
-        });
-      } catch (error) {
-        console.error("Failed to sync reading stats:", error);
-      }
+    console.log("准备同步数据到服务器:", {
+      currentStats,
+      timeElapsed,
+      isValidReading
+    });
+
+    try {
+      const updatedStats = {
+        ...currentStats,
+        activeTime: currentStats.activeTime + timeElapsed,
+        isValidReading
+      };
+      console.log("发送到服务器的数据:", updatedStats);
+      await updateReadingStats(updatedStats);
+      lastUpdateTime.current = currentTime;
+    } catch (error) {
+      console.error("Failed to sync reading stats:", error);
     }
-  }, []); // 移除所有依赖
-
-  // 定期同步数据
-  useEffect(() => {
-    const intervalId = setInterval(syncStats, 30000);
-
-    return () => {
-      clearInterval(intervalId);
-      syncStats();
-    };
-  }, [syncStats]);
-
-  // 更新活跃时间
-  const updateActiveTime = useCallback(() => {
-    const currentStats = statsRef.current;
-    if (!currentStats.isActive) return;
-
-    const now = Date.now();
-    const timeDiff = now - lastUpdateRef.current;
-
-    if (timeDiff < 30000) {
-      setStats((prev) => ({
-        ...prev,
-        activeTime: prev.activeTime + timeDiff
-      }));
-    }
-
-    lastUpdateRef.current = now;
-  }, []); // 移除依赖
-
-  // 处理页面可见性变化
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      const isVisible = document.visibilityState === "visible";
-      setStats((prev) => ({
-        ...prev,
-        isActive: isVisible
-      }));
-
-      if (isVisible) {
-        lastUpdateRef.current = Date.now();
-      } else {
-        updateActiveTime();
-        syncStats();
-      }
-    };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [updateActiveTime, syncStats]);
-
-  // 定期更新活跃时间
-  useEffect(() => {
-    if (!statsRef.current.isActive) return;
-
-    const intervalId = setInterval(updateActiveTime, 1000);
-    return () => clearInterval(intervalId);
-  }, [updateActiveTime]);
-
-  // 检查阈值并同步数据
-  useEffect(() => {
-    let shouldSync = false;
-
-    if (
-      !thresholdsRef.current.timeThresholdReached &&
-      stats.activeTime >= 3 * 60 * 1000
-    ) {
-      thresholdsRef.current.timeThresholdReached = true;
-      callbacksRef.current.onReachTimeThreshold?.();
-      shouldSync = true;
-    }
-
-    if (
-      !thresholdsRef.current.progressThresholdReached &&
-      stats.readingProgress >= 30
-    ) {
-      thresholdsRef.current.progressThresholdReached = true;
-      callbacksRef.current.onReachProgressThreshold?.();
-      shouldSync = true;
-    }
-
-    if (shouldSync) {
-      syncStats();
-    }
-  }, [stats.activeTime, stats.readingProgress]);
-
-  const updateProgress = useCallback((scrollPercent: number) => {
-    setStats((prev) => ({
-      ...prev,
-      readingProgress: Math.min(100, Math.max(0, scrollPercent))
-    }));
   }, []);
 
-  const resetStats = useCallback(() => {
-    syncStats();
+  // 更新本地状态
+  const updateLocalStats = useCallback(
+    (updater: (prev: ReadingStats) => ReadingStats) => {
+      setStats((prev) => {
+        const newStats = updater(prev);
+        statsRef.current = newStats;
+        isActiveRef.current = newStats.isActive;
+        return newStats;
+      });
+    },
+    []
+  );
 
-    setStats({
+  // 启动定时器
+  const startTimer = useCallback(() => {
+    if (timer.current) return;
+
+    timer.current = setInterval(() => {
+      if (!isMounted.current) {
+        clearInterval(timer.current!);
+        timer.current = null;
+        return;
+      }
+
+      const timeIncrement = UPDATE_INTERVAL / 1000;
+
+      updateLocalStats((prev) => {
+        const newActiveTime = prev.activeTime + timeIncrement;
+        if (!reachedTimeThreshold.current && newActiveTime >= TIME_THRESHOLD) {
+          reachedTimeThreshold.current = true;
+          onReachTimeThreshold?.();
+        }
+        return {
+          ...prev,
+          activeTime: newActiveTime
+        };
+      });
+
+      syncToServer();
+    }, UPDATE_INTERVAL);
+  }, [onReachTimeThreshold, syncToServer, updateLocalStats]);
+
+  const stopTimer = useCallback(() => {
+    if (timer.current) {
+      clearInterval(timer.current);
+      timer.current = null;
+    }
+  }, []);
+
+  const updateProgress = useCallback(
+    (progress: number) => {
+      if (!isMounted.current) return;
+
+      updateLocalStats((prev) => {
+        if (
+          !reachedProgressThreshold.current &&
+          progress >= PROGRESS_THRESHOLD
+        ) {
+          reachedProgressThreshold.current = true;
+          onReachProgressThreshold?.();
+        }
+        return {
+          ...prev,
+          readingProgress: progress
+        };
+      });
+    },
+    [onReachProgressThreshold, updateLocalStats]
+  );
+
+  const pause = useCallback(() => {
+    stopTimer();
+    updateLocalStats((prev) => ({ ...prev, isActive: false }));
+    syncToServer();
+  }, [stopTimer, syncToServer, updateLocalStats]);
+
+  const resume = useCallback(() => {
+    if (!isMounted.current) return;
+    updateLocalStats((prev) => ({ ...prev, isActive: true }));
+    startTimer();
+  }, [startTimer, updateLocalStats]);
+
+  const resetStats = useCallback(() => {
+    const shouldSync =
+      statsRef.current.activeTime > 0 || statsRef.current.readingProgress > 0;
+
+    stopTimer();
+    if (shouldSync) {
+      syncToServer();
+    }
+
+    if (!isMounted.current) return;
+
+    const newStats = {
       bookId,
       chapterId,
       startTime: Date.now(),
@@ -209,38 +180,41 @@ const useReadingStats = ({
       readingProgress: 0,
       totalWords,
       isActive: true
-    });
-    lastUpdateRef.current = Date.now();
-    thresholdsRef.current = {
-      timeThresholdReached: false,
-      progressThresholdReached: false
     };
-  }, [bookId, chapterId, totalWords, syncStats]);
 
-  const pause = useCallback(() => {
-    updateActiveTime();
-    syncStats();
-    setStats((prev) => ({
-      ...prev,
-      isActive: false
-    }));
-  }, [updateActiveTime, syncStats]);
+    statsRef.current = newStats;
+    setStats(newStats);
 
-  const resume = useCallback(() => {
-    lastUpdateRef.current = Date.now();
-    setStats((prev) => ({
-      ...prev,
-      isActive: true
-    }));
-  }, []);
+    lastUpdateTime.current = Date.now();
+    reachedTimeThreshold.current = false;
+    reachedProgressThreshold.current = false;
+    startTimer();
+  }, [bookId, chapterId, totalWords, stopTimer, startTimer, syncToServer]);
+
+  useEffect(() => {
+    isMounted.current = true;
+
+    // 使用 ref 而不是 stats.isActive
+    if (isActiveRef.current) {
+      startTimer();
+    }
+
+    return () => {
+      isMounted.current = false;
+      stopTimer();
+      const shouldSync =
+        statsRef.current.activeTime > 0 || statsRef.current.readingProgress > 0;
+      if (shouldSync) {
+        syncToServer();
+      }
+    };
+  }, [startTimer, stopTimer, syncToServer]);
 
   return {
     stats,
     updateProgress,
-    resetStats,
     pause,
-    resume
+    resume,
+    resetStats
   };
-};
-
-export default useReadingStats;
+}
