@@ -41,10 +41,11 @@ let token: string | null = null;
 
 // 创建 axios 实例
 const api = axios.create({
-  baseURL:
-    process.env.NODE_ENV === "development"
-      ? "http://192.168.0.103:8088/inworlds/api"
-      : "https://api.inworlds.xyz:8088/inworlds/api",
+  baseURL: "https://api.inworlds.xyz/inworlds/api",
+  // process.env.NODE_ENV === "development"
+  //   ? "http://192.168.0.103:8088/inworlds/api"
+  //   : "https://api.inworlds.xyz:8088/inworlds/api",
+
   headers: {
     "Content-Type": "application/json"
   },
