@@ -55,9 +55,37 @@
       "balanceFetchError": "获取用户余额时发生错误："
     },
     "withdraw": {
-      "title": "提现功能正在建设中",
-      "description": "我们正在努力为您开发这项功能，请稍后再试。",
-      "estimatedCompletion": "预计完成时间：近期"
+      "title": "提现到钱包",
+      "available": "可用余额",
+      "inkTokens": "墨币",
+      "equivalentUSD": "约等于",
+      "amountLabel": "提现金额",
+      "invalidAmount": "请输入有效金额",
+      "insufficientBalance": "余额不足",
+      "failed": "提现失败，请稍后重试",
+      "processing": "处理中...",
+      "submit": "提交提现",
+      "notice": "提现说明",
+      "minAmount": "最小提现金额",
+      "processTime": "处理时间",
+      "businessDays": "个工作日",
+      "fee": "手续费",
+      "selectCard": "选择银行卡",
+      "addNewCard": "+ 添加新卡",
+      "useExistingCard": "使用已有银行卡",
+      "newCardInfo": "新卡信息",
+      "bankName": "开户银行",
+      "cardNumber": "银行卡号",
+      "holderName": "持卡人姓名",
+      "setAsDefault": "设为默认卡片",
+      "default": "默认",
+      "incompleteCardInfo": "请填写完整的银行卡信息",
+      "selectCountry": "选择国家",
+      "swiftCode": "SWIFT Code",
+      "swiftCodeHelp": "银行国际代码，用于国际转账",
+      "bankAddress": "银行地址",
+      "errors.swiftCodeRequired": "国际转账需要填写SWIFT代码",
+      "errors.bankAddressRequired": "国际转账需要填写银行地址"
     }
   }
 }

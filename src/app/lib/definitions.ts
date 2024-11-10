@@ -441,3 +441,70 @@ export interface PaginatedTransferRecords {
   totalPage: number;
   currentPage: number;
 }
+
+// definitions.ts 中添加以下接口
+
+// 银行卡信息接口
+export interface BankCard {
+  id: string;
+  userId: number;
+  bankName: string;
+  cardNumber: string;
+  holderName: string;
+  isDefault: boolean;
+  createAt: string;
+  lastUsed: string;
+  country?: string;
+  swiftCode?: string;
+  bankAddress?: string;
+}
+// 新增银行卡请求接口
+export interface AddBankCardRequest {
+  bankName: string;
+  cardNumber: string;
+  holderName: string;
+  isDefault: boolean;
+}
+
+// 提现请求接口
+export interface WithdrawRequest {
+  amount: number; // USD金额
+  inkAmount: number; // 墨币数量
+  bankCardId: string; // 银行卡ID
+}
+
+// 提现记录接口
+export interface WithdrawRecord {
+  id: string;
+  userId: number;
+  amount: number; // USD金额
+  inkAmount: number; // 墨币数量
+  bankCardId: string;
+  bankName: string;
+  cardNumber: string; // 部分隐藏的卡号
+  status: "pending" | "processing" | "completed" | "failed";
+  createAt: string;
+  completedAt?: string;
+  failReason?: string;
+}
+
+// 提现响应接口
+export interface WithdrawResponse {
+  withdrawId: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  remainingBalance: number; // 剩余墨币数量
+}
+
+// 银行卡列表响应
+export interface PaginatedBankCards {
+  dataList: BankCard[];
+  totalPage: number;
+  currentPage: number;
+}
+
+// 提现记录列表响应
+export interface PaginatedWithdrawRecords {
+  dataList: WithdrawRecord[];
+  totalPage: number;
+  currentPage: number;
+}

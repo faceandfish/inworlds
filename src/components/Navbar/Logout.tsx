@@ -34,7 +34,10 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onClick }) => {
     setAlertMessage(t("loggingOut"));
 
     try {
-      // 先执行自定义的登出逻辑
+      await signOut({
+        redirect: false // 阻止 NextAuth 自动重定向
+      });
+
       await logoutUser();
 
       setAlertMessage(t("logoutSuccess"));
@@ -46,7 +49,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onClick }) => {
       // 延迟跳转到登录页
       setTimeout(() => {
         setShowStatusAlert(false);
-        router.push("/login");
+        router.replace("/login");
       }, 2000);
     } catch (error) {
       console.error(t("logoutError"), error);
