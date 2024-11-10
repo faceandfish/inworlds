@@ -21,7 +21,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onSave }) => {
   const [formData, setFormData] = useState<AccountSettingsFields>({
     email: user.email,
     phone: user.phone || "",
-    language: user.language,
+    language: user.language || "en",
     gender: user.gender || "male",
     birthDate: user.birthDate
       ? new Date(user.birthDate).toISOString().split("T")[0]
@@ -32,7 +32,7 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onSave }) => {
     setFormData({
       email: user.email,
       phone: user.phone || "",
-      language: user.language,
+      language: user.language || "en",
       gender: user.gender || "other",
       birthDate: user.birthDate
         ? new Date(user.birthDate).toISOString().split("T")[0]
@@ -52,9 +52,18 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onSave }) => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("Submitting form data:", formData);
+
+    const filteredData = Object.fromEntries(
+      Object.entries(formData).filter(([key, value]) => {
+        // 特殊处理language字段，确保它不会是null
+        if (key === "language") return value !== null;
+        return value !== null && value !== "";
+      })
+    );
+    console.log("Submitting form data:", filteredData);
     try {
-      await onSave(formData);
+      await onSave(filteredData);
+
       console.log("Form data saved successfully");
 
       updateUser({ ...user, ...formData });

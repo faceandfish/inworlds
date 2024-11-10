@@ -55,7 +55,11 @@
       "balanceFetchError": "获取用户余额时发生错误："
     },
     "withdraw": {
-      "title": "提现到钱包",
+      "title": "提现到银行卡",
+      "description": "请选择提现金额和收款方式",
+      "paymentMethod": "收款方式",
+      "exchangeRate": "兑换比例",
+      "amountSection": "提现金额",
       "available": "可用余额",
       "inkTokens": "墨币",
       "equivalentUSD": "约等于",
@@ -84,8 +88,11 @@
       "swiftCode": "SWIFT Code",
       "swiftCodeHelp": "银行国际代码，用于国际转账",
       "bankAddress": "银行地址",
-      "errors.swiftCodeRequired": "国际转账需要填写SWIFT代码",
-      "errors.bankAddressRequired": "国际转账需要填写银行地址"
+      "errors": {
+        "swiftCodeRequired": "国际转账需要填写SWIFT代码",
+        "bankAddressRequired": "国际转账需要填写银行地址"
+      },
+      "maxWithdraw": "最多可提现"
     }
   }
 }

@@ -55,9 +55,44 @@
       "balanceFetchError": "獲取用戶餘額時發生錯誤："
     },
     "withdraw": {
-      "title": "提現功能正在建設中",
-      "description": "我們正在努力為您開發這項功能，請稍後再試。",
-      "estimatedCompletion": "預計完成時間：近期"
+      "title": "提現到銀行卡",
+      "description": "請選擇提現金額和收款方式",
+      "paymentMethod": "收款方式",
+      "exchangeRate": "兌換比例",
+      "amountSection": "提現金額",
+      "available": "可用餘額",
+      "inkTokens": "墨幣",
+      "equivalentUSD": "約等於",
+      "amountLabel": "提現金額",
+      "invalidAmount": "請輸入有效金額",
+      "insufficientBalance": "餘額不足",
+      "failed": "提現失敗，請稍後重試",
+      "processing": "處理中...",
+      "submit": "提交提現",
+      "notice": "提現說明",
+      "minAmount": "最小提現金額",
+      "processTime": "處理時間",
+      "businessDays": "個工作日",
+      "fee": "手續費",
+      "selectCard": "選擇銀行卡",
+      "addNewCard": "+ 新增卡片",
+      "useExistingCard": "使用已有銀行卡",
+      "newCardInfo": "新卡資訊",
+      "bankName": "開戶銀行",
+      "cardNumber": "銀行卡號",
+      "holderName": "持卡人姓名",
+      "setAsDefault": "設為預設卡片",
+      "default": "預設",
+      "incompleteCardInfo": "請填寫完整的銀行卡資訊",
+      "selectCountry": "選擇國家",
+      "swiftCode": "SWIFT Code",
+      "swiftCodeHelp": "銀行國際代碼，用於國際轉賬",
+      "bankAddress": "銀行地址",
+      "maxWithdraw": "最多可提現",
+      "errors": {
+        "swiftCodeRequired": "國際轉賬需要填寫SWIFT代碼",
+        "bankAddressRequired": "國際轉賬需要填寫銀行地址"
+      }
     }
   }
 }

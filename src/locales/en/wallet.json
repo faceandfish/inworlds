@@ -55,9 +55,44 @@
       "balanceFetchError": "Error while fetching user balance:"
     },
     "withdraw": {
-      "title": "Withdraw Function Under Construction",
-      "description": "We are working hard to develop this feature for you. Please try again later.",
-      "estimatedCompletion": "Estimated completion time: Coming soon"
+      "title": "Withdraw to Bank Card",
+      "description": "Please select withdrawal amount and payment method",
+      "paymentMethod": "Payment Method",
+      "exchangeRate": "Exchange Rate",
+      "amountSection": "Withdrawal Amount",
+      "available": "Available Balance",
+      "inkTokens": "InkCoin",
+      "equivalentUSD": "Approximately",
+      "amountLabel": "Withdrawal Amount",
+      "invalidAmount": "Please enter a valid amount",
+      "insufficientBalance": "Insufficient balance",
+      "failed": "Withdrawal failed, please try again later",
+      "processing": "Processing...",
+      "submit": "Submit Withdrawal",
+      "notice": "Withdrawal Notice",
+      "minAmount": "Minimum Withdrawal Amount",
+      "processTime": "Processing Time",
+      "businessDays": "business days",
+      "fee": "Fee",
+      "selectCard": "Select Bank Card",
+      "addNewCard": "+ Add New Card",
+      "useExistingCard": "Use Existing Card",
+      "newCardInfo": "New Card Information",
+      "bankName": "Bank Name",
+      "cardNumber": "Card Number",
+      "holderName": "Card Holder Name",
+      "setAsDefault": "Set as Default Card",
+      "default": "Default",
+      "incompleteCardInfo": "Please complete all bank card information",
+      "selectCountry": "Select Country",
+      "swiftCode": "SWIFT Code",
+      "swiftCodeHelp": "International bank code for international transfers",
+      "bankAddress": "Bank Address",
+      "maxWithdraw": "Maximum withdrawal amount",
+      "errors": {
+        "swiftCodeRequired": "SWIFT code is required for international transfers",
+        "bankAddressRequired": "Bank address is required for international transfers"
+      }
     }
   }
 }

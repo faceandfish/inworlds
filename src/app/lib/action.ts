@@ -227,7 +227,6 @@ export async function register(
 export const updateProfile = async (
   updateData: UpdateUserRequest
 ): Promise<ApiResponse<UserInfo>> => {
-  console.log("Sending update request with:", updateData);
   try {
     const token = getToken();
     const response = await api.put<ApiResponse<UserInfo>>(

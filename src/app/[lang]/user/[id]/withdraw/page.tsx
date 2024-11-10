@@ -8,7 +8,7 @@ import { AmountInput } from "@/components/Withdraw/AmountInput";
 import { BankCardList } from "@/components/Withdraw/BankCardList";
 import { WithdrawNotice } from "@/components/Withdraw/WithdrawNotice";
 import { AddBankCardRequest, BankCard } from "@/app/lib/definitions";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
 import InternationalBankForm from "@/components/Withdraw/InternationalBankForm";
 
 const EXCHANGE_RATE = 0.01;
@@ -123,67 +123,82 @@ export default function WithdrawPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-2xl mx-auto">
-          <div className="mb-8">
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          {/* 标题部分 */}
+          <div className="mb-6">
             <h1 className="text-2xl font-bold text-gray-900">
               {t("wallet.withdraw.title")}
             </h1>
-            <p className="mt-1 text-gray-500">
-              {t("wallet.withdraw.description")}
-            </p>
+            <div className="mt-2 flex items-center text-sm text-gray-500">
+              <p>{t("wallet.withdraw.description")}</p>
+              <span className="mx-2">•</span>
+              <p>
+                {t("wallet.withdraw.exchangeRate")}: 1 USD = {1 / EXCHANGE_RATE}{" "}
+                {t("wallet.withdraw.inkTokens")}
+              </p>
+            </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+          {/* 主卡片内容 */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 divide-y divide-gray-200">
+            {/* 余额卡片 */}
             <div className="p-6">
               <BalanceCard
                 totalIncome={user?.totalIncome || 0}
                 availableUSD={availableUSD}
               />
+            </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6 mt-6">
+            {/* 提现表单 */}
+            <form onSubmit={handleSubmit} className="p-6 space-y-8">
+              {/* 金额输入 */}
+              <div>
+                <h3 className="text-base font-medium text-gray-900 mb-4">
+                  {t("wallet.withdraw.amountSection")}
+                </h3>
                 <div className="bg-gray-50 rounded-lg p-4">
                   <AmountInput
                     amount={amount}
                     inkAmount={inkTokenAmount}
                     onChange={setAmount}
+                    maxInkAmount={user?.totalIncome || 0}
                   />
                 </div>
+              </div>
 
-                <div className="border-t pt-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-medium text-gray-900">
-                      {t("wallet.withdraw.paymentMethod")}
-                    </h3>
-                    {savedCards.length > 0 && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowNewCardForm(!showNewCardForm);
-                          if (!showNewCardForm) {
-                            setSelectedCard("");
-                          }
-                        }}
-                        className="text-orange-500 hover:text-orange-600 text-sm font-medium"
-                      >
-                        {showNewCardForm
-                          ? t("wallet.withdraw.useExistingCard")
-                          : t("wallet.withdraw.addNewCard")}
-                      </button>
-                    )}
-                  </div>
+              {/* 支付方式 */}
+              <div>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-base font-medium text-gray-900">
+                    {t("wallet.withdraw.paymentMethod")}
+                  </h3>
+                  {savedCards.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowNewCardForm(!showNewCardForm);
+                        if (!showNewCardForm) setSelectedCard("");
+                      }}
+                      className="text-orange-500 hover:text-orange-600 text-sm font-medium"
+                    >
+                      {showNewCardForm
+                        ? t("wallet.withdraw.useExistingCard")
+                        : t("wallet.withdraw.addNewCard")}
+                    </button>
+                  )}
+                </div>
 
-                  {!showNewCardForm && savedCards.length > 0 && (
+                <div className="bg-gray-50 rounded-lg">
+                  {!showNewCardForm && savedCards.length > 0 ? (
                     <BankCardList
                       cards={savedCards}
                       selectedCard={selectedCard}
                       onSelectCard={setSelectedCard}
                     />
-                  )}
-
-                  {(showNewCardForm || savedCards.length === 0) && (
-                    <div className="bg-gray-50 rounded-lg p-4">
+                  ) : (
+                    <div className="p-4">
                       <InternationalBankForm
                         card={newCard}
                         onChange={setNewCard}
@@ -191,54 +206,36 @@ export default function WithdrawPage() {
                     </div>
                   )}
                 </div>
+              </div>
 
-                {error && (
-                  <div className="rounded-md bg-red-50 p-4">
-                    <div className="flex">
-                      <div className="ml-3">
-                        <p className="text-sm text-red-700">{error}</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                <div className="border-t pt-6">
-                  <button
-                    type="submit"
-                    disabled={isSubmitting || !amount || Number(amount) <= 0}
-                    className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center space-x-2"
-                  >
-                    {isSubmitting && (
-                      <svg
-                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
-                    )}
-                    <span>
-                      {isSubmitting
-                        ? t("wallet.withdraw.processing")
-                        : t("wallet.withdraw.submit")}
-                    </span>
-                  </button>
+              {/* 错误提示 */}
+              {error && (
+                <div className="rounded-md bg-red-50 p-4 border border-red-200">
+                  <p className="text-sm text-red-700">{error}</p>
                 </div>
-              </form>
+              )}
 
+              {/* 提交按钮 */}
+              <div className="pt-6">
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !amount || Number(amount) <= 0}
+                  className="w-full bg-orange-500 text-white py-3 px-4 rounded-lg hover:bg-orange-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
+                >
+                  {isSubmitting && (
+                    <ArrowPathIcon className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
+                  )}
+                  <span>
+                    {isSubmitting
+                      ? t("wallet.withdraw.processing")
+                      : t("wallet.withdraw.submit")}
+                  </span>
+                </button>
+              </div>
+            </form>
+
+            {/* 提现说明 */}
+            <div className="p-6 bg-gray-50 rounded-b-xl">
               <WithdrawNotice />
             </div>
           </div>

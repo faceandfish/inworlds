@@ -55,9 +55,44 @@
       "balanceFetchError": "ユーザーの残高の取得中にエラーが発生しました："
     },
     "withdraw": {
-      "title": "出金機能は現在開発中です",
-      "description": "この機能の開発に取り組んでいます。後ほどお試しください。",
-      "estimatedCompletion": "完成予定時期：近日中"
+      "title": "銀行口座への出金",
+      "description": "出金額と受取方法を選択してください",
+      "paymentMethod": "受取方法",
+      "exchangeRate": "為替レート",
+      "amountSection": "出金額",
+      "available": "利用可能残高",
+      "inkTokens": "インクトークン",
+      "equivalentUSD": "約",
+      "amountLabel": "出金額",
+      "invalidAmount": "有効な金額を入力してください",
+      "insufficientBalance": "残高不足です",
+      "failed": "出金に失敗しました。後でもう一度お試しください",
+      "processing": "処理中...",
+      "submit": "出金を申請",
+      "notice": "出金に関する注意事項",
+      "minAmount": "最低出金額",
+      "processTime": "処理時間",
+      "businessDays": "営業日",
+      "fee": "手数料",
+      "selectCard": "銀行口座を選択",
+      "addNewCard": "+ 新規口座を追加",
+      "useExistingCard": "既存の口座を使用",
+      "newCardInfo": "新規口座情報",
+      "bankName": "銀行名",
+      "cardNumber": "口座番号",
+      "holderName": "口座名義",
+      "setAsDefault": "デフォルトに設定",
+      "default": "デフォルト",
+      "incompleteCardInfo": "銀行口座情報を全て入力してください",
+      "selectCountry": "国を選択",
+      "swiftCode": "SWIFTコード",
+      "swiftCodeHelp": "海外送金用の国際銀行コード",
+      "bankAddress": "銀行住所",
+      "maxWithdraw": "最大出金可能額",
+      "errors": {
+        "swiftCodeRequired": "海外送金にはSWIFTコードが必要です",
+        "bankAddressRequired": "海外送金には銀行住所が必要です"
+      }
     }
   }
 }
