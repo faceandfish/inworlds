@@ -37,18 +37,6 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onClick }) => {
       // 先执行自定义的登出逻辑
       await logoutUser();
 
-      // 再处理 NextAuth 的会话清除
-      try {
-        await signOut({
-          redirect: false,
-          callbackUrl: "/login"
-        });
-      } catch (authError) {
-        // 即使 NextAuth signOut 失败，只要自定义 logout 成功，
-        // 我们仍然认为登出成功
-        console.warn("NextAuth signOut error:", authError);
-      }
-
       setAlertMessage(t("logoutSuccess"));
 
       if (onClick) {
