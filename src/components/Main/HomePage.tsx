@@ -19,13 +19,14 @@ interface HomePageProps {
 }
 
 export default function HomePage({ initialBooks }: HomePageProps) {
+  const { t, lang, browserLanguage } = useTranslation("navbar");
   const [books, setBooks] = useState<BookInfo[]>(initialBooks || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(2); // Start from page 2 since we already have initial books
   const [hasMore, setHasMore] = useState(true);
+
   const memoizedBooks = useMemo(() => books, [books]);
-  const { t } = useTranslation("navbar");
 
   const observer = useRef<IntersectionObserver | null>(null);
   const lastBookElementRef = useCallback(
@@ -46,7 +47,10 @@ export default function HomePage({ initialBooks }: HomePageProps) {
     const fetchMoreBooks = async () => {
       setLoading(true);
       try {
-        const response = await fetchHomepageBooks(page);
+        const response = await fetchHomepageBooks(page, 20, {
+          preferredLanguage: lang,
+          browserLanguage
+        });
         setBooks((prevBooks) => {
           const uniqueIds = new Set(prevBooks.map((book) => book.id));
           const newBooks = response.data.dataList.filter(
@@ -63,7 +67,32 @@ export default function HomePage({ initialBooks }: HomePageProps) {
     };
 
     fetchMoreBooks();
-  }, [page]);
+  }, [page, lang]); // 添加 preferredLanguage 作为依赖
+
+  // 当语言改变时重新加载内容
+  useEffect(() => {
+    setBooks([]); // 清空现有书籍
+    setPage(1); // 重置页码
+    setHasMore(true); // 重置加载状态
+
+    const loadInitialBooks = async () => {
+      setLoading(true);
+      try {
+        const response = await fetchHomepageBooks(1, 20, {
+          preferredLanguage: lang,
+          browserLanguage
+        });
+        setBooks(response.data.dataList);
+        setHasMore(response.data.dataList.length >= 20);
+      } catch (err) {
+        setError("err");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInitialBooks();
+  }, [lang]); // 当首选语言改变时重新加载
 
   if (!memoizedBooks) {
     return <BookPreviewCardSkeleton />;

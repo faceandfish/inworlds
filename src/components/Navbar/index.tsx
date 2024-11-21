@@ -8,7 +8,6 @@ import { useUser } from "../UserContextProvider";
 import UserMenuSkeleton from "./Skeleton/UserMenuSkeleton";
 import { IoIosSearch } from "react-icons/io";
 import { usePathname, useSearchParams, useRouter } from "next/navigation";
-import { getToken } from "@/app/lib/token";
 
 interface NavbarProps {
   className?: string;

@@ -41,7 +41,7 @@
   "enter_email": "Enter your email",
   "enter_password": "Enter your password",
   "confirm_password": "Confirm password",
-  "registration_success_message": "Registration successful!\nWe have sent a verification link to your email. Please check your inbox and click the link to complete the registration.",
+  "registration_success_message": "Registration submitted!\n\nImportant Notice:\n1. We have sent a verification link to your email\n2. Please check your email and click the verification link\n3. You can only log in after completing email verification\n\nIf you haven't received the email, please check your spam folder",
   "username_format_error": "Username can only contain letters, numbers, @, _ (underscore) and - (hyphen)",
   "password_format_error": "Password must be at least 6 characters and can be letters only, numbers only, or any combination of letters, numbers, and @ symbol",
   "username_requirements": "Only letters, numbers, @, _ (underscore) and - (hyphen) are allowed",

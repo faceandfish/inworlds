@@ -57,6 +57,7 @@
     "withdraw": {
       "title": "提现到银行卡",
       "description": "请选择提现金额和收款方式",
+      "submitSuccess": "提现申请提交成功，请等待审核",
       "paymentMethod": "收款方式",
       "exchangeRate": "兑换比例",
       "amountSection": "提现金额",
@@ -70,10 +71,14 @@
       "processing": "处理中...",
       "submit": "提交提现",
       "notice": "提现说明",
-      "minAmount": "最小提现金额",
+      "minAmount": "最低提现金额",
+      "minAmountNote": "为了减少手续费支出，建议累积到较大金额再提现",
       "processTime": "处理时间",
       "businessDays": "个工作日",
+      "processTimeNote": "包含审核、处理和银行转账时间，实际到账时间可能会因为节假日、银行系统等因素有所延长",
       "fee": "手续费",
+      "feeLink": "查看详细费率说明",
+      "feeNote": "具体费率因提现金额、目标国家/地区、货币兑换等因素而异",
       "selectCard": "选择银行卡",
       "addNewCard": "+ 添加新卡",
       "useExistingCard": "使用已有银行卡",
@@ -88,11 +93,51 @@
       "swiftCode": "SWIFT Code",
       "swiftCodeHelp": "银行国际代码，用于国际转账",
       "bankAddress": "银行地址",
+      "savingCard": "正在保存卡片",
+      "saveCard": "保存卡片",
+      "deleteCard": "删除银行卡",
+      "confirmDeleteCard": "确定要删除这张银行卡吗？",
+      "confirmDelete": "确认删除",
+      "deleteSuccess": "银行卡删除成功",
       "errors": {
+        "fillAllFields": "请填写所有必填字段",
+        "fetchCardsFailed": "获取银行卡列表失败",
+        "saveCardFailed": "保存银行卡失败",
         "swiftCodeRequired": "国际转账需要填写SWIFT代码",
-        "bankAddressRequired": "国际转账需要填写银行地址"
+        "bankAddressRequired": "国际转账需要填写银行地址",
+        "deleteFailed": "删除银行卡失败",
+        "amountTooSmall": "提现金额必须大于10美元",
+        "insufficientBalance": "账户余额不足",
+        "pendingWithdraw": "有未处理完成的提现请求",
+        "submitFailed": "提交提现申请失败",
+        "invalidAmount": "请输入有效的提现金额",
+        "selectCard": "请选择银行卡"
       },
-      "maxWithdraw": "最多可提现"
+      "maxWithdraw": "最多可提现",
+      "branchName": "支行名称",
+      "branchNamePlaceholder": "例：东京支行",
+      "branchCode": "支行代码",
+      "branchCodeHelp": "请输入3位支行代码",
+      "accountType": "账户类型",
+      "accountTypes": {
+        "ordinary": "普通账户",
+        "current": "支票账户"
+      },
+      "history": "提现记录",
+      "noRecords": "暂无提现记录",
+      "columns": {
+        "amount": "金额",
+        "bankName": "银行名称",
+        "cardNumber": "银行卡号",
+        "status": "状态",
+        "time": "时间"
+      },
+      "status": {
+        "completed": "已完成",
+        "pending": "待处理",
+        "processing": "处理中",
+        "failed": "失败"
+      }
     }
   }
 }

@@ -1,3 +1,4 @@
+import { Locale } from "../i18n-config";
 import {
   CreateUserRequest,
   LoginRequest,
@@ -32,8 +33,15 @@ import {
   SearchHistoryItem,
   ReadingStats,
   TransferToWalletResponse,
-  PaginatedTransferRecords
+  PaginatedTransferRecords,
+  PaginatedBankCards,
+  AddBankCardRequest,
+  BankCard,
+  WithdrawRequest,
+  WithdrawResponse,
+  PaginatedWithdrawRecords
 } from "./definitions";
+import safeLocalStorage from "./localStorage";
 import { getToken, removeToken, setToken } from "./token";
 import axios, { AxiosError, AxiosResponse } from "axios";
 
@@ -42,16 +50,11 @@ let token: string | null = null;
 // 创建 axios 实例
 const api = axios.create({
   baseURL: "https://api.inworlds.xyz/inworlds/api",
-  // baseURL:
-  //   process.env.NODE_ENV === "development"
-  //     ? "http://192.168.0.103:8088/inworlds/api"
-  //     : "https://api.inworlds.xyz:8088/inworlds/api",
+  //baseURL: "http://192.168.0.103:8088/inworlds/api",
 
   headers: {
     "Content-Type": "application/json"
-  },
-  timeout: 10000,
-  withCredentials: true
+  }
 });
 
 api.interceptors.request.use((config) => {
@@ -69,8 +72,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (typeof window !== "undefined" && error.response?.status === 401) {
-      // 检查是否在浏览器环境
-      removeToken();
+      console.log("401 error, current token:", getToken());
     }
     return Promise.reject(error);
   }
@@ -93,6 +95,10 @@ export const login = async (
         headers: { "Content-Type": "multipart/form-data" }
       }
     );
+
+    if (response.data.code === 200) {
+      setToken(response.data.data);
+    }
 
     return response.data;
   } catch (error) {
@@ -121,7 +127,9 @@ export const handleGoogleLogin = async (
       }
     );
 
-    if (response.data.code !== 200) {
+    if (response.data.code === 200) {
+      setToken(response.data.data); // 添加这行
+    } else {
       throw new Error(response.data.msg || "Google 登录失败");
     }
 
@@ -132,10 +140,13 @@ export const handleGoogleLogin = async (
   }
 };
 
-export const getUserInfo = async (
-  token: string
-): Promise<ApiResponse<UserInfo>> => {
+export const getUserInfo = async (): Promise<ApiResponse<UserInfo>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+
     const response: AxiosResponse<ApiResponse<UserInfo>> = await api.get(
       "/user/principal",
       {
@@ -168,7 +179,6 @@ export async function logout(): Promise<{ code: number; msg: string }> {
   }
 
   try {
-    console.log("尝试从API获取数据");
     const response = await api.post<{ code: number; msg: string }>(
       "/logout",
       null,
@@ -179,10 +189,7 @@ export async function logout(): Promise<{ code: number; msg: string }> {
       }
     );
 
-    console.log("收到API响应，状态:", response.status);
-
     const result = response.data;
-    console.log("API结果:", result);
 
     removeToken();
 
@@ -224,6 +231,57 @@ export async function register(
   }
 }
 
+// 需要token验证的用户语言设置 - 会存储到数据库
+export const updateUserLanguage = async (
+  language: Locale
+): Promise<ApiResponse<void>> => {
+  try {
+    const token = getToken();
+
+    if (!token) throw new Error("Token not available");
+
+    const response = await api.put<ApiResponse<void>>(
+      "/user/language",
+      { language },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to update language");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("[updateUserLanguage] 错误:", error);
+    throw error;
+  }
+};
+
+// 公开的语言设置 - 不需要token，不存数据库
+export const updatePublicLanguage = async (
+  language: Locale
+): Promise<ApiResponse<void>> => {
+  try {
+    const response = await api.put<ApiResponse<void>>("/user/public/language", {
+      language
+    });
+
+    if (response.data.code !== 200) {
+      throw new Error(response.data.msg || "Failed to update language");
+    }
+
+    return response.data;
+  } catch (error) {
+    console.error("[updatePublicLanguage] 错误:", error);
+    throw error;
+  }
+};
+
 export const updateProfile = async (
   updateData: UpdateUserRequest
 ): Promise<ApiResponse<UserInfo>> => {
@@ -257,6 +315,8 @@ export const uploadAvatar = async (
   try {
     const token = getToken();
     const formData = new FormData();
+    console.log("Avatar file:", fileData.avatarImage);
+
     if (fileData.avatarImage) {
       formData.append("avatarImage", fileData.avatarImage);
     }
@@ -363,6 +423,7 @@ interface BookUploadData
     | "wordCount"
     | "tags"
     | "authorIntroduction"
+    | "views"
   > {
   coverImageUrl?: string;
 }
@@ -780,17 +841,43 @@ export const fetchSingleBookAnalytics = async (
   }
 };
 
+interface LanguageParams {
+  preferredLanguage?: string | null;
+  browserLanguage?: string | null;
+}
 //首页内容api
-
 export const fetchHomepageBooks = async (
   page: number,
-  limit: number = 20
+  limit: number = 20,
+  languages?: LanguageParams
 ): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
   try {
     const url = `/books/homepage`;
 
+    // 1. 首选: URL参数指定的语言
+    const params: Record<string, any> = {
+      page,
+      limit
+    };
+
+    if (languages?.preferredLanguage) {
+      params.language = languages.preferredLanguage;
+    }
+
+    const defaultLang = "en";
+
     const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(url, {
-      params: { page, limit }
+      params,
+      headers: {
+        // 将所有语言偏好按优先级排序发送给后端
+        "Accept-Language": [
+          languages?.preferredLanguage,
+          languages?.browserLanguage,
+          defaultLang
+        ]
+          .filter(Boolean)
+          .join(",")
+      }
     });
 
     if (response.data.code !== 200) {
@@ -1181,6 +1268,28 @@ export const addNewChapter = async (
   }
 };
 
+// 获取用户总收入
+export const getUserTotalIncome = async (): Promise<ApiResponse<number>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.get<ApiResponse<number>>(
+      "/user/wallet/earnings",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching total income:", error);
+    throw error;
+  }
+};
+
 export const fetchIncomeData = async (
   currentPage: number = 1,
   pageSize: number = 5
@@ -1316,8 +1425,6 @@ export const checkBookFavoriteStatus = async (
       throw new Error("Token 不可用，请重新登录");
     }
 
-    console.log("Checking favorite status for book:", bookId);
-
     const response = await api.get<ApiResponse<boolean>>(
       `/book/${bookId}/favorite-status`,
       {
@@ -1326,8 +1433,6 @@ export const checkBookFavoriteStatus = async (
         }
       }
     );
-
-    console.log("Raw API response:", response);
 
     if (response.data.code !== 200) {
       throw new Error(response.data.msg || "获取书籍收藏状态失败");
@@ -1712,7 +1817,7 @@ export const getBookPurchasedChapters = async (
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      throw new Error(" Please login ");
     }
 
     const response = await api.get<
@@ -1940,6 +2045,131 @@ export const getTransferRecords = async (
     return response.data;
   } catch (error) {
     console.error("Error fetching transfer records:", error);
+    throw error;
+  }
+};
+
+// 银行卡相关 API
+export const getBankCards = async (): Promise<
+  ApiResponse<PaginatedBankCards>
+> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.get<ApiResponse<PaginatedBankCards>>(
+      "/user/bankcards",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching bank cards:", error);
+    throw error;
+  }
+};
+
+export const addBankCard = async (
+  card: AddBankCardRequest
+): Promise<ApiResponse<BankCard>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.post<ApiResponse<BankCard>>(
+      "/user/bankcard",
+      card,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error adding bank card:", error);
+    throw error;
+  }
+};
+
+// 提现申请 API
+export const submitWithdrawRequest = async (
+  request: WithdrawRequest
+): Promise<ApiResponse<WithdrawResponse>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.post<ApiResponse<WithdrawResponse>>(
+      "/user/withdraw",
+      request,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error submitting withdraw request:", error);
+    throw error;
+  }
+};
+
+// 获取提现记录
+export const getWithdrawHistory = async (
+  currentPage: number = 1,
+  pageSize: number = 10
+): Promise<ApiResponse<PaginatedWithdrawRecords>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.get<ApiResponse<PaginatedWithdrawRecords>>(
+      "/user/withdraw/records",
+      {
+        params: { currentPage, pageSize },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching withdraw records:", error);
+    throw error;
+  }
+};
+
+// 删除银行卡 API
+export const deleteBankCard = async (
+  cardId: string
+): Promise<ApiResponse<void>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+    const response = await api.delete<ApiResponse<void>>(
+      `/user/bankcard/${cardId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error deleting bank card:", error);
     throw error;
   }
 };

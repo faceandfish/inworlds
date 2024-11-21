@@ -23,6 +23,7 @@
     "confirmUpdate": "确认更新",
     "setPricing": "设置章节价格",
     "pricingPaid": "付费",
+    "pricePlaceholder": "请输入整数",
     "price": "价格（墨币）",
     "priceNote": "1墨币 = 0.01美元",
     "confirmSetting": "确认设置",

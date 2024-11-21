@@ -57,6 +57,7 @@
     "withdraw": {
       "title": "提現到銀行卡",
       "description": "請選擇提現金額和收款方式",
+      "submitSuccess": "提現申請提交成功，請等待審核",
       "paymentMethod": "收款方式",
       "exchangeRate": "兌換比例",
       "amountSection": "提現金額",
@@ -70,10 +71,14 @@
       "processing": "處理中...",
       "submit": "提交提現",
       "notice": "提現說明",
-      "minAmount": "最小提現金額",
+      "minAmount": "最低提現金額",
+      "minAmountNote": "為了減少手續費支出，建議累積到較大金額再提現",
       "processTime": "處理時間",
+      "processTimeNote": "包含審核、處理和銀行轉賬時間，實際到賬時間可能會因為節假日、銀行系統等因素有所延長",
       "businessDays": "個工作日",
       "fee": "手續費",
+      "feeLink": "查看詳細費率說明",
+      "feeNote": "具體費率因提現金額、目標國家/地區、貨幣兌換等因素而異",
       "selectCard": "選擇銀行卡",
       "addNewCard": "+ 新增卡片",
       "useExistingCard": "使用已有銀行卡",
@@ -89,9 +94,49 @@
       "swiftCodeHelp": "銀行國際代碼，用於國際轉賬",
       "bankAddress": "銀行地址",
       "maxWithdraw": "最多可提現",
+      "branchName": "支行名稱",
+      "branchNamePlaceholder": "例：東京支行",
+      "branchCode": "支行代碼",
+      "branchCodeHelp": "請輸入3位支行代碼",
+      "accountType": "賬戶類型",
+      "accountTypes": {
+        "ordinary": "普通賬戶",
+        "current": "支票賬戶"
+      },
+      "savingCard": "正在保存卡片..",
+      "saveCard": "保存卡片",
+      "deleteCard": "刪除銀行卡",
+      "confirmDeleteCard": "確定要刪除這張銀行卡嗎？",
+      "confirmDelete": "確認刪除",
+      "deleteSuccess": "銀行卡刪除成功",
       "errors": {
+        "fillAllFields": "請填寫所有必填欄位",
+        "fetchCardsFailed": "獲取銀行卡列表失敗",
+        "saveCardFailed": "保存銀行卡失敗",
         "swiftCodeRequired": "國際轉賬需要填寫SWIFT代碼",
-        "bankAddressRequired": "國際轉賬需要填寫銀行地址"
+        "bankAddressRequired": "國際轉賬需要填寫銀行地址",
+        "deleteFailed": "刪除銀行卡失敗",
+        "amountTooSmall": "提現金額必須大於10美元",
+        "insufficientBalance": "賬戶餘額不足",
+        "pendingWithdraw": "有未處理完成的提現請求",
+        "submitFailed": "提交提現申請失敗",
+        "invalidAmount": "請輸入有效的提現金額",
+        "selectCard": "請選擇銀行卡"
+      },
+      "history": "提現記錄",
+      "noRecords": "暫無提現記錄",
+      "columns": {
+        "amount": "金額",
+        "bankName": "銀行名稱",
+        "cardNumber": "銀行卡號",
+        "status": "狀態",
+        "time": "時間"
+      },
+      "status": {
+        "completed": "已完成",
+        "pending": "待處理",
+        "processing": "處理中",
+        "failed": "失敗"
       }
     }
   }

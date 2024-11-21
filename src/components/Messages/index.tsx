@@ -31,7 +31,7 @@ import {
 } from "./MessagesSkeleton";
 
 const Messages: React.FC = () => {
-  const { t, isLoaded } = useTranslation("message");
+  const { t, isLoaded, lang } = useTranslation("message");
 
   const [activeSection, setActiveSection] = useState<SectionType>("books");
   const [data, setData] = useState({
@@ -80,7 +80,7 @@ const Messages: React.FC = () => {
       console.error("Error fetching data:", error);
       setError("获取数据时发生错误。请稍后再试。");
     }
-  }, [activeSection, data]);
+  }, [activeSection]);
 
   useEffect(() => {
     fetchData();
@@ -92,7 +92,36 @@ const Messages: React.FC = () => {
 
   const ContentComponent = () => {
     if (!isLoaded) return <MessagesSkeleton />;
-    if (error) return <div className="text-red-500">{error}</div>;
+
+    if (error) {
+      return (
+        <div className="flex flex-col items-center justify-center py-20">
+          <div className="mb-4">
+            <BookOpenIcon
+              className="w-16 h-16 text-gray-400"
+              strokeWidth={1.5}
+            />
+          </div>
+          <p className="text-neutral-600 text-lg text-center mb-4">
+            {t("pleaseLoginFirst")}
+          </p>
+          <div className="flex space-x-4">
+            <Link
+              href={`/${lang}/login`}
+              className="px-6 py-2 bg-orange-400 text-white rounded-md hover:bg-orange-500"
+            >
+              {t("login")}
+            </Link>
+            <Link
+              href={`/${lang}/register`}
+              className="px-6 py-2 border border-orange-400 text-orange-400 rounded-md hover:bg-orange-50"
+            >
+              {t("register")}
+            </Link>
+          </div>
+        </div>
+      );
+    }
 
     switch (activeSection) {
       case "books":

@@ -1,4 +1,7 @@
 {
+  "pleaseLoginFirst": "請先登錄或註冊賬戶以查看收藏內容",
+  "login": "登錄",
+  "register": "註冊",
   "favoriteBookPreviewCard": {
     "author": "作者",
     "latestChapter": "最新章節：第"
@@ -8,7 +11,12 @@
     "errorFetchingData": "獲取數據時發生錯誤。請稍後再試。",
     "favoriteBooks": "收藏的書籍",
     "followedUsers": "關注的用戶",
-    "systemNotifications": "系統通知"
+    "systemNotifications": "系統通知",
+    "noFavoriteBooks": "暫無收藏的書",
+    "noFollowedAuthors": "暫無關注的作者",
+    "noNotifications": "暫無系統消息",
+    "exploreBooks": "去看看有什麼好書",
+    "exploreAuthors": "去發現更多作者"
   },
   "sidebar": {
     "messageCenter": "訊息中心",

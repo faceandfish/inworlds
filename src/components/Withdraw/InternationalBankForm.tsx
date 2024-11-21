@@ -1,27 +1,32 @@
 import React from "react";
 import { useTranslation } from "../useTranslation";
 
-// 国家列表
 const COUNTRIES = [
   { code: "JP", name: "Japan" },
   { code: "CN", name: "China" },
   { code: "US", name: "United States" },
   { code: "GB", name: "United Kingdom" },
   { code: "SG", name: "Singapore" }
-  // 可以添加更多国家
 ];
 
+interface BankCard {
+  bankName: string;
+  cardNumber: string;
+  holderName: string;
+  isDefault: boolean;
+  country: string;
+  // 国际账户字段
+  swiftCode?: string;
+  bankAddress?: string;
+  // 日本国内账户字段
+  branchCode?: string;
+  branchName?: string;
+  accountType?: "ordinary" | "current"; // 普通账户 or 当座账户
+}
+
 interface InternationalBankFormProps {
-  card: {
-    bankName: string;
-    cardNumber: string;
-    holderName: string;
-    isDefault: boolean;
-    swiftCode?: string;
-    bankAddress?: string;
-    country: string;
-  };
-  onChange: (card: any) => void;
+  card: BankCard;
+  onChange: (card: BankCard) => void;
 }
 
 const InternationalBankForm: React.FC<InternationalBankFormProps> = ({
@@ -30,16 +35,21 @@ const InternationalBankForm: React.FC<InternationalBankFormProps> = ({
 }) => {
   const { t } = useTranslation("wallet");
 
-  const isInternational = card.country !== "JP";
+  const isJapan = card.country === "JP";
 
   const handleCountryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newCountry = e.target.value;
+    const isNewJapan = newCountry === "JP";
+
     onChange({
       ...card,
       country: newCountry,
-      // 如果切换回日本，清空国际转账相关字段
-      swiftCode: newCountry === "JP" ? "" : card.swiftCode,
-      bankAddress: newCountry === "JP" ? "" : card.bankAddress
+      // 切换国家时清空对应字段
+      swiftCode: isNewJapan ? undefined : card.swiftCode,
+      bankAddress: isNewJapan ? undefined : card.bankAddress,
+      branchCode: isNewJapan ? card.branchCode : undefined,
+      branchName: isNewJapan ? card.branchName : undefined,
+      accountType: isNewJapan ? card.accountType || "ordinary" : undefined
     });
   };
 
@@ -65,6 +75,7 @@ const InternationalBankForm: React.FC<InternationalBankFormProps> = ({
           </select>
         </div>
 
+        {/* 银行名称 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("wallet.withdraw.bankName")}
@@ -77,7 +88,70 @@ const InternationalBankForm: React.FC<InternationalBankFormProps> = ({
           />
         </div>
 
-        {isInternational && (
+        {/* 日本国内银行特有字段 */}
+        {isJapan && (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("wallet.withdraw.branchName")}
+              </label>
+              <input
+                type="text"
+                value={card.branchName}
+                onChange={(e) =>
+                  onChange({ ...card, branchName: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                placeholder={t("wallet.withdraw.branchNamePlaceholder")}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("wallet.withdraw.branchCode")}
+              </label>
+              <input
+                type="text"
+                value={card.branchCode}
+                onChange={(e) =>
+                  onChange({ ...card, branchCode: e.target.value })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                placeholder="XXX"
+                maxLength={3}
+              />
+              <p className="mt-1 text-sm text-gray-500">
+                {t("wallet.withdraw.branchCodeHelp")}
+              </p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t("wallet.withdraw.accountType")}
+              </label>
+              <select
+                value={card.accountType}
+                onChange={(e) =>
+                  onChange({
+                    ...card,
+                    accountType: e.target.value as "ordinary" | "current"
+                  })
+                }
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+              >
+                <option value="ordinary">
+                  {t("wallet.withdraw.accountTypes.ordinary")}
+                </option>
+                <option value="current">
+                  {t("wallet.withdraw.accountTypes.current")}
+                </option>
+              </select>
+            </div>
+          </>
+        )}
+
+        {/* 国际银行特有字段 */}
+        {!isJapan && (
           <>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -113,6 +187,7 @@ const InternationalBankForm: React.FC<InternationalBankFormProps> = ({
           </>
         )}
 
+        {/* 账号 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("wallet.withdraw.cardNumber")}
@@ -125,6 +200,7 @@ const InternationalBankForm: React.FC<InternationalBankFormProps> = ({
           />
         </div>
 
+        {/* 账户持有人姓名 */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             {t("wallet.withdraw.holderName")}
@@ -137,6 +213,7 @@ const InternationalBankForm: React.FC<InternationalBankFormProps> = ({
           />
         </div>
 
+        {/* 设为默认 */}
         <div className="flex items-center">
           <input
             type="checkbox"

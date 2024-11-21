@@ -1,4 +1,7 @@
 {
+  "pleaseLoginFirst": "请先登录或注册账户以查看收藏内容",
+  "login": "登录",
+  "register": "注册",
   "favoriteBookPreviewCard": {
     "author": "作者",
     "latestChapter": "最新章节："

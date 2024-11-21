@@ -34,7 +34,6 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
   const { t, isLoaded } = useTranslation("book");
 
   const isLoggedIn = !!user;
-  console.log("kk:", book.favoritesCount);
 
   // 格式化日期函数
   const formatDate = useCallback((dateString: string) => {
@@ -124,10 +123,16 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
         {/* 书籍信息 */}
         <div className="flex flex-col justify-around mt-4 md:mt-0">
           <h2 className="text-2xl md:text-3xl font-bold">{book.title}</h2>
-          <p className="text-neutral-500 text-sm">
-            {t("updatedTime")}:{" "}
-            {book.lastSaved ? formatDate(book.lastSaved) : "unknown"}
-          </p>
+          <div className="flex gap-5 text-neutral-500 text-sm">
+            <p>
+              {t("updatedTime")}:{" "}
+              {book.lastSaved ? formatDate(book.lastSaved) : "unknown"}
+            </p>
+            <p>
+              {t("totalWords")}: {book.totalWordCount}
+            </p>
+          </div>
+
           <div className="flex gap-5 text-neutral-500">
             <p>
               {t("latestChapter")}:{" "}

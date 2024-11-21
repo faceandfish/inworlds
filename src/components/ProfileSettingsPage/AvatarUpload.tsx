@@ -24,6 +24,18 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // 检查文件大小（例如：2MB 限制）
+      if (file.size > 2 * 1024 * 1024) {
+        alert("图片大小不能超过 2MB");
+        return;
+      }
+
+      // 检查文件类型
+      if (!file.type.startsWith("image/")) {
+        alert("请选择图片文件");
+        return;
+      }
+      console.log("Selected file:", file);
       setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -79,20 +91,19 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
             height={160}
             className="rounded-full object-cover w-40 h-40"
           />
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute bottom-0 right-0 rounded-full p-3 bg-orange-500 hover:bg-orange-600 transition-colors duration-200 text-white shadow-lg"
-          >
+          <label className="absolute bottom-0 right-0 rounded-full p-3 bg-orange-500 hover:bg-orange-600 transition-colors duration-200 text-white shadow-lg cursor-pointer">
             <CameraIcon className="h-6 w-6" />
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleAvatarChange}
-            className="hidden"
-          />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                console.log("File input onChange triggered");
+                console.log("Files:", e.target.files);
+                handleAvatarChange(e);
+              }}
+              className="hidden"
+            />
+          </label>
         </div>
         <div className="text-center space-y-10">
           <p className="text-sm text-gray-500 mt-5">

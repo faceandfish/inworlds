@@ -1,5 +1,6 @@
 {
   "ageConfirmation": "年龄确认",
+  "views": "人在看",
   "adultContentWarning": "包含成人内容。您确定要继续吗？",
   "author": "作者",
   "userLazy": "这个用户很懒，还没有写自我介绍。",
@@ -20,6 +21,7 @@
   "loading": "处理中...",
   "unfavoriteBook": "取消收藏",
   "unfavoriteSuccess": "取消收藏成功！",
+  "totalWords": "总字数",
   "words": "字",
   "paidChapter": "这是付费章节，您需要支付 {price} 墨币阅读",
   "payAndRead": "付费阅读",

@@ -87,7 +87,9 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
             className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all duration-200"
           />
 
-          {optionMenu && <UserOptionsMenu closeMenu={closeMenu} />}
+          {optionMenu && (
+            <UserOptionsMenu isOpen={optionMenu} closeMenu={closeMenu} />
+          )}
         </div>
       </div>
       {isMobile && optionMenu && (
@@ -96,7 +98,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
             <button onClick={closeMenu} className="mb-4">
               <IoMdClose className="text-2xl" />
             </button>
-            <UserOptionsMenu closeMenu={closeMenu} />
+            <UserOptionsMenu isOpen={optionMenu} closeMenu={closeMenu} />
           </div>
         </div>
       )}

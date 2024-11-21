@@ -160,7 +160,7 @@ export interface BookInfo {
   ageRating: "under18" | "adult" | "allAges";
   coverImageUrl?: string;
 
-  wordCount?: number;
+  totalWordCount?: number;
   lastSaved?: string;
   createdAt?: string;
   latestChapterNumber: number; //最新章节的编号
@@ -173,7 +173,7 @@ export interface BookInfo {
 
   status: "ongoing" | "completed"; // 书籍的连载状态：连载中或已完结
   publishStatus: "draft" | "published"; // 书籍的发布状态：草稿（仅作者可见）或已发布（所有人可见）
-
+  views: number;
   income24h: number; // 24小时总收入
   totalIncome: number; // 总收入
   donationIncome: number; // 总打赏收入
@@ -433,7 +433,6 @@ export interface TransferRecord {
   amount: number;
   status: "success" | "failed" | "pending";
   createAt: string;
-  type: "wallet" | "withdraw"; // wallet表示转入钱包，withdraw表示提现
 }
 
 export interface PaginatedTransferRecords {
@@ -464,6 +463,9 @@ export interface AddBankCardRequest {
   cardNumber: string;
   holderName: string;
   isDefault: boolean;
+  country: string;
+  swiftCode?: string; // 可选的，用于国际转账
+  bankAddress?: string;
 }
 
 // 提现请求接口

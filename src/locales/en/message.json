@@ -1,4 +1,7 @@
 {
+  "pleaseLoginFirst": "Please log in or register an account to view your favorites",
+  "login": "Login",
+  "register": "Register",
   "favoriteBookPreviewCard": {
     "author": "Author",
     "latestChapter": "Latest Chapter: Chapter"
@@ -8,7 +11,12 @@
     "errorFetchingData": "An error occurred while fetching data. Please try again later.",
     "favoriteBooks": "Favorite Books",
     "followedUsers": "Followed Users",
-    "systemNotifications": "System Notifications"
+    "systemNotifications": "System Notifications",
+    "noFavoriteBooks": "No favorite books yet",
+    "noFollowedAuthors": "No followed authors yet",
+    "noNotifications": "No system messages yet",
+    "exploreBooks": "Explore books",
+    "exploreAuthors": "Discover more authors"
   },
   "sidebar": {
     "messageCenter": "Message Center",

@@ -41,7 +41,7 @@
   "enter_email": "输入您的电子邮箱",
   "enter_password": "输入您的密码",
   "confirm_password": "确认密码",
-  "registration_success_message": "注册成功！\n我们已经向您的邮箱发送了一个验证链接，请查看您的邮箱并点击链接以完成注册。",
+  "registration_success_message": "注册信息已提交！\n\n重要提示：\n1. 我们已向您的邮箱发送了验证链接\n2. 请登录邮箱并点击验证链接\n3. 完成邮箱验证后，您才能使用账号登录\n\n如果没有收到邮件，请检查垃圾邮件文件夹",
   "username_format_error": "用户名只能包含英文字母、数字、@、_(下划线)和-(连字符)",
   "password_format_error": "密码至少需要6个字符，可以是纯英文字母、纯数字或字母、数字、@的任意组合",
 

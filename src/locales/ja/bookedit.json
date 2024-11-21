@@ -14,6 +14,7 @@
     "wordCount": "文字数：",
     "lastModified": "最終更新：",
     "free": "無料",
+    "pricePlaceholder": "整数を入力してください",
     "authorNote": "著者のノート",
     "updateStatus": "チャプターの状態を更新",
     "saveDraft": "下書きを保存",

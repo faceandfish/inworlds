@@ -12,6 +12,7 @@ export function setToken(token: string): void {
 export function getToken(): string | null {
   if (typeof window !== "undefined") {
     // 检查是否在浏览器环境
+
     return localStorage.getItem(TOKEN_KEY);
   }
   return null;

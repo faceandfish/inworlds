@@ -45,22 +45,16 @@ const UserSettingsPage: React.FC = () => {
     setAlert({ message, type });
   };
 
-  const handleProfileSave = async (updatedData: UpdateUserRequest) => {
+  const handleProfileSave = async (updatedData: Partial<UpdateUserRequest>) => {
     try {
       const response = await updateProfile(updatedData);
-
-      if (user) {
-        const updatedUser: UserInfo = {
-          ...user,
-          ...response.data
-        };
-        updateUser(updatedUser);
+      if (response.code === 200) {
+        showAlert(t("userSettings.profileUpdateSuccess"), "success");
         await refetch();
-
-        console.log("更改后：", user);
+        return;
       }
-      showAlert(t("userSettings.profileUpdateSuccess"), "success");
     } catch (error) {
+      console.error("更新失败:", error);
       showAlert(t("userSettings.profileUpdateFail"), "error");
     }
   };

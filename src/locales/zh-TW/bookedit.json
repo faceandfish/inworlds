@@ -14,6 +14,7 @@
     "wordCount": "字數：",
     "lastModified": "最後修改：",
     "free": "免費",
+    "pricePlaceholder": "請輸入整數",
     "authorNote": "作者說",
     "updateStatus": "更新章節狀態",
     "saveDraft": "保存草稿",

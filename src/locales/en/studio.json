@@ -86,6 +86,10 @@
     "transferRecords": "Transfer Records",
     "noTransferRecords": "No transfer records",
     "transferNotice": "Ink Coins transferred to wallet can only be used for platform consumption and cannot be withdrawn",
+    "required": "Please enter transfer amount",
+    "positiveAmount": "Please enter an amount greater than 0",
+    "integerAmount": "Please enter an integer amount",
+    "insufficientBalance": "Transfer amount cannot exceed available balance",
 
     "noIncome": "No income records",
     "transferType": {

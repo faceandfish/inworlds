@@ -15,14 +15,8 @@ export function useUserInfo() {
     try {
       setLoading(true);
       setError(null);
-      const token = getToken();
-      if (!token) {
-        setUser(null);
-        setLoading(false);
-        return;
-      }
-      const response = await getUserInfo(token);
-      if (response.code === 200 && response.data) {
+      const response = await getUserInfo();
+      if (response.code === 200) {
         setUser(response.data);
       } else {
         setError(response.msg || "Failed to fetch user info");

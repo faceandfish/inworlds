@@ -17,14 +17,17 @@ export const BalanceCard: React.FC<BalanceCardProps> = ({
       <div className="flex justify-between items-center mb-2">
         <span className="text-gray-600">{t("wallet.withdraw.available")}:</span>
         <span className="text-xl font-semibold text-orange-600">
-          {totalIncome || 0} {t("wallet.withdraw.inkTokens")}
+          ${availableUSD} USD
         </span>
       </div>
       <div className="flex justify-between items-center text-sm">
         <span className="text-gray-500">
           {t("wallet.withdraw.equivalentUSD")}:
         </span>
-        <span className="text-gray-700">${availableUSD} USD</span>
+        <span className="text-gray-700">
+          {" "}
+          {totalIncome || 0} {t("wallet.withdraw.inkTokens")}
+        </span>
       </div>
     </div>
   );

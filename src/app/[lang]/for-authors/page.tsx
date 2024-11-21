@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import {
   ChartPieIcon,
   ClockIcon,
@@ -11,9 +11,24 @@ import {
 } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { useTranslation } from "@/components/useTranslation";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/components/UserContextProvider";
+import Alert from "@/components/Main/Alert";
 
 export default function AuthorAreaPage() {
   const { t } = useTranslation("authorArea");
+  const [showAlert, setShowAlert] = useState(false);
+  const router = useRouter();
+  const { user } = useUser();
+
+  const handleWritingClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (!user) {
+      setShowAlert(true);
+    } else {
+      router.push("/writing");
+    }
+  };
 
   const reasons = [
     { icon: ChartPieIcon, text: t("whyChooseUs.reason1") },
@@ -71,13 +86,24 @@ export default function AuthorAreaPage() {
         </div>
       </div>
 
-      <div className="text-center">
-        <Link href="/writing">
-          <div className="inline-block bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold py-3 px-8 rounded-full text-xl cursor-pointer hover:from-orange-600 hover:to-yellow-600 transition duration-300 transform hover:scale-105 shadow-lg">
-            {t("callToAction")}
-          </div>
-        </Link>
+      <div className="text-center" onClick={handleWritingClick}>
+        <div className="inline-block bg-gradient-to-r from-orange-500 to-yellow-500 text-white font-bold py-3 px-8 rounded-full text-xl cursor-pointer hover:from-orange-600 hover:to-yellow-600 transition duration-300 transform hover:scale-105 shadow-lg">
+          {t("callToAction")}
+        </div>
       </div>
+
+      {showAlert && (
+        <Alert
+          message={t("pleaseLoginFirst")}
+          type="error"
+          onClose={() => setShowAlert(false)}
+          autoClose={false}
+          customButton={{
+            text: t("goToLogin"),
+            onClick: () => router.push("/login")
+          }}
+        />
+      )}
 
       <div className="mt-12">
         <h2 className="md:text-3xl text-xl font-bold mb-6 text-center text-orange-600">

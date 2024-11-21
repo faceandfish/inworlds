@@ -49,7 +49,9 @@ export const BookPreviewCard = React.memo(
     return (
       <>
         <Link href={`/book/${book.id.toString()}`} onClick={handleBookClick}>
-          <div className={`flex ${width} ${height} flex-1 hover:bg-neutral-50`}>
+          <div
+            className={`flex ${width} ${height} flex-1 hover:bg-neutral-50 overflow-hidden `}
+          >
             <div className="w-36 h-full relative border  rounded flex-shrink-0 overflow-hidden">
               {book.coverImageUrl ? (
                 <>
@@ -66,8 +68,8 @@ export const BookPreviewCard = React.memo(
                     }}
                   />
                   {isDefaultCover && (
-                    <div className="absolute inset-x-0 top-1/3 transform -translate-y-1/2 flex items-center justify-center">
-                      <p className="text-white text-center font-bold px-2 py-1 break-words bg-black bg-opacity-50 rounded">
+                    <div className="absolute inset-x-0 top-1/3 transform -translate-y-1/2 flex items-center justify-center  max-w-full px-2">
+                      <p className="text-white text-center font-bold line-clamp-5 py-1 break-words bg-black bg-opacity-50 rounded ">
                         {book.title}
                       </p>
                     </div>
@@ -79,18 +81,20 @@ export const BookPreviewCard = React.memo(
                 </div>
               )}
             </div>
-            <div className="flex flex-col mx-5 justify-around">
-              <div className="text-xl font-bold truncate max-w-full">
+            <div className="flex flex-col py-2 mx-4 justify-start w-full min-w-0">
+              <div className="text-xl font-bold overflow-hidden text-ellipsis  max-h-16 line-clamp-2 break-all mb-2">
                 {book.title}
               </div>
-              <div className="line-clamp-4 text-sm text-gray-600">
+              <p className="line-clamp-4 mb-2 min-h-0 text-sm text-gray-600 break-words whitespace-pre-wrap overflow-hidden">
                 {book.description}
-              </div>
-              <div>
-                <p className="text-sm text-gray-500">{book.authorName}</p>
+              </p>
+              <div className="mt-auto pt-1">
+                <p className="text-sm text-gray-500 break-all overflow-hidden text-ellipsis">
+                  {book.authorName}
+                </p>
                 <p className="text-sm text-orange-500">
-                  {book.favoritesCount} {""}
-                  {t("followers")}
+                  {book.views} {""}
+                  {t("views")}
                 </p>
               </div>
             </div>

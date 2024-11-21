@@ -55,6 +55,7 @@
       "balanceFetchError": "ユーザーの残高の取得中にエラーが発生しました："
     },
     "withdraw": {
+      "submitSuccess": "出金リクエストが正常に送信されました。審査をお待ちください",
       "title": "銀行口座への出金",
       "description": "出金額と受取方法を選択してください",
       "paymentMethod": "受取方法",
@@ -71,14 +72,29 @@
       "submit": "出金を申請",
       "notice": "出金に関する注意事項",
       "minAmount": "最低出金額",
+      "minAmountNote": "手数料を抑えるため、ある程度金額を貯めてから出金することをお勧めします",
       "processTime": "処理時間",
       "businessDays": "営業日",
+      "processTimeNote": "審査、処理、銀行振込の時間を含み、祝日や銀行システムなどの要因により実際の着金までの時間が延長される場合があります",
       "fee": "手数料",
+      "feeLink": "詳細な手数料について",
+      "feeNote": "出金額、対象国/地域、為替レートなどにより手数料が異なります",
       "selectCard": "銀行口座を選択",
       "addNewCard": "+ 新規口座を追加",
       "useExistingCard": "既存の口座を使用",
       "newCardInfo": "新規口座情報",
       "bankName": "銀行名",
+
+      "branchName": "支店名",
+      "branchNamePlaceholder": "例：東京支店",
+      "branchCode": "支店コード",
+      "branchCodeHelp": "3桁の支店コードを入力してください",
+      "accountType": "口座種別",
+      "accountTypes": {
+        "ordinary": "普通預金",
+        "current": "当座預金"
+      },
+
       "cardNumber": "口座番号",
       "holderName": "口座名義",
       "setAsDefault": "デフォルトに設定",
@@ -89,9 +105,40 @@
       "swiftCodeHelp": "海外送金用の国際銀行コード",
       "bankAddress": "銀行住所",
       "maxWithdraw": "最大出金可能額",
+      "savingCard": "カードを保存中...",
+      "saveCard": "カードを保存",
+      "deleteCard": "銀行カードを削除",
+      "confirmDeleteCard": "この銀行カードを削除してもよろしいですか？",
+      "confirmDelete": "削除を確認",
+      "deleteSuccess": "銀行カードが正常に削除されました",
       "errors": {
+        "fillAllFields": "すべての必須項目をご記入ください",
+        "fetchCardsFailed": "銀行カード情報の取得に失敗しました",
+        "saveCardFailed": "銀行カードの保存に失敗しました",
         "swiftCodeRequired": "海外送金にはSWIFTコードが必要です",
-        "bankAddressRequired": "海外送金には銀行住所が必要です"
+        "bankAddressRequired": "海外送金には銀行住所が必要です",
+        "deleteFailed": "銀行カードの削除に失敗しました",
+        "amountTooSmall": "出金額は10ドル以上である必要があります",
+        "insufficientBalance": "口座残高不足",
+        "pendingWithdraw": "処理中の出金リクエストがあります",
+        "submitFailed": "出金リクエストの送信に失敗しました",
+        "invalidAmount": "有効な出金額を入力してください",
+        "selectCard": "銀行カードを選択してください"
+      },
+      "history": "出金履歴",
+      "noRecords": "出金履歴がありません",
+      "columns": {
+        "amount": "金額",
+        "bankName": "銀行情報",
+        "cardNumber": "口座番号",
+        "status": "状態",
+        "time": "日時"
+      },
+      "status": {
+        "completed": "完了",
+        "pending": "承認待ち",
+        "processing": "処理中",
+        "failed": "失敗"
       }
     }
   }

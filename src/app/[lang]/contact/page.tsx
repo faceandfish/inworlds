@@ -1,3 +1,5 @@
+"use client";
+
 import { useTranslation } from "@/components/useTranslation";
 import React from "react";
 import { FaEnvelope, FaQuestionCircle } from "react-icons/fa";

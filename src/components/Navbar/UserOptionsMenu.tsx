@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { HiOutlineHome } from "react-icons/hi";
 import { MdOutlineHelpOutline, MdOutlineAnalytics } from "react-icons/md";
 import { RiMoneyDollarCircleLine } from "react-icons/ri";
@@ -10,8 +10,9 @@ import Link from "next/link";
 import LogoutButton from "./Logout";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BecomeCreatorModal } from "../Main/NewUserView";
+import MenuLanguageOption from "./MenuLanguageOption";
 
 interface MenuOptionProps {
   href: string;
@@ -39,10 +40,14 @@ const MenuOption: React.FC<MenuOptionProps> = ({
 );
 
 interface UserOptionsMenuProps {
+  isOpen: boolean;
   closeMenu: () => void;
 }
 
-const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({ closeMenu }) => {
+const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
+  isOpen,
+  closeMenu
+}) => {
   const { user } = useUser();
   const { t, lang } = useTranslation("navbar");
   const [showCreatorModal, setShowCreatorModal] = useState(false);
@@ -50,16 +55,21 @@ const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({ closeMenu }) => {
 
   if (!user) return null;
 
-  console.log("Current user type:", user.userType); // 添加调试日志
+  const handleOptionClick = async (route: string) => {
+    closeMenu();
+    setTimeout(() => {
+      router.push(route);
+    }, 100);
+  };
 
   const handleStudioClick = () => {
-    console.log("Studio clicked"); // 添加调试日志
     if (user.userType === "regular") {
-      console.log("Setting modal to true"); // 添加调试日志
       setShowCreatorModal(true);
     } else {
-      router.push(`/${lang}/studio/${user.id}`);
       closeMenu();
+      setTimeout(() => {
+        router.push(`/${lang}/studio/${user.id}`);
+      }, 100);
     }
   };
 
@@ -68,19 +78,19 @@ const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({ closeMenu }) => {
       href: `/${lang}/user/${user.id}`,
       icon: <HiOutlineHome />,
       text: t("myHomepage"),
-      onClick: () => router.push(`/${lang}/user/${user.id}`)
+      onClick: () => handleOptionClick(`/${lang}/user/${user.id}`)
     },
     {
       href: `/${lang}/user/${user.id}/setting`,
       icon: <CgProfile />,
       text: t("accountModification"),
-      onClick: () => router.push(`/${lang}/user/${user.id}/setting`)
+      onClick: () => handleOptionClick(`/${lang}/user/${user.id}/setting`)
     },
     {
       href: `/${lang}/user/${user.id}/wallet`,
       icon: <RiMoneyDollarCircleLine />,
       text: t("purchasedContent"),
-      onClick: () => router.push(`/${lang}/user/${user.id}/wallet`)
+      onClick: () => handleOptionClick(`/${lang}/user/${user.id}/wallet`)
     },
     {
       href: `/${lang}/studio/${user.id}`,
@@ -89,38 +99,30 @@ const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({ closeMenu }) => {
       onClick: handleStudioClick
     },
     {
-      href: `/${lang}/user/${user.id}/setting`,
-      icon: <IoLanguageOutline />,
-      text: t("language"),
-      onClick: () => router.push(`/${lang}/user/${user.id}/setting`)
-    },
-    {
       href: `/${lang}/contact`,
       icon: <MdOutlineHelpOutline />,
       text: t("needHelp"),
-      onClick: () => router.push(`/${lang}/contact`)
+      onClick: () => handleOptionClick(`/${lang}/contact`)
     }
   ];
 
   return (
     <>
-      <div className="md:absolute md:top-12 md:right-10 md:z-10">
-        <ul className="bg-white md:shadow w-full md:w-80 py-2 md:rounded-md text-neutral-600 h-full md:h-auto">
-          {menuOptions.map((option, index) => (
-            <MenuOption key={index} {...option} />
-          ))}
-          <LogoutButton onClick={closeMenu} />
-        </ul>
-      </div>
-      {/* 将 Modal 移到最外层 */}
+      {isOpen && (
+        <div className="md:absolute md:top-12 md:right-10 md:z-10">
+          <ul className="bg-white md:shadow w-full md:w-80 py-2 md:rounded-md text-neutral-600 h-full md:h-auto">
+            {menuOptions.map((option, index) => (
+              <MenuOption key={index} {...option} />
+            ))}
+            <MenuLanguageOption variant="desktop" />
+            <LogoutButton onClick={closeMenu} />
+          </ul>
+        </div>
+      )}
       <BecomeCreatorModal
         isOpen={showCreatorModal}
-        onClose={() => {
-          console.log("Closing modal"); // 添加调试日志
-          setShowCreatorModal(false);
-        }}
+        onClose={() => setShowCreatorModal(false)}
         onSuccess={() => {
-          console.log("Modal success"); // 添加调试日志
           router.push(`/${lang}/studio/${user.id}`);
         }}
       />

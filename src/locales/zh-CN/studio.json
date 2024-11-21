@@ -72,7 +72,6 @@
     "wallet": "转入钱包",
     "transferRecords": "转账记录",
     "noTransferRecords": "暂无转账记录",
-
     "transferTitle": "转入钱包",
     "amountPlaceholder": "请输入转账金额",
     "invalidAmount": "请输入有效金额",
@@ -82,6 +81,11 @@
     "processing": "处理中...",
     "transferSuccess": "转账成功！",
     "autoClose": "窗口将自动关闭...",
+
+    "required": "请输入转账金额",
+    "positiveAmount": "请输入大于0的金额",
+    "integerAmount": "请输入整数金额",
+    "insufficientBalance": "转账金额不能超过可用余额",
 
     "revenueExplanation": "收入明细说明：到账金额为实际金额的70%\n• 平台将收取30%服务费用于维护运营和服务升级",
     "booksIncome": "作品收入",

@@ -29,6 +29,7 @@ export const AmountInput: React.FC<AmountInputProps> = ({
         value={amount}
         onChange={(e) => {
           const value = e.target.value;
+
           // 验证输入值是否为有效的金额格式，且不超过最大可提现金额
           if (
             (/^\d*\.?\d{0,2}$/.test(value) || value === "") &&

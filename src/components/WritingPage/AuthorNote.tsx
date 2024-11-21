@@ -13,11 +13,13 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
   onAuthorNoteChange,
   error
 }) => {
-  const maxLength = 1000;
+  const MAX_LENGTH = 1000;
+  const CHAR_LIMIT_BUFFER = 3000;
   const { t } = useTranslation("book");
-  const { text, wordCount, handleTextChange } = useWordCount(
+
+  const { text, wordCount, handleTextChange, isMaxLength } = useWordCount(
     authorNote,
-    maxLength
+    MAX_LENGTH
   );
 
   const handleNoteChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -26,7 +28,7 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
   };
 
   return (
-    <div className="w-full ">
+    <div className="w-full">
       <label
         htmlFor="authorNote"
         className="block text-2xl font-medium text-gray-700 mb-6"
@@ -38,13 +40,22 @@ const AuthorNote: React.FC<AuthorNoteProps> = ({
           id="authorNote"
           name="authorNote"
           rows={8}
-          className="w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none focus:border-orange-500"
+          className={`w-full px-3 py-2 text-gray-700 border rounded-lg focus:outline-none ${
+            isMaxLength
+              ? "border-red-400"
+              : "border-gray-300 focus:border-orange-500"
+          }`}
           placeholder={t("authorNote.placeholder")}
           value={text}
           onChange={handleNoteChange}
-        ></textarea>
-        <p className="absolute bottom-2 right-3 text-sm text-gray-500 mt-2">
-          {wordCount}/{maxLength}
+          maxLength={CHAR_LIMIT_BUFFER}
+        />
+        <p
+          className={`absolute bottom-2 right-3 text-sm ${
+            isMaxLength ? "text-red-500" : "text-gray-500"
+          } mt-2`}
+        >
+          {wordCount}/{MAX_LENGTH}
         </p>
       </div>
     </div>

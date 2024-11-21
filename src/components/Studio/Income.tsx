@@ -8,7 +8,8 @@ import {
   fetchIncomeData,
   getSponsorList,
   transferToWallet,
-  getTransferRecords
+  getTransferRecords,
+  getUserTotalIncome
 } from "@/app/lib/action";
 import {
   InformationCircleIcon,
@@ -49,6 +50,8 @@ const Income: React.FC = () => {
     useState<PaginatedTransferRecords | null>(null);
   const [currentTransferPage, setCurrentTransferPage] = useState(1);
   const [showTransferRecords, setShowTransferRecords] = useState(true);
+  const [totalIncome, setTotalIncome] = useState<number>(0);
+  const [isLoadingIncome, setIsLoadingIncome] = useState(true);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -90,9 +93,58 @@ const Income: React.FC = () => {
     }
   }, [currentPage, currentSponsorPage, currentTransferPage, user?.id, t]);
 
-  const handleTransfer = async () => {
-    if (!transferAmount || isNaN(Number(transferAmount))) {
+  // Add input validation
+  const validateTransferAmount = (value: string) => {
+    const amount = Number(value);
+
+    // Check if empty
+    if (!value.trim()) {
+      setTransferError(t("income.required"));
+      return false;
+    }
+
+    // Check if it's a valid number
+    if (isNaN(amount)) {
       setTransferError(t("income.invalidAmount"));
+      return false;
+    }
+
+    // Check if negative or zero
+    if (amount <= 0) {
+      setTransferError(t("income.positiveAmount"));
+      return false;
+    }
+
+    // Check if it's an integer
+    if (!Number.isInteger(amount)) {
+      setTransferError(t("income.integerAmount"));
+      return false;
+    }
+
+    // Check if exceeds total balance
+    if (amount > (user?.totalIncome || 0)) {
+      setTransferError(t("income.insufficientBalance"));
+      return false;
+    }
+
+    setTransferError(null);
+    return true;
+  };
+
+  const handleTransferAmountChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const value = e.target.value;
+    setTransferAmount(value);
+    if (value) {
+      validateTransferAmount(value);
+    } else {
+      setTransferError(null);
+    }
+  };
+
+  const handleTransfer = async () => {
+    if (!validateTransferAmount(transferAmount)) {
       return;
     }
 
@@ -103,7 +155,6 @@ const Income: React.FC = () => {
       const response = await transferToWallet(Number(transferAmount));
       if (response.code === 200) {
         setTransferSuccess(true);
-        // 2秒后关闭对话框
         setTimeout(() => {
           setShowTransferModal(false);
           setTransferAmount("");
@@ -116,6 +167,36 @@ const Income: React.FC = () => {
       setIsTransferring(false);
     }
   };
+
+  const resetModalState = () => {
+    setShowTransferModal(false);
+    setTransferAmount("");
+    setTransferError(null);
+    setTransferSuccess(false);
+  };
+
+  // 添加获取总收入的函数
+  const fetchTotalIncome = async () => {
+    try {
+      const response = await getUserTotalIncome();
+      console.log("income", response);
+
+      if (response.code === 200) {
+        setTotalIncome(response.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch total income:", err);
+      setError(t("income.fetchTotalIncomeFailed"));
+    } finally {
+      setIsLoadingIncome(false);
+    }
+  };
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchTotalIncome();
+    }
+  }, [user?.id]);
 
   if (isLoading) {
     return (
@@ -142,9 +223,13 @@ const Income: React.FC = () => {
             {t("income.totalIncome")}
           </h2>
           <div className="flex gap-10 items-center">
-            <p className="text-4xl font-bold text-orange-600">
-              {user?.totalIncome} {t("income.currency")}
-            </p>
+            {isLoadingIncome ? (
+              <div className="text-gray-500">{t("common.loading")}</div>
+            ) : (
+              <p className="text-4xl font-bold text-orange-600">
+                {totalIncome.toLocaleString()} {t("income.currency")}
+              </p>
+            )}
             {user && (
               <Link href={`/${lang}/user/${user.id}/withdraw`}>
                 <span className="bg-orange-400 hover:bg-orange-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 cursor-pointer">
@@ -189,9 +274,11 @@ const Income: React.FC = () => {
                       <div className="space-y-4">
                         <input
                           type="number"
+                          min="1"
+                          max={user?.totalIncome || 0}
                           value={transferAmount}
-                          onChange={(e) => setTransferAmount(e.target.value)}
-                          className="w-full px-3 py-2 border rounded-lg"
+                          onChange={handleTransferAmountChange}
+                          className="w-full px-3 py-2 border rounded-lg outline-none hover:border-orange-400"
                           placeholder={t("income.amountPlaceholder")}
                         />
 
@@ -203,7 +290,7 @@ const Income: React.FC = () => {
 
                         <div className="flex justify-end gap-4">
                           <button
-                            onClick={() => setShowTransferModal(false)}
+                            onClick={resetModalState}
                             className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                           >
                             {t("income.cancel")}
@@ -431,7 +518,7 @@ const Income: React.FC = () => {
                       className="grid grid-cols-4 py-3 px-3 items-center border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150"
                     >
                       <span className="font-medium text-neutral-600">
-                        {t(`income.transferType.${record.type}`)}
+                        {t("income.transferType.wallet")}
                       </span>
                       <span className="text-sm text-orange-400 text-center">
                         {record.amount} {t("income.currency")}

@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React from "react";
 import { ChapterInfo } from "@/app/lib/definitions";
 import { useTranslation } from "../useTranslation";
 import { useWordCount } from "./useWordCount";
@@ -14,16 +14,25 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
   onContentChange
 }) => {
   const { t } = useTranslation("book");
+
+  // 定义最大长度常量
+  const CONTENT_MAX_LENGTH = 20000;
+  const TITLE_MAX_LENGTH = 100;
+  const CHAR_LIMIT_BUFFER = 30000;
+
   const {
     text: content,
-    wordCount,
+    wordCount: contentCount,
     handleTextChange: handleContentChange,
-    language
-  } = useWordCount(chapter.content || "", 20000); // 假设最大字数为 10000
-  const { text: title, handleTextChange: handleTitleChange } = useWordCount(
-    chapter.title || "",
-    100
-  );
+    isMaxLength: isContentMaxLength
+  } = useWordCount(chapter.content || "", CONTENT_MAX_LENGTH);
+
+  const {
+    text: title,
+    wordCount: titleCount,
+    handleTextChange: handleTitleChange,
+    isMaxLength: isTitleMaxLength
+  } = useWordCount(chapter.title || "", TITLE_MAX_LENGTH);
 
   const handleTitleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleTitleChange(e.target.value);
@@ -34,7 +43,10 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
     e: React.ChangeEvent<HTMLTextAreaElement>
   ) => {
     handleContentChange(e.target.value);
-    onContentChange({ content: e.target.value, wordCount });
+    onContentChange({
+      content: e.target.value,
+      wordCount: contentCount
+    });
   };
 
   return (
@@ -46,20 +58,36 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
       </h1>
 
       <div className="mb-6">
-        <label
-          htmlFor="chapter-title"
-          className="block text-sm font-medium  text-neutral-600 mb-2"
-        >
-          {t("contentEditor.chapterTitle")}
-        </label>
-        <input
-          type="text"
-          id="chapter-title"
-          value={title}
-          onChange={handleTitleInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-orange-400  "
-          placeholder={t("contentEditor.titlePlaceholder")}
-        />
+        <div className="flex justify-between items-center mb-2">
+          <label
+            htmlFor="chapter-title"
+            className="text-sm font-medium text-neutral-600"
+          >
+            {t("contentEditor.chapterTitle")}
+          </label>
+          <span
+            className={`text-sm ${
+              isTitleMaxLength ? "text-red-500" : "text-neutral-400"
+            }`}
+          >
+            {titleCount}/{TITLE_MAX_LENGTH}
+          </span>
+        </div>
+        <div className="relative">
+          <input
+            type="text"
+            id="chapter-title"
+            value={title}
+            onChange={handleTitleInputChange}
+            className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none ${
+              isTitleMaxLength
+                ? "border-red-400"
+                : "border-gray-300 focus:border-orange-400"
+            }`}
+            placeholder={t("contentEditor.titlePlaceholder")}
+            maxLength={CHAR_LIMIT_BUFFER}
+          />
+        </div>
       </div>
 
       <div className="mb-10">
@@ -67,13 +95,24 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
           <span className="text-sm font-medium text-neutral-600">
             {t("contentEditor.chapterContent")}
           </span>
-          <span className="text-sm text-neutral-400">{wordCount}/20000</span>
+          <span
+            className={`text-sm ${
+              isContentMaxLength ? "text-red-500" : "text-neutral-400"
+            }`}
+          >
+            {contentCount}/{CONTENT_MAX_LENGTH}
+          </span>
         </div>
         <textarea
           value={content}
           onChange={handleContentInputChange}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-orange-400 h-80"
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none h-80 ${
+            isContentMaxLength
+              ? "border-red-400"
+              : "border-gray-300 focus:border-orange-400"
+          }`}
           placeholder={t("contentEditor.contentPlaceholder")}
+          maxLength={CHAR_LIMIT_BUFFER}
         />
       </div>
     </div>

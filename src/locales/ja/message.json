@@ -1,4 +1,7 @@
 {
+  "pleaseLoginFirst": "お気に入りを見るにはログインまたはアカウント登録が必要です",
+  "login": "ログイン",
+  "register": "登録",
   "favoriteBookPreviewCard": {
     "author": "著者",
     "latestChapter": "最新チャプター：第"
@@ -8,7 +11,12 @@
     "errorFetchingData": "データの取得中にエラーが発生しました。後でもう一度お試しください。",
     "favoriteBooks": "お気に入りの本",
     "followedUsers": "フォロー中のユーザー",
-    "systemNotifications": "システム通知"
+    "systemNotifications": "システム通知",
+    "noFavoriteBooks": "お気に入りの本はまだありません",
+    "noFollowedAuthors": "フォローしている作者はまだいません",
+    "noNotifications": "システムメッセージはまだありません",
+    "exploreBooks": "本を探索する",
+    "exploreAuthors": "作者をもっと見つける"
   },
   "sidebar": {
     "messageCenter": "メッセージセンター",

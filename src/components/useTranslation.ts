@@ -9,6 +9,13 @@ import { useUser } from "./UserContextProvider";
 // 保留全局缓存对象
 const translationCache: Record<string, Record<string, any>> = {};
 
+const getLocalStorage = () => {
+  if (typeof window !== "undefined") {
+    return window.localStorage;
+  }
+  return null;
+};
+
 export function useTranslation(namespace: Namespace = "navbar") {
   const params = useParams();
   const [dict, setDict] = useState<Record<string, any>>({});
@@ -18,19 +25,35 @@ export function useTranslation(namespace: Namespace = "navbar") {
     i18n.defaultLocale
   );
 
+  // useTranslation.ts
   const locale = useMemo(() => {
-    let selectedLocale: Locale;
+    let selectedLocale: Locale = i18n.defaultLocale;
+
+    // 1. 未登录用户：优先使用 localStorage
+    if (!user) {
+      const storage = getLocalStorage();
+      if (storage) {
+        const savedLanguage = storage.getItem("preferredLanguage");
+        if (savedLanguage && i18n.locales.includes(savedLanguage as Locale)) {
+          selectedLocale = savedLanguage as Locale;
+          return selectedLocale;
+        }
+      }
+    }
+
+    // 2. 已登录用户：使用用户设置
     if (user?.language && i18n.locales.includes(user.language as Locale)) {
       selectedLocale = user.language as Locale;
-    } else if (params.lang && i18n.locales.includes(params.lang as Locale)) {
+      return selectedLocale;
+    }
+
+    // 3. 如果都没有，才使用 URL 参数
+    if (params?.lang && i18n.locales.includes(params.lang as Locale)) {
       selectedLocale = params.lang as Locale;
-    } else {
-      selectedLocale = i18n.defaultLocale;
     }
 
     return selectedLocale;
   }, [user, params.lang]);
-
   const loadTranslations = useCallback(async () => {
     const cacheKey = `${locale}:${namespace}`;
     if (translationCache[cacheKey]) {
@@ -95,5 +118,19 @@ export function useTranslation(namespace: Namespace = "navbar") {
     [dict]
   );
 
-  return { t, isLoaded, lang: locale, setLanguage };
+  // 获取浏览器语言
+  const browserLanguage = useMemo(() => {
+    if (typeof window !== "undefined") {
+      return navigator.language;
+    }
+    return null;
+  }, []);
+
+  return {
+    t,
+    isLoaded,
+    lang: locale,
+    setLanguage,
+    browserLanguage
+  };
 }

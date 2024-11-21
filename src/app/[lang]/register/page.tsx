@@ -201,8 +201,8 @@ const Register = () => {
           type="success"
           onClose={() => {
             setShowAlert(false);
-            router.push("/login");
           }}
+          autoClose={false}
         />
       )}
     </div>

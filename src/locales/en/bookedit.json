@@ -14,6 +14,7 @@
     "wordCount": "Word Count:",
     "lastModified": "Last Modified:",
     "free": "Free",
+    "pricePlaceholder": "Please enter a positive integer",
     "authorNote": "Author's Note",
     "updateStatus": "Update Chapter Status",
     "saveDraft": "Save Draft",

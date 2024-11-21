@@ -38,8 +38,6 @@ export function LoginForm() {
         await refetch();
         router.push("/");
       } else {
-        console.log("cuocuocuo", response.msg);
-
         setError(response.msg || t("loginError"));
       }
     } catch (error) {

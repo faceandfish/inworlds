@@ -86,6 +86,10 @@
     "transferRecords": "取引履歴",
     "noTransferRecords": "取引履歴がありません",
     "transferNotice": "ウォレットに転送された墨コインはプラットフォームでの消費のみ可能で、出金することはできません",
+    "required": "振込金額を入力してください",
+    "positiveAmount": "0より大きい金額を入力してください",
+    "integerAmount": "整数の金額を入力してください",
+    "insufficientBalance": "振込金額が利用可能残高を超えることはできません",
     "noIncome": "収入記録なし",
     "transferType": {
       "wallet": "ウォレットへ",

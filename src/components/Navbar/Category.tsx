@@ -28,12 +28,12 @@ const CategoryItem: React.FC<CategoryItemProps> = ({ href, label }) => {
 };
 
 function Category() {
-  const { t } = useTranslation("navbar");
+  const { t, lang } = useTranslation("navbar");
 
   const categories: CategoryItemProps[] = [
-    { href: "/messages", label: t("favorites") },
+    { href: `/${lang}/messages`, label: t("favorites") },
     // { label: t("newBooks") },
-    { href: "/for-authors", label: t("forAuthors") }
+    { href: `/${lang}/for-authors`, label: t("forAuthors") }
   ];
 
   return (

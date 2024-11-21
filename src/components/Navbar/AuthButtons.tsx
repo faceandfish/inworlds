@@ -1,24 +1,26 @@
 import Link from "next/link";
 import { useTranslation } from "../useTranslation";
+import MenuLanguageOption from "./MenuLanguageOption";
 
 interface AuthButtonsProps {
   isMobile: boolean;
 }
 
 const AuthButtons: React.FC<AuthButtonsProps> = ({ isMobile }) => {
-  const { t } = useTranslation("navbar");
+  const { t, lang } = useTranslation("navbar");
 
   if (isMobile) {
     return (
-      <div className="flex justify-around  items-center  w-full">
+      <div className="flex justify-around items-center w-full">
+        <MenuLanguageOption variant="mobile" />
         <Link
-          href="/register"
-          className=" py-3 text-center shadow-md border px-5 text-neutral-600  rounded-md"
+          href={`/${lang}/register`}
+          className="py-3 text-center shadow-md border px-5 text-neutral-600 rounded-md"
         >
           {t("register")}
         </Link>
         <Link
-          href="/login"
+          href={`/${lang}/login`}
           className="py-3 text-center px-5 shadow-md text-white bg-orange-400 rounded-md"
         >
           {t("login")}
@@ -28,15 +30,16 @@ const AuthButtons: React.FC<AuthButtonsProps> = ({ isMobile }) => {
   }
 
   return (
-    <div className="flex">
+    <div className="flex items-center gap-6">
+      <MenuLanguageOption variant="auth-desktop" />
       <Link
-        href="/register"
-        className="pb-1 mr-10 font-light hover:border-b hover:border-b-black transition duration-500 ease-in-out"
+        href={`/${lang}/register`}
+        className="pb-1 font-light hover:border-b hover:border-b-black transition duration-500 ease-in-out"
       >
         {t("register")}
       </Link>
       <Link
-        href="/login"
+        href={`/${lang}/login`}
         className="font-light pb-1 hover:border-b hover:border-b-black transition duration-500 ease-in-out"
       >
         {t("login")}

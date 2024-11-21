@@ -209,6 +209,7 @@ const WritingPage: React.FC = () => {
           | "wordCount"
           | "tags"
           | "authorIntroduction"
+          | "views"
         > = {
           title: bookData.title || "",
           description: bookData.description || "",
