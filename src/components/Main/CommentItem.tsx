@@ -5,9 +5,10 @@ import Image from "next/image";
 import Alert from "./Alert";
 import { CommentInfo } from "../../app/lib/definitions";
 import { useTranslation } from "../useTranslation";
+import { useWordCount } from "../WritingPage/useWordCount";
 
 interface CommentActions {
-  onLike: (commentId: number, isLiked: boolean) => Promise<void>;
+  onLike: (commentId: number) => Promise<void>;
   onReply: (commentId: number, content: string) => Promise<void>;
   onDelete?: (commentId: number, isReply: boolean) => Promise<void>;
   onBlock?: (userId: number) => Promise<void>;
@@ -22,6 +23,8 @@ interface CommentItemProps {
   currentUserId?: number | null;
 }
 
+const MAX_COMMENT_LENGTH = 1000; // 最大评论字数
+
 const CommentItem: React.FC<CommentItemProps> = ({
   comment,
   actions,
@@ -31,14 +34,19 @@ const CommentItem: React.FC<CommentItemProps> = ({
   currentUserId
 }) => {
   const { t } = useTranslation("book");
-  const [replyContent, setReplyContent] = useState("");
   const [showReplies, setShowReplies] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [alertConfirmAction, setAlertConfirmAction] = useState<() => void>(
     () => {}
   );
-  const MAX_COMMENT_LENGTH = 1000; // 最大评论字数
+
+  const {
+    text: replyContent,
+    wordCount,
+    handleTextChange,
+    isMaxLength
+  } = useWordCount("", MAX_COMMENT_LENGTH);
 
   const handleReplyToggle = () => {
     setShowReplies(!showReplies);
@@ -46,12 +54,12 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
   const handleReplySubmit = async () => {
     if (!replyContent.trim()) return;
-    if (replyContent.length > MAX_COMMENT_LENGTH) {
+    if (isMaxLength) {
       return;
     }
     try {
       await actions.onReply(comment.id, replyContent);
-      setReplyContent("");
+      handleTextChange(""); // 清空回复内容
     } catch (error) {
       console.error(error);
     }
@@ -59,7 +67,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
   const handleLike = async () => {
     try {
-      await actions.onLike(comment.id, !comment.isLiked);
+      await actions.onLike(comment.id);
     } catch (error) {
       console.error("点赞失败", error);
     }
@@ -115,7 +123,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
             <div className="flex space-x-10 text-sm">
               <button
                 onClick={handleReplyToggle}
-                className="text-gray-500 hover:text-gray-700  flex items-center"
+                className="text-gray-500 hover:text-orange-500 flex items-center"
               >
                 <FiMessageSquare className="mr-1 text-xl" />{" "}
                 {comment.replyCount}
@@ -154,31 +162,27 @@ const CommentItem: React.FC<CommentItemProps> = ({
           <div className="mt-2 flex flex-col">
             <textarea
               value={replyContent}
-              onChange={(e) => {
-                setReplyContent(e.target.value);
-              }}
+              onChange={(e) => handleTextChange(e.target.value)}
               className={`w-1/2 p-2 border rounded focus:outline-none ${
-                replyContent.length > MAX_COMMENT_LENGTH
-                  ? "border-red-500"
-                  : "border-gray-200"
+                isMaxLength ? "border-red-500" : "border-gray-200"
               }`}
               placeholder={t("comment.enterReply")}
             />
             <div className="mt-1 text-sm">
-              {replyContent.length > MAX_COMMENT_LENGTH ? (
+              {isMaxLength ? (
                 <span className="text-red-500">
                   {t("comment.exceedLimit", { max: MAX_COMMENT_LENGTH })}
                 </span>
               ) : (
                 <span
                   className={`text-gray-500 ${
-                    replyContent.length > MAX_COMMENT_LENGTH * 0.8
+                    wordCount > MAX_COMMENT_LENGTH * 0.8
                       ? "text-orange-500"
                       : ""
                   }`}
                 >
                   {t("comment.characterCount", {
-                    current: replyContent.length,
+                    current: wordCount,
                     max: MAX_COMMENT_LENGTH
                   })}
                 </span>
@@ -186,15 +190,12 @@ const CommentItem: React.FC<CommentItemProps> = ({
             </div>
             <button
               onClick={handleReplySubmit}
-              disabled={
-                replyContent.length > MAX_COMMENT_LENGTH || !replyContent.trim()
-              }
+              disabled={isMaxLength || !replyContent.trim()}
               className={`mt-2 px-4 py-2 w-24 rounded text-white
                 ${
-                  replyContent.length > MAX_COMMENT_LENGTH ||
-                  !replyContent.trim()
+                  isMaxLength || !replyContent.trim()
                     ? "bg-neutral-300 cursor-not-allowed"
-                    : "bg-neutral-400 hover:bg-neutral-500"
+                    : "bg-orange-400 hover:bg-orange-500"
                 }`}
             >
               {t("comment.submitReply")}

@@ -1,5 +1,6 @@
 import { BookInfo, ChapterInfo } from "@/app/lib/definitions";
 import Link from "next/link";
+import { useTranslation } from "../useTranslation";
 
 interface ChapterListProps {
   chapters: ChapterInfo[];
@@ -12,6 +13,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
   book,
   className
 }) => {
+  const { t } = useTranslation("book");
   return (
     <div className="w-full">
       <div className={`${className}`}>
@@ -31,7 +33,7 @@ export const ChapterList: React.FC<ChapterListProps> = ({
                   {chapter.title}
                   {isPaid && (
                     <span className="ml-2 text-sm text-orange-500 font-semibold">
-                      ({chapter.price} InkCoin)
+                      ({chapter.price} {t("coins")})
                     </span>
                   )}
                 </p>

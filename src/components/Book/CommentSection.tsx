@@ -13,13 +13,16 @@ import CommentItem from "../Main/CommentItem";
 import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
 import BookContentSkeleton from "./skeleton/BookContentSkeleton";
+import { useWordCount } from "../WritingPage/useWordCount";
 
 interface CommentSectionProps {
   bookId: number;
-  isLoggedIn: boolean; // 新增：用于判断用户是否已登录
-  onLogin: () => void; // 新增：登录回调函数
+  isLoggedIn: boolean;
+  onLogin: () => void;
   currentUserId: number | null;
 }
+
+const MAX_COMMENT_LENGTH = 1000; // 最大评论字数
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   bookId,
@@ -28,7 +31,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   currentUserId
 }) => {
   const [comments, setComments] = useState<CommentInfo[]>([]);
-  const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -36,7 +38,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const commentsPerPage = 20;
   const { t, isLoaded } = useTranslation("book");
-  const MAX_COMMENT_LENGTH = 1000; // 最大评论字数
+
+  const {
+    text: newComment,
+    wordCount,
+    handleTextChange,
+    isMaxLength
+  } = useWordCount("", MAX_COMMENT_LENGTH);
 
   useEffect(() => {
     fetchComments(currentPage);
@@ -58,7 +66,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-    if (newComment.length > MAX_COMMENT_LENGTH) {
+    if (isMaxLength) {
       setError(t("commentTooLong"));
       return;
     }
@@ -71,7 +79,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     try {
       const response = await addCommentOrReply(bookId, newComment);
       setComments([response.data, ...comments]);
-      setNewComment("");
+      handleTextChange(""); // 使用 handleTextChange 清空评论
     } catch (err) {
       setError(t("addingCommentFailed"));
     } finally {
@@ -87,7 +95,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
     try {
       const response = await addCommentOrReply(bookId, content, commentId);
-
       setComments(
         comments.map((comment) =>
           comment.id === commentId
@@ -112,7 +119,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       await deleteComment(commentId);
 
       if (isReply) {
-        // 如果是删除回复,只需要过滤掉该条回复
         setComments(
           comments.map((comment) => ({
             ...comment,
@@ -124,7 +130,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           }))
         );
       } else {
-        // 如果是删除主评论,直接过滤掉整个评论及其回复
         setComments(comments.filter((comment) => comment.id !== commentId));
       }
     } catch (err) {
@@ -165,7 +170,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   };
 
   if (!isLoaded) {
-    return <BookContentSkeleton />; // 显示骨架屏
+    return <BookContentSkeleton />;
   }
 
   return (
@@ -173,24 +178,25 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       <form onSubmit={handleSubmitComment} className="mb-6 flex flex-col">
         <textarea
           value={newComment}
-          onChange={(e) => {
-            if (e.target.value.length <= MAX_COMMENT_LENGTH) {
-              setNewComment(e.target.value);
-            }
-          }}
+          onChange={(e) => handleTextChange(e.target.value)}
           placeholder={t("leaveComment")}
-          maxLength={MAX_COMMENT_LENGTH}
-          className="w-full md:w-1/2 p-2 border rounded text-neutral-600 focus:outline-none"
+          className={`w-full md:w-1/2 p-2 border rounded text-neutral-600 focus:outline-none ${
+            isMaxLength ? "border-red-500" : ""
+          }`}
           rows={3}
         />
-        {newComment && ( // 添加字数提示
-          <div className="text-sm text-gray-500 mt-1">
-            {newComment.length}/{MAX_COMMENT_LENGTH}
+        {newComment && (
+          <div
+            className={`text-sm mt-1 ${
+              isMaxLength ? "text-red-500" : "text-gray-500"
+            }`}
+          >
+            {wordCount}/{MAX_COMMENT_LENGTH}
           </div>
         )}
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || isMaxLength || !newComment.trim()}
           className="mt-2 px-4 py-2 w-full md:w-fit bg-orange-400 text-white rounded hover:bg-orange-500 disabled:bg-neutral-400"
         >
           {loading ? t("submitting") : t("addComment")}
@@ -230,7 +236,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               onReply: handleReply,
               onDelete: handleDeleteComment
             }}
-            showDeleteButton={currentUserId === comment.userId} // 只有当前用户的评论才显示删除按钮
+            showDeleteButton={currentUserId === comment.userId}
             showBlockButton={false}
           />
         ))}

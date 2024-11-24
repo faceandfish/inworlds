@@ -3,6 +3,7 @@ import {
   getUnreadNotificationCount,
   markNotificationAsRead
 } from "@/app/lib/action";
+import { useUser } from "./UserContextProvider";
 
 interface NotificationContextType {
   unreadCount: number;
@@ -18,7 +19,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   children
 }) => {
   const [unreadCount, setUnreadCount] = useState(0);
-
+  const { user } = useUser();
   // 只在首次加载时获取一次初始数据
   useEffect(() => {
     const initializeUnreadCount = async () => {
@@ -34,7 +35,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     };
 
     initializeUnreadCount();
-  }, []);
+  }, [user]);
 
   const markAllAsRead = async () => {
     try {

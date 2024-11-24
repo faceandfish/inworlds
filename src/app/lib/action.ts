@@ -50,8 +50,8 @@ let token: string | null = null;
 
 // 创建 axios 实例
 const api = axios.create({
-  //baseURL: "https://api.inworlds.xyz/inworlds/api",
-  baseURL: "http://192.168.0.103:8088/inworlds/api",
+  baseURL: "https://api.inworlds.xyz/inworlds/api",
+  //baseURL: "http://192.168.0.103:8088/inworlds/api",
 
   headers: {
     "Content-Type": "application/json"

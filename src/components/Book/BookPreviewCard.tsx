@@ -50,9 +50,9 @@ export const BookPreviewCard = React.memo(
       <>
         <Link href={`/book/${book.id.toString()}`} onClick={handleBookClick}>
           <div
-            className={`flex ${width} ${height} flex-1 hover:bg-neutral-50 overflow-hidden `}
+            className={`flex ${width} ${height} flex-1 hover:bg-neutral-50 overflow-hidden`}
           >
-            <div className="w-36 h-full relative border  rounded flex-shrink-0 overflow-hidden">
+            <div className="w-36 h-full relative border rounded flex-shrink-0 overflow-hidden">
               {book.coverImageUrl ? (
                 <>
                   <Image
@@ -68,10 +68,12 @@ export const BookPreviewCard = React.memo(
                     }}
                   />
                   {isDefaultCover && (
-                    <div className="absolute inset-x-0 top-1/3 transform -translate-y-1/2 flex items-center justify-center  max-w-full px-2">
-                      <p className="text-white text-center font-bold line-clamp-5 py-1 break-words bg-black bg-opacity-50 rounded ">
-                        {book.title}
-                      </p>
+                    <div className="absolute inset-x-0 top-1/3 transform -translate-y-1/2 flex items-center justify-center p-2">
+                      <div className="w-full max-w-[90%] bg-black bg-opacity-50 rounded px-3 py-2">
+                        <p className="text-white text-center font-bold line-clamp-5 break-all whitespace-pre-line">
+                          {book.title}
+                        </p>
+                      </div>
                     </div>
                   )}
                 </>
@@ -82,7 +84,7 @@ export const BookPreviewCard = React.memo(
               )}
             </div>
             <div className="flex flex-col py-2 mx-4 justify-start w-full min-w-0">
-              <div className="text-xl font-bold overflow-hidden text-ellipsis  max-h-16 line-clamp-2 break-all mb-2">
+              <div className="text-xl font-bold overflow-hidden text-ellipsis max-h-16 line-clamp-2 break-all mb-2">
                 {book.title}
               </div>
               <p className="line-clamp-4 mb-2 min-h-0 text-sm text-gray-600 break-words whitespace-pre-wrap overflow-hidden">
