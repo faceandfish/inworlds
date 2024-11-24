@@ -8,7 +8,7 @@ import { useTranslation } from "../useTranslation";
 import { useWordCount } from "../WritingPage/useWordCount";
 
 interface CommentActions {
-  onLike: (commentId: number) => Promise<void>;
+  onLike: (commentId: number, isLiked: boolean) => Promise<void>;
   onReply: (commentId: number, content: string) => Promise<void>;
   onDelete?: (commentId: number, isReply: boolean) => Promise<void>;
   onBlock?: (userId: number) => Promise<void>;
@@ -67,7 +67,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
 
   const handleLike = async () => {
     try {
-      await actions.onLike(comment.id);
+      await actions.onLike(comment.id, !comment.isLiked);
     } catch (error) {
       console.error("点赞失败", error);
     }
