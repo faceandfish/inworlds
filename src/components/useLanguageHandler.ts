@@ -19,6 +19,10 @@ export const useLanguageHandler = () => {
 
           const newPath = currentPath.replace(/^\/[^/]+/, `/${newLanguage}`);
 
+          if (typeof window !== "undefined") {
+            localStorage.setItem("preferredLanguage", newLanguage);
+          }
+
           if (newPath !== currentPath) {
             await router.push(newPath);
             router.refresh();

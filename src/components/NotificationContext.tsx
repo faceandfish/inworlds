@@ -25,7 +25,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     const initializeUnreadCount = async () => {
       try {
         const response = await getUnreadNotificationCount();
-        console.log("getUnreadNotificationCount", response);
+
         if (response.code === 200) {
           setUnreadCount(response.data);
         }
@@ -40,7 +40,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   const markAllAsRead = async () => {
     try {
       const response = await markNotificationAsRead();
-      console.log("markNotificationAsRead:", response);
+
       if (response.code === 200) {
         setUnreadCount(0);
       }
