@@ -5,6 +5,8 @@ import {
   BellIcon
 } from "@heroicons/react/24/outline";
 import { useTranslation } from "../useTranslation";
+import { useNotification } from "../NotificationContext";
+import { NotificationBadge } from "../Main/NotificationBadge";
 
 export type SectionType = "books" | "authors" | "notifications";
 
@@ -12,6 +14,7 @@ interface MenuItem {
   key: SectionType;
   name: string;
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
+  badge?: number;
 }
 
 interface SidebarProps {
@@ -24,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onSectionChange
 }) => {
   const { t } = useTranslation("message");
+  const { unreadCount } = useNotification();
 
   const menuItems: MenuItem[] = [
     { key: "books", name: t("sidebar.favoriteBooks"), icon: BookOpenIcon },
@@ -31,7 +35,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       key: "notifications",
       name: t("sidebar.systemNotifications"),
-      icon: BellIcon
+      icon: BellIcon,
+      badge: unreadCount
     }
   ];
 
@@ -46,7 +51,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <li key={item.key} className="mb-2">
               <button
                 onClick={() => onSectionChange(item.key)}
-                className={`flex items-center w-full p-2 rounded-lg ${
+                className={`flex items-center w-full p-2 rounded-lg  ${
                   activeSection === item.key
                     ? "bg-orange-500 text-white"
                     : "text-neutral-600 hover:bg-orange-100"
@@ -54,6 +59,9 @@ const Sidebar: React.FC<SidebarProps> = ({
               >
                 <item.icon className="h-5 w-5 mr-2" />
                 {item.name}
+                {item.key === "notifications" && (
+                  <NotificationBadge count={unreadCount} className="ml-2" />
+                )}
               </button>
             </li>
           ))}

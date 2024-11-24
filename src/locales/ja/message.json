@@ -4,7 +4,7 @@
   "register": "登録",
   "favoriteBookPreviewCard": {
     "author": "著者",
-    "latestChapter": "最新チャプター：第"
+    "latestChapter": "第{number}話：{title}"
   },
   "messages": {
     "loading": "読み込み中...",

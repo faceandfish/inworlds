@@ -72,6 +72,7 @@ export function BookContent({ book }: BookContentProps) {
           bookId={book.id}
           isLoggedIn={isLoggedIn}
           onLogin={handleLogin}
+          currentUserId={user?.id || null}
         />
       )}
       {activeTab === "chapters" && (

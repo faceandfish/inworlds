@@ -10,8 +10,6 @@ import {
   addCommentOrReply
 } from "@/app/lib/action";
 import CommentItem from "../Main/CommentItem";
-
-import WorkContentSkeleton from "./Skeleton/WorkContentSkeleton";
 import Alert from "../Main/Alert";
 import Pagination from "../Main/Pagination";
 import { getImageUrl } from "@/app/lib/imageUrl";
@@ -19,6 +17,7 @@ import Image from "next/image";
 import CommentsSkeleton from "./Skeleton/CommentsSkeleton";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
+import { BiCommentDetail } from "react-icons/bi";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -44,7 +43,7 @@ const Comments: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const booksResponse = await fetchBooksList(userId, 1, 1000, "published");
+      const booksResponse = await fetchBooksList(1, 1000, "published");
       const allBooks = booksResponse.data.dataList;
       const allComments: CommentInfo[] = [];
 
@@ -84,10 +83,10 @@ const Comments: React.FC = () => {
   }, [commentsData]);
 
   // 注释：处理点赞操作
-  const handleLike = async (commentId: number) => {
+  const handleLike = async (commentId: number, isLiked: boolean) => {
     if (!user?.id) return;
     try {
-      await likeComment(commentId);
+      await likeComment(commentId, isLiked);
       setAlertInfo({ message: t("comments.likeSuccess"), type: "success" });
       fetchComments(user.id);
     } catch (error) {
@@ -153,7 +152,14 @@ const Comments: React.FC = () => {
   }
 
   if (!commentsData || commentsData.comments.length === 0) {
-    return <div className="text-center py-10">{t("comments.noComments")}</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-20 rounded-lg">
+        <BiCommentDetail className="w-16 h-16 text-neutral-300 mb-4" />
+        <p className="text-neutral-500 text-lg font-medium mb-2">
+          {t("comments.noComments")}
+        </p>
+      </div>
+    );
   }
 
   return (

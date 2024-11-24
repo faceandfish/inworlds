@@ -25,6 +25,7 @@ interface BookHeaderProps {
 export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(book.favoritesCount || 0);
   const [alert, setAlert] = useState<{
     message: string;
     type: "success" | "error";
@@ -75,6 +76,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
       if (isFavorited) {
         await unfavoriteBook(book.id);
         setIsFavorited(false);
+        setFavoriteCount(favoriteCount - 1);
         setAlert({
           message: t("unfavoriteSuccess"),
           type: "success"
@@ -82,6 +84,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
       } else {
         await favoriteBook(book.id);
         setIsFavorited(true);
+        setFavoriteCount(favoriteCount + 1);
         setAlert({
           message: t("favoriteSuccess"),
           type: "success"
@@ -141,6 +144,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
             </p>
             <p>{book.status === "ongoing" ? t("ongoing") : t("completed")}</p>
           </div>
+
           <div className="flex flex-col md:flex-row mt-4 md:mt-0">
             <Link href={`/book/${book.id}/chapter/1`}>
               <div className="px-5 py-2 border rounded hover:bg-neutral-100 text-orange-400 mb-2 md:mb-0 md:mr-10 text-center">
@@ -179,7 +183,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
               </Link>
               <div className="flex">
                 <FireIcon className="w-5 text-red-500 ml-5" />
-                <p className="text-red-500">{book.favoritesCount}</p>
+                <p className="text-red-500">{favoriteCount}</p>
               </div>
             </div>
           </div>

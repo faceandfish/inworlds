@@ -67,6 +67,7 @@
   "income": {
     "title": "収入詳細",
     "totalIncome": "総収入",
+    "noBookIncome": "作品収入はまだありません",
     "wallet": "ウォレットに振込",
     "withdraw": "出金",
     "currency": "インクコイン",
@@ -160,6 +161,7 @@
         "delete": "この作品を削除してもよろしいですか？"
       },
       "newWork": "新しい作品",
+      "noWorks": "作品がまだありません。新しい記事を投稿してみましょう！",
       "errors": {
         "fetchFailed": "作品リストの取得に失敗しました",
         "unpublishFailed": "作品の非公開に失敗しました",

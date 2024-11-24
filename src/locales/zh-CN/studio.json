@@ -67,6 +67,7 @@
   "income": {
     "title": "收入详情",
     "totalIncome": "总收入",
+    "noBookIncome": "暂无作品收入",
     "currency": "墨币",
     "withdraw": "提现",
     "wallet": "转入钱包",
@@ -164,6 +165,7 @@
         "delete": "确定要删除这个作品吗？"
       },
       "newWork": "新作品",
+      "noWorks": "暂无作品，快去发表新的文章吧！",
       "errors": {
         "fetchFailed": "获取作品列表失败",
         "unpublishFailed": "取消发布作品失败",

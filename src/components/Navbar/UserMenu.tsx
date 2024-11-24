@@ -11,6 +11,8 @@ import { useTranslation } from "../useTranslation";
 import UserOptionsMenu from "./UserOptionsMenu";
 import { useRouter } from "next/navigation";
 import { BecomeCreatorModal } from "../Main/NewUserView";
+import { useNotification } from "../NotificationContext";
+import { NotificationBadge } from "../Main/NotificationBadge";
 
 const UserMenu = ({ user }: { user: UserInfo }) => {
   const [optionMenu, setOptionMenu] = useState(false);
@@ -19,6 +21,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const { t } = useTranslation("navbar");
   const router = useRouter();
+  const { unreadCount } = useNotification();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -64,15 +67,19 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
   return (
     <>
       <div className="flex md:justify-center justify-around items-center w-full md:w-auto md:gap-10 relative">
-        <div onClick={handleWriteClick} className="group/write">
-          <PiNotePencilLight className="text-4xl" />
-          <div className="absolute left-0 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/write:visible group-hover/write:opacity-100 transition-opacity duration-300 md:block hidden">
+        <div onClick={handleWriteClick} className="group/write relative">
+          <PiNotePencilLight className="text-4xl  cursor-pointer  " />
+          <div className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap  top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/write:visible group-hover/write:opacity-100 transition-opacity duration-300 md:block hidden">
             {t("startWriting")}
           </div>
         </div>
-        <Link href="/messages" className="group/message">
+        <Link href="/messages" className="group/message relative">
           <GoBell className="text-3xl" />
-          <div className="absolute left-16 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/message:visible group-hover/message:opacity-100 transition-opacity duration-300 md:block hidden">
+          <NotificationBadge
+            count={unreadCount}
+            className="absolute -top-2 -right-2"
+          />
+          <div className="absolute whitespace-nowrap  left-1/2 -translate-x-1/2 top-full mt-2 px-2 py-1 bg-gray-500 text-white text-sm rounded opacity-0 invisible group-hover/message:visible group-hover/message:opacity-100 transition-opacity duration-300 md:block hidden">
             {t("newMessages")}
           </div>
         </Link>

@@ -4,11 +4,12 @@ import { getAvatarUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import Alert from "./Alert";
 import { CommentInfo } from "../../app/lib/definitions";
+import { useTranslation } from "../useTranslation";
 
 interface CommentActions {
-  onLike: (commentId: number) => Promise<void>;
+  onLike: (commentId: number, isLiked: boolean) => Promise<void>;
   onReply: (commentId: number, content: string) => Promise<void>;
-  onDelete?: (commentId: number) => Promise<void>;
+  onDelete?: (commentId: number, isReply: boolean) => Promise<void>;
   onBlock?: (userId: number) => Promise<void>;
 }
 
@@ -18,6 +19,7 @@ interface CommentItemProps {
   showDeleteButton?: boolean;
   showBlockButton?: boolean;
   isTopLevel?: boolean;
+  currentUserId?: number | null;
 }
 
 const CommentItem: React.FC<CommentItemProps> = ({
@@ -25,8 +27,10 @@ const CommentItem: React.FC<CommentItemProps> = ({
   actions,
   showDeleteButton = false,
   showBlockButton = false,
-  isTopLevel = true
+  isTopLevel = true,
+  currentUserId
 }) => {
+  const { t } = useTranslation("book");
   const [replyContent, setReplyContent] = useState("");
   const [showReplies, setShowReplies] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
@@ -34,44 +38,41 @@ const CommentItem: React.FC<CommentItemProps> = ({
   const [alertConfirmAction, setAlertConfirmAction] = useState<() => void>(
     () => {}
   );
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(
-      2,
-      "0"
-    )}/${String(date.getDate()).padStart(2, "0")}`;
-  };
+  const MAX_COMMENT_LENGTH = 1000; // 最大评论字数
 
   const handleReplyToggle = () => {
     setShowReplies(!showReplies);
   };
 
   const handleReplySubmit = async () => {
+    if (!replyContent.trim()) return;
+    if (replyContent.length > MAX_COMMENT_LENGTH) {
+      return;
+    }
     try {
       await actions.onReply(comment.id, replyContent);
       setReplyContent("");
     } catch (error) {
-      console.error("回复失败", error);
+      console.error(error);
     }
   };
 
   const handleLike = async () => {
     try {
-      await actions.onLike(comment.id);
+      await actions.onLike(comment.id, !comment.isLiked);
     } catch (error) {
       console.error("点赞失败", error);
     }
   };
 
   const handleDelete = () => {
-    setAlertMessage("你确定要删除这条评论吗？此操作无法撤销。");
+    setAlertMessage(t("comment.deleteConfirm"));
     setAlertConfirmAction(() => async () => {
       if (actions.onDelete) {
         try {
-          await actions.onDelete(comment.id);
+          await actions.onDelete(comment.id, !isTopLevel);
         } catch (error) {
-          console.error("删除失败", error);
+          console.error(error);
         }
       }
       setShowAlert(false);
@@ -80,13 +81,13 @@ const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   const handleBlock = () => {
-    setAlertMessage("你确定要拉黑这个用户吗？此操作可能会影响用户体验。");
+    setAlertMessage(t("comment.blockConfirm"));
     setAlertConfirmAction(() => async () => {
       if (actions.onBlock) {
         try {
           await actions.onBlock(comment.userId);
         } catch (error) {
-          console.error("拉黑用户失败", error);
+          console.error(error);
         }
       }
       setShowAlert(false);
@@ -106,7 +107,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
       <div className="flex flex-col justify-between flex-grow">
         <div className="text-neutral-400 space-x-5">
           <span>{comment.username}</span>
-          <span className="text-sm">{formatDate(comment.createdAt)}</span>
+          <span className="text-sm">{comment.createdAt}</span>
         </div>
         <p className="py-2 mb-3 pr-10">{comment.content}</p>
         <div className="flex space-x-10 text-sm">
@@ -121,7 +122,11 @@ const CommentItem: React.FC<CommentItemProps> = ({
               </button>
               <button
                 onClick={handleLike}
-                className="text-gray-500 hover:text-red-500 flex items-center"
+                className={`flex items-center ${
+                  comment.isLiked
+                    ? "text-red-500"
+                    : "text-gray-500 hover:text-red-500"
+                }`}
               >
                 <FiThumbsUp className="mr-1 text-xl" /> {comment.likes}
               </button>
@@ -149,24 +154,60 @@ const CommentItem: React.FC<CommentItemProps> = ({
           <div className="mt-2 flex flex-col">
             <textarea
               value={replyContent}
-              onChange={(e) => setReplyContent(e.target.value)}
-              className="w-1/2 p-2 border focus:outline-none rounded"
-              placeholder="输入你的回复..."
+              onChange={(e) => {
+                setReplyContent(e.target.value);
+              }}
+              className={`w-1/2 p-2 border rounded focus:outline-none ${
+                replyContent.length > MAX_COMMENT_LENGTH
+                  ? "border-red-500"
+                  : "border-gray-200"
+              }`}
+              placeholder={t("comment.enterReply")}
             />
+            <div className="mt-1 text-sm">
+              {replyContent.length > MAX_COMMENT_LENGTH ? (
+                <span className="text-red-500">
+                  {t("comment.exceedLimit", { max: MAX_COMMENT_LENGTH })}
+                </span>
+              ) : (
+                <span
+                  className={`text-gray-500 ${
+                    replyContent.length > MAX_COMMENT_LENGTH * 0.8
+                      ? "text-orange-500"
+                      : ""
+                  }`}
+                >
+                  {t("comment.characterCount", {
+                    current: replyContent.length,
+                    max: MAX_COMMENT_LENGTH
+                  })}
+                </span>
+              )}
+            </div>
             <button
               onClick={handleReplySubmit}
-              className="mt-2 px-4 py-2 w-24 bg-neutral-400 text-white rounded hover:bg-neutral-500"
+              disabled={
+                replyContent.length > MAX_COMMENT_LENGTH || !replyContent.trim()
+              }
+              className={`mt-2 px-4 py-2 w-24 rounded text-white
+                ${
+                  replyContent.length > MAX_COMMENT_LENGTH ||
+                  !replyContent.trim()
+                    ? "bg-neutral-300 cursor-not-allowed"
+                    : "bg-neutral-400 hover:bg-neutral-500"
+                }`}
             >
-              提交回复
+              {t("comment.submitReply")}
             </button>
-            {comment.replies && comment.replies.length > 0 && (
+            {Array.isArray(comment.replies) && comment.replies.length > 0 && (
               <div className="mt-4 ml-8">
                 {comment.replies.map((reply) => (
                   <CommentItem
                     key={reply.id}
                     comment={reply}
                     actions={actions}
-                    showDeleteButton={showDeleteButton}
+                    currentUserId={currentUserId}
+                    showDeleteButton={currentUserId === reply.userId}
                     showBlockButton={showBlockButton}
                     isTopLevel={false}
                   />
@@ -182,7 +223,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
           type="error"
           onClose={() => setShowAlert(false)}
           customButton={{
-            text: "确认",
+            text: t("comment.confirm"),
             onClick: alertConfirmAction
           }}
           autoClose={false}

@@ -39,7 +39,8 @@ import {
   BankCard,
   WithdrawRequest,
   WithdrawResponse,
-  PaginatedWithdrawRecords
+  PaginatedWithdrawRecords,
+  LikeResponse
 } from "./definitions";
 import safeLocalStorage from "./localStorage";
 import { getToken, removeToken, setToken } from "./token";
@@ -49,8 +50,8 @@ let token: string | null = null;
 
 // 创建 axios 实例
 const api = axios.create({
-  baseURL: "https://api.inworlds.xyz/inworlds/api",
-  //baseURL: "http://192.168.0.103:8088/inworlds/api",
+  //baseURL: "https://api.inworlds.xyz/inworlds/api",
+  baseURL: "http://192.168.0.103:8088/inworlds/api",
 
   headers: {
     "Content-Type": "application/json"
@@ -513,7 +514,6 @@ export const publishBook = async (
 };
 
 export const fetchBooksList = async (
-  userId: number,
   currentPage: number,
   pageSize: number,
   checkStatus: string
@@ -530,7 +530,7 @@ export const fetchBooksList = async (
       checkStatus: checkStatus
     });
 
-    const url = `/user/${userId}/books?${params.toString()}`;
+    const url = `/user/books?${params.toString()}`;
 
     const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(url, {
       headers: {
@@ -727,11 +727,24 @@ export const getBookComments = async (
 
 // 点赞评论
 export const likeComment = async (
-  commentId: number
-): Promise<ApiResponse<void>> => {
+  commentId: number,
+  isLiked: boolean
+): Promise<ApiResponse<LikeResponse>> => {
   try {
-    const response = await api.post<ApiResponse<void>>(
-      `/comment/${commentId}/like`
+    const token = getToken();
+    if (!token) {
+      throw new Error("Please login");
+    }
+
+    const response = await api.post<ApiResponse<LikeResponse>>(
+      `/comment/${commentId}/like`,
+      { isLiked },
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
     );
     return response.data;
   } catch (error) {
@@ -749,7 +762,7 @@ export const addCommentOrReply = async (
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      throw new Error(" Please login again.");
     }
 
     const url = parentCommentId
@@ -783,8 +796,19 @@ export const deleteComment = async (
   commentId: number
 ): Promise<ApiResponse<void>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+
     const response = await api.delete<ApiResponse<void>>(
-      `/comment/${commentId}`
+      `/comment/${commentId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
     );
     return response.data;
   } catch (error) {
@@ -799,8 +823,20 @@ export const blockUserInBook = async (
   bookId: number
 ): Promise<ApiResponse<void>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+
     const response = await api.post<ApiResponse<void>>(
-      `/book/${bookId}/user/${userId}/block`
+      `/book/${bookId}/user/${userId}/block`,
+      {}, // 空对象作为请求体
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
+        }
+      }
     );
     return response.data;
   } catch (error) {
@@ -996,7 +1032,54 @@ export const fetchSystemNotifications = async (
   }
 };
 
-// ... (existing code)
+// action.ts
+export const markNotificationAsRead = async (): Promise<ApiResponse<void>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+
+    const response = await api.put<ApiResponse<void>>(
+      "/system/notifications/read",
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error marking notifications as read:", error);
+    throw error;
+  }
+};
+
+// 获取未读消息数量
+export const getUnreadNotificationCount = async (): Promise<
+  ApiResponse<number>
+> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      throw new Error("Token not available");
+    }
+
+    const response = await api.get<ApiResponse<number>>(
+      "/system/notifications/unread/count",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Error fetching unread notification count:", error);
+    throw error;
+  }
+};
 
 // Fetch followed authors
 export const fetchFollowedAuthors = async (
@@ -1585,7 +1668,7 @@ export const confirmPayPalOrder = async (
   }
 };
 
-// 获取用户余额
+// 获取用户��额
 export const getUserBalance = async (): Promise<ApiResponse<UserBalance>> => {
   try {
     const token = getToken();

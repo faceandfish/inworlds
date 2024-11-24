@@ -42,7 +42,7 @@ const DataAnalysis: React.FC = () => {
   useEffect(() => {
     if (user?.id) {
       setIsLoading(true);
-      fetchBooksList(user.id, 1, 999, "published")
+      fetchBooksList(1, 999, "published")
         .then((response) => {
           if (response.code === 200) {
             setBooks(response.data.dataList);
@@ -127,19 +127,25 @@ const DataAnalysis: React.FC = () => {
 
           {isOpen && (
             <div className="absolute z-10 w-full mt-1 bg-white border border-neutral-200 rounded-lg shadow-sm max-h-60 overflow-auto">
-              {books.map((book) => (
-                <div
-                  key={book.id}
-                  className={`px-4 py-2 cursor-pointer hover:bg-neutral-50
+              {books.length > 0 ? (
+                books.map((book) => (
+                  <div
+                    key={book.id}
+                    className={`px-4 py-2 cursor-pointer hover:bg-neutral-50
             ${selectedBookId === book.id ? "bg-neutral-100" : ""}`}
-                  onClick={() => {
-                    handleBookSelect(book.id);
-                    setIsOpen(false);
-                  }}
-                >
-                  {book.title}
+                    onClick={() => {
+                      handleBookSelect(book.id);
+                      setIsOpen(false);
+                    }}
+                  >
+                    {book.title}
+                  </div>
+                ))
+              ) : (
+                <div className="px-4 py-2 text-neutral-500 text-center">
+                  {t("studio.workContent.noWorks")}
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>

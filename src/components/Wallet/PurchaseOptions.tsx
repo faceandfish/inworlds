@@ -8,7 +8,7 @@ interface PurchaseOptionsProps {
   isConfirmingPayment: boolean;
 }
 const options: PurchaseOption[] = [
-  { id: 1, coins: 1, price: 0.01 },
+  { id: 1, coins: 10, price: 1 },
   { id: 2, coins: 500, price: 5 },
   { id: 3, coins: 1000, price: 10 },
   { id: 4, coins: 2000, price: 20 }

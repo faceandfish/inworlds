@@ -4,7 +4,8 @@ import { CommentInfo } from "@/app/lib/definitions";
 import {
   getBookComments,
   addCommentOrReply,
-  likeComment
+  likeComment,
+  deleteComment
 } from "@/app/lib/action";
 
 import Alert from "../Main/Alert";
@@ -17,12 +18,14 @@ interface CommentSectionProps {
   bookId: number;
   isLoggedIn: boolean; // 新增：用于判断用户是否已登录
   onLogin: () => void; // 新增：登录回调函数
+  currentUserId: number | null;
 }
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   bookId,
   isLoggedIn,
-  onLogin
+  onLogin,
+  currentUserId
 }) => {
   const [comments, setComments] = useState<CommentInfo[]>([]);
   const [newComment, setNewComment] = useState("");
@@ -33,6 +36,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const [showLoginAlert, setShowLoginAlert] = useState(false);
   const commentsPerPage = 20;
   const { t, isLoaded } = useTranslation("book");
+  const MAX_COMMENT_LENGTH = 1000; // 最大评论字数
 
   useEffect(() => {
     fetchComments(currentPage);
@@ -54,7 +58,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newComment.trim()) return;
-
+    if (newComment.length > MAX_COMMENT_LENGTH) {
+      setError(t("commentTooLong"));
+      return;
+    }
     if (!isLoggedIn) {
       setShowLoginAlert(true);
       return;
@@ -65,7 +72,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       const response = await addCommentOrReply(bookId, newComment);
       setComments([response.data, ...comments]);
       setNewComment("");
-      fetchComments(1);
     } catch (err) {
       setError(t("addingCommentFailed"));
     } finally {
@@ -81,18 +87,48 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
     try {
       const response = await addCommentOrReply(bookId, content, commentId);
+
       setComments(
         comments.map((comment) =>
           comment.id === commentId
             ? {
                 ...comment,
-                replies: [...(comment.replies || []), response.data]
+                replies: [...(comment.replies || []), response.data],
+                replyCount: (comment.replyCount || 0) + 1
               }
             : comment
         )
       );
     } catch (err) {
       setError(t("replyFailed"));
+    }
+  };
+
+  const handleDeleteComment = async (
+    commentId: number,
+    isReply: boolean = false
+  ) => {
+    try {
+      await deleteComment(commentId);
+
+      if (isReply) {
+        // 如果是删除回复,只需要过滤掉该条回复
+        setComments(
+          comments.map((comment) => ({
+            ...comment,
+            replies:
+              comment.replies?.filter((reply) => reply.id !== commentId) || [],
+            replyCount: (
+              comment.replies?.filter((reply) => reply.id !== commentId) || []
+            ).length
+          }))
+        );
+      } else {
+        // 如果是删除主评论,直接过滤掉整个评论及其回复
+        setComments(comments.filter((comment) => comment.id !== commentId));
+      }
+    } catch (err) {
+      setError(t("deletingCommentFailed"));
     }
   };
 
@@ -103,11 +139,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
 
     try {
-      await likeComment(commentId);
+      const currentComment = comments.find((c) => c.id === commentId);
+      if (!currentComment) return;
+
+      const response = await likeComment(commentId, !currentComment.isLiked);
+
       setComments(
         comments.map((comment) =>
           comment.id === commentId
-            ? { ...comment, likes: comment.likes + 1 }
+            ? {
+                ...comment,
+                isLiked: response.data.isLiked,
+                likes: response.data.likes
+              }
             : comment
         )
       );
@@ -129,11 +173,21 @@ const CommentSection: React.FC<CommentSectionProps> = ({
       <form onSubmit={handleSubmitComment} className="mb-6 flex flex-col">
         <textarea
           value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
+          onChange={(e) => {
+            if (e.target.value.length <= MAX_COMMENT_LENGTH) {
+              setNewComment(e.target.value);
+            }
+          }}
           placeholder={t("leaveComment")}
+          maxLength={MAX_COMMENT_LENGTH}
           className="w-full md:w-1/2 p-2 border rounded text-neutral-600 focus:outline-none"
           rows={3}
         />
+        {newComment && ( // 添加字数提示
+          <div className="text-sm text-gray-500 mt-1">
+            {newComment.length}/{MAX_COMMENT_LENGTH}
+          </div>
+        )}
         <button
           type="submit"
           disabled={loading}
@@ -173,9 +227,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({
             comment={comment}
             actions={{
               onLike: handleLike,
-              onReply: handleReply
+              onReply: handleReply,
+              onDelete: handleDeleteComment
             }}
-            showDeleteButton={false}
+            showDeleteButton={currentUserId === comment.userId} // 只有当前用户的评论才显示删除按钮
             showBlockButton={false}
           />
         ))}

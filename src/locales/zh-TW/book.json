@@ -179,5 +179,15 @@
     "authorMessage": "作者留言",
     "saveDraft": "保存草稿",
     "publishArticle": "發布文章"
+  },
+  "comment": {
+    "reply": "回覆",
+    "submitReply": "提交回覆",
+    "enterReply": "輸入你的回覆...",
+    "deleteConfirm": "你確定要刪除這條評論嗎？此操作無法撤銷。",
+    "blockConfirm": "你確定要封鎖這個用戶嗎？此操作可能會影響用戶體驗。",
+    "characterCount": "{current}/{max}字",
+    "commentTooLong": "評論不能超過{max}字",
+    "confirm": "確認"
   }
 }

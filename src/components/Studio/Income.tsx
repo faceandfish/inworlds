@@ -433,35 +433,41 @@ const Income: React.FC = () => {
                   {t("income.columns.creationTime")}
                 </div>
               </div>
-              <ul className="max-h-96 overflow-y-auto">
-                {incomeData?.dataList.map((book) => (
-                  <li
-                    key={book.id}
-                    className="grid grid-cols-7 py-3 px-3 items-center border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150"
-                  >
-                    <span className="col-span-2 font-medium text-neutral-600 truncate">
-                      {book.title}
-                    </span>
-                    <span className="text-sm text-orange-400 text-center">
-                      {book.income24h.toLocaleString()} {t("income.currency")}
-                    </span>
-                    <span className="text-sm text-center text-neutral-500">
-                      {book.chapterIncome} {t("income.currency")}
-                    </span>
-                    <span className="text-sm text-center text-neutral-500">
-                      {book.donationIncome.toLocaleString()}{" "}
-                      {t("income.currency")}
-                    </span>
-                    <span className="text-sm text-center text-orange-400">
-                      {book.bookTotalIncome.toLocaleString()}{" "}
-                      {t("income.currency")}
-                    </span>
-                    <span className="text-sm text-center text-neutral-500">
-                      {formatDate(book.createdAt)}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              {!incomeData?.dataList.length ? (
+                <p className="text-neutral-500 pt-5 text-center  ">
+                  {t("income.noBookIncome")}
+                </p>
+              ) : (
+                <ul className="max-h-96 overflow-y-auto">
+                  {incomeData?.dataList.map((book) => (
+                    <li
+                      key={book.id}
+                      className="grid grid-cols-7 py-3 px-3 items-center border-b border-neutral-100 hover:bg-neutral-50 transition-colors duration-150"
+                    >
+                      <span className="col-span-2 font-medium text-neutral-600 truncate">
+                        {book.title}
+                      </span>
+                      <span className="text-sm text-orange-400 text-center">
+                        {book.income24h.toLocaleString()} {t("income.currency")}
+                      </span>
+                      <span className="text-sm text-center text-neutral-500">
+                        {book.chapterIncome} {t("income.currency")}
+                      </span>
+                      <span className="text-sm text-center text-neutral-500">
+                        {book.donationIncome.toLocaleString()}{" "}
+                        {t("income.currency")}
+                      </span>
+                      <span className="text-sm text-center text-orange-400">
+                        {book.bookTotalIncome.toLocaleString()}{" "}
+                        {t("income.currency")}
+                      </span>
+                      <span className="text-sm text-center text-neutral-500">
+                        {formatDate(book.createdAt)}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
               <div className="py-4">
                 {(incomeData?.totalPage || 1) > 1 && (
                   <Pagination

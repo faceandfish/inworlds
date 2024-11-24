@@ -29,6 +29,7 @@ import {
   SidebarSkeleton,
   TitleSkeleton
 } from "./MessagesSkeleton";
+import { useNotification } from "../NotificationContext";
 
 const Messages: React.FC = () => {
   const { t, isLoaded, lang } = useTranslation("message");
@@ -40,6 +41,13 @@ const Messages: React.FC = () => {
     notifications: [] as SystemNotification[]
   });
   const [error, setError] = useState<string | null>(null);
+  const { markAllAsRead } = useNotification();
+
+  useEffect(() => {
+    if (activeSection === "notifications") {
+      markAllAsRead();
+    }
+  }, [activeSection]);
 
   const fetchData = useCallback(async () => {
     if (data[activeSection].length > 0) {

@@ -4,7 +4,7 @@
   "register": "Register",
   "favoriteBookPreviewCard": {
     "author": "Author",
-    "latestChapter": "Latest Chapter: Chapter"
+    "latestChapter": "Chapter {number} : {title}"
   },
   "messages": {
     "loading": "Loading...",

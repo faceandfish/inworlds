@@ -179,5 +179,15 @@
     "authorMessage": "作者留言",
     "saveDraft": "保存草稿",
     "publishArticle": "发布文章"
+  },
+  "comment": {
+    "reply": "回复",
+    "submitReply": "提交回复",
+    "enterReply": "输入你的回复...",
+    "deleteConfirm": "你确定要删除这条评论吗？此操作无法撤销。",
+    "blockConfirm": "你确定要拉黑这个用户吗？此操作可能会影响用户体验。",
+    "characterCount": "{current}/{max}字",
+    "commentTooLong": "评论不能超过{max}字",
+    "confirm": "确认"
   }
 }

@@ -180,5 +180,15 @@
     "authorMessage": "著者のメッセージ",
     "saveDraft": "下書きを保存",
     "publishArticle": "記事を公開"
+  },
+  "comment": {
+    "reply": "返信",
+    "submitReply": "返信を送信",
+    "enterReply": "返信を入力...",
+    "deleteConfirm": "このコメントを削除してもよろしいですか？この操作は取り消せません。",
+    "blockConfirm": "このユーザーをブロックしてもよろしいですか？ユーザー体験に影響を与える可能性があります。",
+    "characterCount": "{current}/{max}文字",
+    "commentTooLong": "コメントは{max}文字を超えることはできません",
+    "confirm": "確認"
   }
 }

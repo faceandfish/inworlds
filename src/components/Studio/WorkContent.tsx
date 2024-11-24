@@ -31,7 +31,6 @@ const WorkContent: React.FC = () => {
   const [allBooks, setAllBooks] = useState<BookInfo[]>([]);
   const [activeTab, setActiveTab] = useState<(typeof tabs)[number]>(tabs[0]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [isPending, startTransition] = useTransition();
   const [isLoading, setIsLoading] = useState(true);
   const { t } = useTranslation("studio");
 
@@ -60,7 +59,7 @@ const WorkContent: React.FC = () => {
   useEffect(() => {
     if (user && user.id) {
       let ignore = false;
-      fetchBooksList(user.id, 1, 1000, "all")
+      fetchBooksList(1, 1000, "all")
         .then((response) => {
           if (!ignore) {
             if (response.code === 200) {
@@ -359,11 +358,23 @@ const WorkContent: React.FC = () => {
           </div>
         </div>
 
-        <ul className="h-64 ">
-          {paginatedBooks.map((book: BookInfo) => (
-            <BookListItem key={book.id} book={book} />
-          ))}
-        </ul>
+        {paginatedBooks.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-64 text-neutral-500">
+            <p>{t("studio.workContent.noWorks")}</p>
+            <button
+              onClick={handleNewWork}
+              className="mt-4 text-orange-400 hover:text-orange-500 transition-colors duration-200"
+            >
+              {t("studio.workContent.newWork")}
+            </button>
+          </div>
+        ) : (
+          <ul className="h-64">
+            {paginatedBooks.map((book: BookInfo) => (
+              <BookListItem key={book.id} book={book} />
+            ))}
+          </ul>
+        )}
 
         <div className="flex justify-between items-center ">
           <Link href="/writing">

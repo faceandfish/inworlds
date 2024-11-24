@@ -188,12 +188,18 @@ export interface CommentInfo {
   replyCount: number;
   username: string;
   createdAt: string;
+  isLiked: boolean;
   likes: number;
   bookId: number;
   parentCommentId?: number; // 用于回复功能
   userId: number; // 评论者ID
   avatarUrl: string;
   replies?: CommentInfo[]; // 直接回复的数组
+}
+
+export interface LikeResponse {
+  isLiked: boolean;
+  likes: number;
 }
 
 export interface IncomeBookInfo {

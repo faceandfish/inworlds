@@ -68,6 +68,7 @@
   "income": {
     "title": "收入詳情",
     "totalIncome": "總收入",
+    "noBookIncome": "暫無作品收入",
     "withdraw": "提現",
     "wallet": "轉入錢包",
     "transferTitle": "轉入錢包",
@@ -161,6 +162,7 @@
         "delete": "確定要刪除這個作品嗎？"
       },
       "newWork": "新作品",
+      "noWorks": "暫無作品，快去發表新的文章吧！",
       "errors": {
         "fetchFailed": "獲取作品列表失敗",
         "unpublishFailed": "取消發布作品失敗",
