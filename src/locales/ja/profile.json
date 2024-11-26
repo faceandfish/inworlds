@@ -72,7 +72,8 @@
     "avatarUpdateSuccess": "アバターの更新に成功しました！",
     "passwordChangeSuccess": "パスワードの変更に成功しました！",
     "passwordChangeFail": "パスワードの変更に失敗しました。後でもう一度お試しください。",
-    "networkError": "パスワードの変更に失敗しました。ネットワーク接続を確認し、後でもう一度お試しください。"
+    "networkError": "パスワードの変更に失敗しました。ネットワーク接続を確認し、後でもう一度お試しください。",
+    "incorrectCurrentPassword": "現在のパスワードが正しくありません"
   },
   "notificationSettings": {
     "title": "通知設定",

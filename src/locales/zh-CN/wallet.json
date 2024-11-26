@@ -99,6 +99,11 @@
       "confirmDeleteCard": "确定要删除这张银行卡吗？",
       "confirmDelete": "确认删除",
       "deleteSuccess": "银行卡删除成功",
+      "feeDeductionNote": "根据PayPal的政策，提现手续费会从转账金额中直接扣除。",
+      "feeExample": "示例：",
+      "feeExampleTotal": "提现金额：${amount}",
+      "feeExampleFee": "手续费（{rate}%）：${fee}",
+      "feeExampleFinal": "实际到账金额：${final}",
       "errors": {
         "fillAllFields": "请填写所有必填字段",
         "fetchCardsFailed": "获取银行卡列表失败",

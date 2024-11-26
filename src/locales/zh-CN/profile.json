@@ -72,7 +72,8 @@
     "avatarUpdateSuccess": "头像更新成功！",
     "passwordChangeSuccess": "密码修改成功！",
     "passwordChangeFail": "密码修改失败。请稍后重试。",
-    "networkError": "密码修改失败。请检查网络连接并稍后重试。"
+    "networkError": "密码修改失败。请检查网络连接并稍后重试。",
+    "incorrectCurrentPassword": "原密码不正确"
   },
   "notificationSettings": {
     "title": "通知设置",

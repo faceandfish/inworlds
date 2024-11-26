@@ -47,5 +47,8 @@
   "username_requirements": "只能使用英文字母、數字、@、_(底線)和-(連字符)",
   "password_requirements": "至少6個字符。可以使用：純英文字母、純數字，或字母、數字、@的任意組合",
   "logoutConfirmMessage": "確定要退出登錄嗎？",
-  "confirm": "確認"
+  "confirm": "確認",
+  "closeSearch": "關閉搜索",
+  "loginToSeeHistory": "登入後查看搜索歷史",
+  "noSearchHistory": "暫無搜索歷史"
 }

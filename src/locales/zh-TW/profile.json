@@ -72,7 +72,8 @@
     "avatarUpdateSuccess": "頭像更新成功！",
     "passwordChangeSuccess": "密碼修改成功！",
     "passwordChangeFail": "密碼修改失敗。請稍後重試。",
-    "networkError": "密碼修改失敗。請檢查網絡連接並稍後重試。"
+    "networkError": "密碼修改失敗。請檢查網絡連接並稍後重試。",
+    "incorrectCurrentPassword": "原密碼不正確"
   },
   "notificationSettings": {
     "title": "通知設置",

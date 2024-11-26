@@ -47,5 +47,8 @@
   "username_requirements": "英字、数字、@、_(アンダースコア)、-(ハイフン)のみ使用可能",
   "password_requirements": "6文字以上必要。使用可能：英字のみ、数字のみ、または英字・数字・@の組み合わせ",
   "logoutConfirmMessage": "ログアウトしてもよろしいですか？",
-  "confirm": "確認"
+  "confirm": "確認",
+  "closeSearch": "検索を閉じる",
+  "loginToSeeHistory": "検索履歴を見るにはログインしてください",
+  "noSearchHistory": "検索履歴がありません"
 }

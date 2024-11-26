@@ -12,7 +12,7 @@ interface UserPreviewCardProps {
 export const UserPreviewCard: React.FC<UserPreviewCardProps> = ({ user }) => {
   const { t } = useTranslation("message");
   return (
-    <div className="   hover:bg-neutral-100 w-full">
+    <div className=" hover:bg-neutral-100 w-full">
       <Link
         href={`/user/${user.id}`}
         className="flex items-center pb-5 border-b "

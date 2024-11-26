@@ -60,7 +60,6 @@ const BookEditPage: React.FC = () => {
         }
 
         const chapterResponse = await getChapterList(bookId, currentPage);
-        console.log("zhangjie:", chapterResponse);
 
         if (chapterResponse.code === 200 && chapterResponse.data) {
           setChapters(chapterResponse.data.dataList);
@@ -91,9 +90,7 @@ const BookEditPage: React.FC = () => {
   ) => {
     if (book) {
       try {
-        console.log("Updating book details with:", updatedBook);
         const response = await updateBookDetails(book.id, updatedBook);
-        console.log("Update response:", response);
 
         if (response.code === 200) {
           setBook(response.data);

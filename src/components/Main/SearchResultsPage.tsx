@@ -73,7 +73,7 @@ const SearchResultsPage = () => {
       {searchResults.users.length > 0 && (
         <div className="mb-8">
           <h2 className="text-lg font-semibold mb-3">{t("users")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 w-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {searchResults.users.map((user) => (
               <UserPreviewCard key={user.id} user={user} />
             ))}

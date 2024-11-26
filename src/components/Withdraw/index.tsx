@@ -1,14 +1,12 @@
 "use client";
 import { useTranslation } from "@/components/useTranslation";
-import { useUser } from "@/components/UserContextProvider";
 import React, { useState, useMemo, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { BalanceCard } from "@/components/Withdraw/BalanceCard";
 import { AmountInput } from "@/components/Withdraw/AmountInput";
 import { BankCardList } from "@/components/Withdraw/BankCardList";
 import { WithdrawNotice } from "@/components/Withdraw/WithdrawNotice";
 import { AddBankCardRequest, BankCard } from "@/app/lib/definitions";
-import { ArrowLeftIcon, ArrowPathIcon } from "@heroicons/react/24/outline";
+import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import InternationalBankForm from "@/components/Withdraw/InternationalBankForm";
 import {
   addBankCard,
@@ -18,18 +16,18 @@ import {
 } from "@/app/lib/action";
 import Alert from "../Main/Alert";
 import { WithdrawHistory } from "./WithdrawHistory";
+import WithdrawSkeleton from "./WithdrawSkeleton";
 
 const EXCHANGE_RATE = 0.01;
 
 export default function Withdraw() {
   const { t } = useTranslation("wallet");
-  const { user } = useUser();
-  const router = useRouter();
   const [totalIncome, setTotalIncome] = useState<number>(0);
   const [amount, setAmount] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingCard, setIsSavingCard] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const [cardError, setCardError] = useState("");
   const [selectedCard, setSelectedCard] = useState<string>("");
   const [showNewCardForm, setShowNewCardForm] = useState(false);
@@ -45,46 +43,40 @@ export default function Withdraw() {
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
 
-  // 获取已保存的银行卡列表
   useEffect(() => {
-    const fetchBankCards = async () => {
+    const fetchData = async () => {
       try {
-        const response = await getBankCards();
-
-        if (response.code === 200) {
-          setSavedCards(response.data.dataList || []);
-          // 如果有默认卡，自动选中
-          const defaultCard = response.data.dataList?.find(
+        // 获取银行卡
+        const cardsResponse = await getBankCards();
+        if (cardsResponse.code === 200) {
+          setSavedCards(cardsResponse.data.dataList || []);
+          const defaultCard = cardsResponse.data.dataList?.find(
             (card) => card.isDefault
           );
           if (defaultCard) {
             setSelectedCard(defaultCard.id);
           }
         }
-      } catch (err) {
-        console.error("Error fetching bank cards:", err);
-      }
-    };
 
-    fetchBankCards();
-  }, []);
-  useEffect(() => {
-    const fetchTotalIncome = async () => {
-      try {
-        const response = await getUserTotalIncome();
-        if (response.code === 200) {
-          setTotalIncome(response.data);
-        } else {
-          console.error("获取总收入失败:", response.msg);
+        // 获取总收入
+        const incomeResponse = await getUserTotalIncome();
+        if (incomeResponse.code === 200) {
+          setTotalIncome(incomeResponse.data);
         }
+
+        // 所有数据加载完成后，设置 loading 为 false
+        setIsLoading(false);
       } catch (err) {
-        console.error("获取总收入出错:", err);
+        console.error("Error fetching data:", err);
         setCardError(t("wallet.withdraw.errors.fetchIncomeFailed"));
+        // 即使出错也要设置 loading 为 false
+        setIsLoading(false);
       }
     };
 
-    fetchTotalIncome();
+    fetchData();
   }, []);
+
   // 金额计算
   const availableUSD = useMemo(() => {
     if (!totalIncome) return 0;
@@ -220,6 +212,10 @@ export default function Withdraw() {
       console.error("Error refreshing bank cards:", err);
     }
   };
+
+  if (isLoading) {
+    return <WithdrawSkeleton />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">

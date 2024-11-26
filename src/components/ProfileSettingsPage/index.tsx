@@ -73,15 +73,20 @@ const UserSettingsPage: React.FC = () => {
   const handlePasswordChange = async (passwordData: ChangePasswordRequest) => {
     try {
       const response = await changePassword(passwordData);
+      console.log("password:", response);
 
       if (response.code === 200) {
         showAlert(t("userSettings.passwordChangeSuccess"), "success");
       } else {
-        // 任何非 200 的 code 都视为错误，显示后端返回的具体错误信息
-        showAlert(
-          response.msg || t("userSettings.passwordChangeFail"),
-          "error"
-        );
+        if (response.code === 500) {
+          showAlert(t("userSettings.incorrectCurrentPassword"), "error");
+        } else {
+          // 其他错误情况
+          showAlert(
+            response.msg || t("userSettings.passwordChangeFail"),
+            "error"
+          );
+        }
       }
     } catch (error) {
       // 处理网络错误或其他未预期的错误

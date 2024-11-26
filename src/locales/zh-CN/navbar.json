@@ -48,6 +48,8 @@
   "username_requirements": "只能使用英文字母、数字、@、_(下划线)和-(连字符)",
   "password_requirements": "至少6个字符。可以使用：纯英文字母、纯数字，或字母、数字、@的任意组合",
   "searchHistory": "搜索历史",
+  "closeSearch": "关闭搜索",
+  "loginToSeeHistory": "登录后查看搜索历史",
   "noSearchHistory": "暂无搜索历史",
   "noResults": "没有找到相关结果",
   "searchResultsFor": "搜索结果",

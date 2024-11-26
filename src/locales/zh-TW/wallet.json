@@ -109,6 +109,11 @@
       "confirmDeleteCard": "確定要刪除這張銀行卡嗎？",
       "confirmDelete": "確認刪除",
       "deleteSuccess": "銀行卡刪除成功",
+      "feeDeductionNote": "根據PayPal的政策，提現手續費會從轉賬金額中直接扣除。",
+      "feeExample": "範例：",
+      "feeExampleTotal": "提現金額：${amount}",
+      "feeExampleFee": "手續費（{rate}%）：${fee}",
+      "feeExampleFinal": "實際到賬金額：${final}",
       "errors": {
         "fillAllFields": "請填寫所有必填欄位",
         "fetchCardsFailed": "獲取銀行卡列表失敗",

@@ -100,6 +100,11 @@
       "confirmDeleteCard": "Are you sure you want to delete this bank card?",
       "confirmDelete": "Confirm Delete",
       "deleteSuccess": "Bank card deleted successfully",
+      "feeDeductionNote": "According to PayPal's policy, withdrawal fees are deducted directly from the transfer amount.",
+      "feeExample": "Example:",
+      "feeExampleTotal": "Withdrawal amount: ${amount}",
+      "feeExampleFee": "Fee ({rate}%): ${fee}",
+      "feeExampleFinal": "Final amount: ${final}",
       "errors": {
         "fillAllFields": "Please fill in all required fields",
         "fetchCardsFailed": "Failed to fetch bank cards",

@@ -111,6 +111,11 @@
       "confirmDeleteCard": "この銀行カードを削除してもよろしいですか？",
       "confirmDelete": "削除を確認",
       "deleteSuccess": "銀行カードが正常に削除されました",
+      "feeDeductionNote": "PayPalのポリシーにより、出金手数料は送金額から直接差し引かれます。",
+      "feeExample": "例：",
+      "feeExampleTotal": "出金額：${amount}",
+      "feeExampleFee": "手数料（{rate}%）：${fee}",
+      "feeExampleFinal": "実際の受取額：${final}",
       "errors": {
         "fillAllFields": "すべての必須項目をご記入ください",
         "fetchCardsFailed": "銀行カード情報の取得に失敗しました",

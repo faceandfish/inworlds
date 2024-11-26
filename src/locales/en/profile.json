@@ -74,7 +74,8 @@
     "avatarUpdateSuccess": "Avatar updated successfully!",
     "passwordChangeSuccess": "Password changed successfully!",
     "passwordChangeFail": "Failed to change password. Please try again later.",
-    "networkError": "Password change failed. Please check your network connection and try again later."
+    "networkError": "Password change failed. Please check your network connection and try again later.",
+    "incorrectCurrentPassword": "Current password is incorrect"
   },
   "notificationSettings": {
     "title": "Notification Settings",
