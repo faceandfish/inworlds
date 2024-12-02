@@ -2,8 +2,9 @@ import React, { useState, useCallback } from "react";
 import { tipAuthor, tipChapter } from "@/app/lib/action";
 import { useTranslation } from "../useTranslation";
 import { useUser } from "../UserContextProvider";
-import { ApiResponse, TipResponse } from "@/app/lib/definitions";
+import { ApiResult, TipResponse } from "@/app/lib/definitions";
 import Alert from "./Alert";
+import { logger } from "../Main/logger";
 
 interface TipButtonProps {
   authorId?: number;
@@ -24,7 +25,6 @@ interface AlertState {
   type: "success" | "error";
 }
 
-// Separate TipAmountButton component with memoization
 const TipAmountButton: React.FC<TipAmountButtonProps> = React.memo(
   ({ amount, onClick, isSelected }) => {
     const { t } = useTranslation("book");
@@ -52,7 +52,6 @@ const TipButton: React.FC<TipButtonProps> = ({
   chapterId,
   className = ""
 }) => {
-  // State
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedAmount, setSelectedAmount] = useState<number>(0);
   const [customAmount, setCustomAmount] = useState<string>("");
@@ -63,14 +62,11 @@ const TipButton: React.FC<TipButtonProps> = ({
     type: "success"
   });
 
-  // Hooks
   const { t } = useTranslation("book");
   const { user } = useUser();
 
-  // Constants
   const PREDEFINED_AMOUNTS = [10, 50, 100];
 
-  // Alert handlers
   const showAlert = (message: string, type: "success" | "error") => {
     setAlert({
       show: true,
@@ -83,7 +79,6 @@ const TipButton: React.FC<TipButtonProps> = ({
     setAlert((prev) => ({ ...prev, show: false }));
   }, []);
 
-  // Dialog handlers
   const handleOpenDialog = useCallback(() => {
     if (!user) {
       showAlert(t("loginRequired"), "error");
@@ -101,6 +96,7 @@ const TipButton: React.FC<TipButtonProps> = ({
 
   const handleAmountSelect = useCallback((amount: number) => {
     setSelectedAmount(amount);
+    setCustomAmount(amount.toString());
   }, []);
 
   const handleCustomAmountChange = useCallback(
@@ -126,37 +122,32 @@ const TipButton: React.FC<TipButtonProps> = ({
     setIsProcessing(true);
 
     try {
-      let response: ApiResponse<TipResponse> | undefined;
+      let response: ApiResult<TipResponse>; // 在这里明确声明类型
 
       if (bookId && chapterId) {
         response = await tipChapter(selectedAmount, bookId, chapterId);
       } else if (authorId) {
         response = await tipAuthor(authorId, selectedAmount);
-      }
-
-      if (!response) {
+      } else {
         throw new Error("No response from server");
       }
 
-      switch (response.code) {
-        case 200:
-          handleCloseDialog();
-          showAlert(
-            t("tipSuccessMessage", {
-              coins: response.data.coins,
-              newBalance: response.data.newBalance
-            }),
-            "success"
-          );
-          break;
-        case 602:
-          showAlert(t("insufficientBalance"), "error");
-          break;
-        default:
-          showAlert(t("tipError"), "error");
+      if (response.code === 200 && "data" in response) {
+        handleCloseDialog();
+        showAlert(
+          t("tipSuccessMessage", {
+            coins: response.data.coins,
+            newBalance: response.data.newBalance
+          }),
+          "success"
+        );
+      } else if (response.code === 602) {
+        showAlert(t("insufficientBalance"), "error");
+      } else {
+        showAlert(t("tipError"), "error");
       }
     } catch (error) {
-      console.error("Tip error:", error);
+      logger.error("Tip error", error, { context: "TipButton" });
       showAlert(t("tipError"), "error");
     } finally {
       setIsProcessing(false);
@@ -186,7 +177,6 @@ const TipButton: React.FC<TipButtonProps> = ({
             <h2 className="text-xl font-semibold mb-4">
               {t("selectTipAmount")}
             </h2>
-
             <div className="flex flex-wrap gap-4 mb-4">
               {PREDEFINED_AMOUNTS.map((amount) => (
                 <TipAmountButton
@@ -197,7 +187,6 @@ const TipButton: React.FC<TipButtonProps> = ({
                 />
               ))}
             </div>
-
             <div className="flex items-center gap-4 mb-6">
               <input
                 type="text"
@@ -208,7 +197,6 @@ const TipButton: React.FC<TipButtonProps> = ({
                 disabled={isProcessing}
               />
             </div>
-
             <div className="flex justify-end gap-4">
               <button
                 onClick={handleCloseDialog}

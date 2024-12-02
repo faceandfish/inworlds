@@ -6,6 +6,7 @@ import Alert from "./Alert";
 import { CommentInfo } from "../../app/lib/definitions";
 import { useTranslation } from "../useTranslation";
 import { useWordCount } from "../WritingPage/useWordCount";
+import { logger } from "./logger";
 
 interface CommentActions {
   onLike: (commentId: number, isLiked: boolean) => Promise<void>;
@@ -61,7 +62,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
       await actions.onReply(comment.id, replyContent);
       handleTextChange(""); // 清空回复内容
     } catch (error) {
-      console.error(error);
+      logger.error("handleReplySubmit", error, {
+        context: "handleReplySubmit"
+      });
     }
   };
 
@@ -69,7 +72,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
     try {
       await actions.onLike(comment.id, !comment.isLiked);
     } catch (error) {
-      console.error("点赞失败", error);
+      logger.error("handleLike", error, {
+        context: "handleLike"
+      });
     }
   };
 
@@ -80,7 +85,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
         try {
           await actions.onDelete(comment.id, !isTopLevel);
         } catch (error) {
-          console.error(error);
+          logger.error("handleDelete", error, {
+            context: "handleDelete"
+          });
         }
       }
       setShowAlert(false);
@@ -95,7 +102,9 @@ const CommentItem: React.FC<CommentItemProps> = ({
         try {
           await actions.onBlock(comment.userId);
         } catch (error) {
-          console.error(error);
+          logger.error("handleBlock", error, {
+            context: "handleBlock"
+          });
         }
       }
       setShowAlert(false);

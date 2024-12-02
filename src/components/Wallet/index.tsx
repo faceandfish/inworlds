@@ -3,18 +3,16 @@ import React, { useState, useEffect } from "react";
 import { BalanceDisplay } from "./BalanceDisplay";
 import { PurchaseOptions } from "./PurchaseOptions";
 import { DonationTip } from "./DonationTip";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
   PurchaseOption,
   PurchaseHistory,
   DonationHistory,
   ConfirmPayPalOrderRequest,
-  ApiResponse,
   PurchasedChapterInfo,
   PaginatedData
 } from "@/app/lib/definitions";
 
-import { useUser } from "../UserContextProvider";
 import {
   confirmPayPalOrder,
   createPayPalOrder,
@@ -29,13 +27,11 @@ import WalletSkeleton from "./WalletSkeleton";
 import { PurchasedChaptersCard } from "./PurchasedChaptersCard";
 import { DonationHistoryCard } from "./DonationHistoryCard";
 import { PurchaseHistoryCard } from "./PurchaseHistoryCard";
+import { logger } from "@/components/Main/logger";
 
 const Wallet: React.FC = () => {
   const { t } = useTranslation("wallet");
-  const router = useRouter();
-  const pathname = usePathname();
   const [balance, setBalance] = useState<number | null>(null);
-  const { user } = useUser();
   const [alert, setAlert] = useState<{
     message: string;
     type: "success" | "error";
@@ -79,26 +75,59 @@ const Wallet: React.FC = () => {
           getDonationHistory(1, 5),
           getBookPurchasedChapters(1, 5)
         ]);
-        setBalance(balanceResponse.data.availableBalance);
-        setPurchaseHistory(purchaseResponse.data);
-        setDonationHistory(donationResponse.data);
-        setPurchasedChapters(chaptersResponse.data);
+
         const errors = [];
-        if (balanceResponse.code !== 200) errors.push("获取用户余额失败");
-        if (purchaseResponse.code !== 200) errors.push("获取购买历史失败");
-        if (donationResponse.code !== 200) errors.push("获取打赏历史失败");
-        if (chaptersResponse.code !== 200) errors.push("获取已购买章节失败");
+
+        if (balanceResponse.code === 200 && "data" in balanceResponse) {
+          setBalance(balanceResponse.data.availableBalance);
+        } else {
+          logger.error("Invalid balance response", {
+            response: balanceResponse,
+            context: "Wallet.fetchInitialData"
+          });
+        }
+
+        if (purchaseResponse.code === 200 && "data" in purchaseResponse) {
+          setPurchaseHistory(purchaseResponse.data);
+        } else {
+          errors.push("获取购买历史失败");
+          logger.error("Invalid purchase history response", {
+            response: purchaseResponse,
+            context: "Wallet.fetchInitialData"
+          });
+        }
+
+        if (donationResponse.code === 200 && "data" in donationResponse) {
+          setDonationHistory(donationResponse.data);
+        } else {
+          errors.push("获取打赏历史失败");
+          logger.error("Invalid donation history response", {
+            response: donationResponse,
+            context: "Wallet.fetchInitialData"
+          });
+        }
+
+        if (chaptersResponse.code === 200 && "data" in chaptersResponse) {
+          setPurchasedChapters(chaptersResponse.data);
+        } else {
+          logger.error("Invalid purchased chapters response", {
+            response: chaptersResponse,
+            context: "Wallet.fetchInitialData"
+          });
+        }
 
         if (errors.length > 0) {
           const errorMessage = errors.join(", ");
-          console.error("数据获取失败:", errorMessage);
-          setHistoryError(
-            `部分数据获取失败：${errorMessage}。请检查控制台以获取详细信息。`
-          );
+          logger.error("Multiple fetch failures", {
+            errors: errorMessage,
+            context: "Wallet.fetchInitialData"
+          });
         }
       } catch (error) {
-        console.error("Error fetching initial data:", error);
-        setHistoryError("获取数据时发生错误，请稍后重试。");
+        logger.error("Failed to fetch initial data", {
+          error,
+          context: "Wallet.fetchInitialData"
+        });
       } finally {
         setHistoryLoading(false);
         setIsLoading(false);
@@ -126,13 +155,19 @@ const Wallet: React.FC = () => {
   const fetchUserBalance = async () => {
     try {
       const response = await getUserBalance();
-      if (response.code === 200) {
+      if (response.code === 200 && "data" in response) {
         setBalance(response.data.availableBalance);
       } else {
-        console.error("Failed to get user balance:", response.msg);
+        logger.error("Failed to get user balance", {
+          response,
+          context: "Wallet.fetchUserBalance"
+        });
       }
     } catch (error) {
-      console.error("Error while fetching user balance:", error);
+      logger.error("Error while fetching user balance", {
+        error,
+        context: "Wallet.fetchUserBalance"
+      });
     }
   };
 
@@ -153,7 +188,7 @@ const Wallet: React.FC = () => {
         description: t("wallet.purchaseOptions.coins", { coins: option.coins })
       });
 
-      if (orderResponse.code === 200 && orderResponse.data) {
+      if (orderResponse.code === 200 && "data" in orderResponse) {
         setPaymentUrl(orderResponse.data.paymentUrl);
         setIsLoading(false);
         setAlert({
@@ -182,27 +217,60 @@ const Wallet: React.FC = () => {
   const handlePurchaseHistoryPageChange = async (page: number) => {
     try {
       const response = await getPurchaseHistory(page, 5);
-      setPurchaseHistory(response.data);
+      if (response.code === 200 && "data" in response) {
+        setPurchaseHistory(response.data);
+      } else {
+        logger.error("Invalid purchase history response", {
+          response,
+          context: "Wallet.handlePurchaseHistoryPageChange"
+        });
+      }
     } catch (error) {
-      console.error("Error fetching purchase history:", error);
+      logger.error("Failed to fetch purchase history", {
+        error,
+        page,
+        context: "Wallet.handlePurchaseHistoryPageChange"
+      });
     }
   };
 
   const handleDonationHistoryPageChange = async (page: number) => {
     try {
       const response = await getDonationHistory(page, 5);
-      setDonationHistory(response.data);
+      if (response.code === 200 && "data" in response) {
+        setDonationHistory(response.data);
+      } else {
+        logger.error("Invalid donation history response", {
+          response,
+          context: "Wallet.handleDonationHistoryPageChange"
+        });
+      }
     } catch (error) {
-      console.error("Error fetching donation history:", error);
+      logger.error("Failed to fetch donation history", {
+        error,
+        page,
+        context: "Wallet.handleDonationHistoryPageChange"
+      });
     }
   };
 
   const handlePurchasedChaptersPageChange = async (page: number) => {
     try {
       const response = await getBookPurchasedChapters(page, 5);
-      setPurchasedChapters(response.data);
+      if (response.code === 200 && "data" in response) {
+        setPurchasedChapters(response.data);
+      } else {
+        logger.error("Invalid purchased chapters response", {
+          response,
+          context: "Wallet.handlePurchasedChaptersPageChange"
+        });
+      }
     } catch (error) {
-      console.error("Error fetching purchased chapters:", error);
+      logger.error("Failed to fetch purchased chapters", {
+        error,
+        page,
+        context: "Wallet.handlePurchasedChaptersPageChange"
+      });
     }
   };
 
@@ -219,29 +287,39 @@ const Wallet: React.FC = () => {
 
   const handleConfirmPayment = async () => {
     if (internalOrderId === null) {
-      console.error("No order ID available for confirmation");
+      logger.error("No order ID available for confirmation", {
+        context: "Wallet.handleConfirmPayment"
+      });
       return;
     }
     setIsLoading(true);
     try {
       const orderData: ConfirmPayPalOrderRequest = { orderId: internalOrderId };
       const response = await confirmPayPalOrder(orderData);
-      if (response.code === 200) {
+      if (response.code === 200 && "data" in response) {
         setIsPaymentConfirmed(true);
-        // 更新余额
         await fetchUserBalance();
         setAlert({
           message: t("wallet.alerts.purchaseSuccess"),
           type: "success"
         });
       } else {
+        logger.error("Payment confirmation failed", {
+          response,
+          orderId: internalOrderId,
+          context: "Wallet.handleConfirmPayment"
+        });
         setAlert({
           message: t("wallet.alerts.purchaseFailed"),
           type: "error"
         });
       }
     } catch (error) {
-      console.error("Error during payment confirmation:", error);
+      logger.error("Error during payment confirmation", {
+        error,
+        orderId: internalOrderId,
+        context: "Wallet.handleConfirmPayment"
+      });
     } finally {
       setIsLoading(false);
     }

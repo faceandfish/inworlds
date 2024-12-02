@@ -2,6 +2,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import type { ReadingStats } from "@/app/lib/definitions";
 import { updateReadingStats } from "@/app/lib/action";
+import { logger } from "./logger";
 
 interface UseReadingStatsProps {
   bookId: number;
@@ -59,23 +60,18 @@ export default function useReadingStats({
       currentStats.activeTime >= TIME_THRESHOLD ||
       currentStats.readingProgress >= PROGRESS_THRESHOLD;
 
-    console.log("准备同步数据到服务器:", {
-      currentStats,
-      timeElapsed,
-      isValidReading
-    });
-
     try {
       const updatedStats = {
         ...currentStats,
         activeTime: currentStats.activeTime + timeElapsed,
         isValidReading
       };
-      console.log("发送到服务器的数据:", updatedStats);
       await updateReadingStats(updatedStats);
       lastUpdateTime.current = currentTime;
     } catch (error) {
-      console.error("Failed to sync reading stats:", error);
+      logger.error("Failed to sync reading stats:", error, {
+        context: "syncToServer"
+      });
     }
   }, []);
 

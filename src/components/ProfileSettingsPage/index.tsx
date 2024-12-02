@@ -16,6 +16,7 @@ import { updateProfile, changePassword } from "@/app/lib/action";
 
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
+import { logger } from "../Main/logger";
 
 const UserSettingsPage: React.FC = () => {
   const { t, lang } = useTranslation("profile");
@@ -54,7 +55,10 @@ const UserSettingsPage: React.FC = () => {
         return;
       }
     } catch (error) {
-      console.error("更新失败:", error);
+      logger.error("updateProfile error:", error, {
+        context: "handleProfileSave"
+      });
+
       showAlert(t("userSettings.profileUpdateFail"), "error");
     }
   };
@@ -73,7 +77,6 @@ const UserSettingsPage: React.FC = () => {
   const handlePasswordChange = async (passwordData: ChangePasswordRequest) => {
     try {
       const response = await changePassword(passwordData);
-      console.log("password:", response);
 
       if (response.code === 200) {
         showAlert(t("userSettings.passwordChangeSuccess"), "success");

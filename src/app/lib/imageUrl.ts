@@ -1,10 +1,7 @@
-// utils/imageUrl.ts
+import { logger } from "@/components/Main/logger";
 
 const IMAGE_BASE_URL = "https://api.inworlds.xyz:9000/book-bucket/";
 const AVATAR_BASE_URL = "https://api.inworlds.xyz:9000/avatar-bucket/";
-
-// const IMAGE_BASE_URL = `http://192.168.0.103:9000/book-bucket/`;
-// const AVATAR_BASE_URL = "http://192.168.0.103:9000/avatar-bucket/";
 
 export function getImageUrl(path: string): string {
   if (!path) {
@@ -28,7 +25,7 @@ export function getAvatarUrl(path: string): string {
         return path; // 如果是 Google 用户头像，直接返回原始 URL
       }
     } catch (error) {
-      console.error("Invalid URL:", path);
+      logger.error("Invalid URL:", error, { context: "getAvatarUrl" });
     }
     return path; // 对于其他外部 URL，也直接返回
   }

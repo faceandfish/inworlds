@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { CommentInfo } from "@/app/lib/definitions";
 import {
   getBookComments,
@@ -7,7 +7,6 @@ import {
   likeComment,
   deleteComment
 } from "@/app/lib/action";
-
 import Alert from "../Main/Alert";
 import CommentItem from "../Main/CommentItem";
 import Pagination from "../Main/Pagination";
@@ -22,7 +21,7 @@ interface CommentSectionProps {
   currentUserId: number | null;
 }
 
-const MAX_COMMENT_LENGTH = 1000; // 最大评论字数
+const MAX_COMMENT_LENGTH = 1000;
 
 const CommentSection: React.FC<CommentSectionProps> = ({
   bookId,
@@ -46,22 +45,32 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     isMaxLength
   } = useWordCount("", MAX_COMMENT_LENGTH);
 
-  useEffect(() => {
-    fetchComments(currentPage);
-  }, [bookId, currentPage]);
+  const fetchComments = useCallback(
+    async (page: number) => {
+      // 避免重复加载
+      if (loading) return;
 
-  const fetchComments = async (page: number) => {
-    setLoading(true);
-    try {
-      const response = await getBookComments(bookId, page, commentsPerPage);
-      setComments(response.data.dataList);
-      setTotalPages(Number(response.data.totalPage));
-    } catch (err) {
-      setError(t("failedToLoadComments"));
-    } finally {
-      setLoading(false);
-    }
-  };
+      setLoading(true);
+      try {
+        const response = await getBookComments(bookId, page, commentsPerPage);
+        if (response.code === 200 && "data" in response) {
+          setComments(response.data.dataList);
+          setTotalPages(response.data.totalPage);
+        } else {
+          throw new Error(response.msg);
+        }
+      } catch (err) {
+        setError(t("failedToLoadComments"));
+      } finally {
+        setLoading(false);
+      }
+    },
+    [bookId, t]
+  );
+
+  useEffect(() => {
+    fetchComments(1);
+  }, [bookId]);
 
   const handleSubmitComment = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,8 +87,12 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     setLoading(true);
     try {
       const response = await addCommentOrReply(bookId, newComment);
-      setComments([response.data, ...comments]);
-      handleTextChange(""); // 使用 handleTextChange 清空评论
+      if (response.code === 200 && "data" in response) {
+        setComments([response.data, ...comments]);
+        handleTextChange("");
+      } else {
+        throw new Error(response.msg);
+      }
     } catch (err) {
       setError(t("addingCommentFailed"));
     } finally {
@@ -95,17 +108,21 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
     try {
       const response = await addCommentOrReply(bookId, content, commentId);
-      setComments(
-        comments.map((comment) =>
-          comment.id === commentId
-            ? {
-                ...comment,
-                replies: [...(comment.replies || []), response.data],
-                replyCount: (comment.replyCount || 0) + 1
-              }
-            : comment
-        )
-      );
+      if (response.code === 200 && "data" in response) {
+        setComments(
+          comments.map((comment) =>
+            comment.id === commentId
+              ? {
+                  ...comment,
+                  replies: [...(comment.replies || []), response.data],
+                  replyCount: (comment.replyCount || 0) + 1
+                }
+              : comment
+          )
+        );
+      } else {
+        throw new Error(response.msg);
+      }
     } catch (err) {
       setError(t("replyFailed"));
     }
@@ -116,21 +133,25 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     isReply: boolean = false
   ) => {
     try {
-      await deleteComment(commentId);
-
-      if (isReply) {
-        setComments(
-          comments.map((comment) => ({
-            ...comment,
-            replies:
-              comment.replies?.filter((reply) => reply.id !== commentId) || [],
-            replyCount: (
-              comment.replies?.filter((reply) => reply.id !== commentId) || []
-            ).length
-          }))
-        );
+      const response = await deleteComment(commentId);
+      if (response.code === 200) {
+        if (isReply) {
+          setComments(
+            comments.map((comment) => ({
+              ...comment,
+              replies:
+                comment.replies?.filter((reply) => reply.id !== commentId) ||
+                [],
+              replyCount: (
+                comment.replies?.filter((reply) => reply.id !== commentId) || []
+              ).length
+            }))
+          );
+        } else {
+          setComments(comments.filter((comment) => comment.id !== commentId));
+        }
       } else {
-        setComments(comments.filter((comment) => comment.id !== commentId));
+        throw new Error(response.msg);
       }
     } catch (err) {
       setError(t("deletingCommentFailed"));
@@ -149,17 +170,21 @@ const CommentSection: React.FC<CommentSectionProps> = ({
 
       const response = await likeComment(commentId, !currentComment.isLiked);
 
-      setComments(
-        comments.map((comment) =>
-          comment.id === commentId
-            ? {
-                ...comment,
-                isLiked: response.data.isLiked,
-                likes: response.data.likes
-              }
-            : comment
-        )
-      );
+      if (response.code === 200 && "data" in response) {
+        setComments(
+          comments.map((comment) =>
+            comment.id === commentId
+              ? {
+                  ...comment,
+                  isLiked: response.data.isLiked,
+                  likes: response.data.likes
+                }
+              : comment
+          )
+        );
+      } else {
+        throw new Error(response.msg);
+      }
     } catch (err) {
       setError(t("likeFailed"));
     }

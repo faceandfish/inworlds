@@ -16,14 +16,13 @@ export function useUserInfo() {
       setLoading(true);
       setError(null);
       const response = await getUserInfo();
-      if (response.code === 200) {
+      if (response.code === 200 && "data" in response) {
         setUser(response.data);
-      } else {
-        setError(response.msg || "Failed to fetch user info");
+        return response;
       }
     } catch (err) {
+      setUser(null);
       setError("An error occurred while fetching user info");
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -47,24 +46,22 @@ export function useUserInfo() {
 
   const updateAvatar = useCallback(async (fileData: FileUploadData) => {
     if (!fileData.avatarImage) {
-      console.error("No avatar image provided");
-      return;
+      throw new Error("No avatar image provided");
     }
 
     try {
       setLoading(true);
       const response = await uploadAvatar(fileData);
-      if (response.code === 200) {
+      if (response.code === 200 && "data" in response) {
         setUser((prevUser) => {
           if (!prevUser) return null;
           return { ...prevUser, avatarUrl: response.data };
         });
-        return response.data; // 返回新的头像 URL
+        return response.data;
       } else {
         throw new Error(response.msg || "Avatar upload failed");
       }
     } catch (error) {
-      console.error("Error uploading avatar:", error);
       setError("Failed to update avatar");
       throw error;
     } finally {
@@ -76,7 +73,6 @@ export function useUserInfo() {
     try {
       await logout();
     } catch (error) {
-      console.error("Logout error:", error);
     } finally {
       removeToken();
       setUser(null);

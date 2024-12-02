@@ -39,12 +39,10 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
   }, [book]);
 
   const handleContentChange = (updatedFields: Partial<ChapterInfo>) => {
-    console.log("Content changed:", updatedFields);
     setNewChapter((prev) => ({ ...prev, ...updatedFields }));
   };
 
   const resetChapterContent = () => {
-    console.log("Resetting chapter content");
     setNewChapter((prev) => ({
       ...prev,
       title: "",
@@ -53,7 +51,6 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
   };
   const setAlertState = useCallback(
     (show: boolean, message: string, type: "success" | "error") => {
-      console.log("Setting alert state:", { show, message, type });
       setShowAlert(show);
       setAlertMessage(message);
       setAlertType(type);
@@ -116,15 +113,13 @@ const NewChapter: React.FC<NewChapterProps> = ({ book, bookId, onSave }) => {
           {t("newChapter.saveToDraft")}
         </button>
       </div>
-      {showAlert &&
-        (console.log("Rendering Alert component"),
-        (
-          <Alert
-            message={alertMessage}
-            type={alertType}
-            onClose={() => setShowAlert(false)}
-          />
-        ))}
+      {showAlert && (
+        <Alert
+          message={alertMessage}
+          type={alertType}
+          onClose={() => setShowAlert(false)}
+        />
+      )}
     </div>
   );
 };

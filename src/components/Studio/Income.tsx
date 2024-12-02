@@ -19,12 +19,11 @@ import {
 import {
   IncomeBookInfo,
   PaginatedData,
-  ApiResponse,
   SponsorInfo,
-  TransferRecord,
   PaginatedTransferRecords
 } from "@/app/lib/definitions";
 import { useUser } from "../UserContextProvider";
+import { logger } from "../Main/logger";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -77,12 +76,41 @@ const Income: React.FC = () => {
             getTransferRecords(currentTransferPage, ITEMS_PER_PAGE)
           ]);
 
-        setIncomeData(incomeResponse.data);
-        setSponsorData(sponsorResponse.data);
-        setTransferRecords(transferResponse.data);
+        if ("data" in incomeResponse && incomeResponse.code === 200) {
+          setIncomeData(incomeResponse.data);
+        } else {
+          logger.error("Invalid income response", {
+            response: incomeResponse,
+            context: "Income.loadData"
+          });
+          setError(t("income.fetchFailed"));
+        }
+
+        if ("data" in sponsorResponse && sponsorResponse.code === 200) {
+          setSponsorData(sponsorResponse.data);
+        } else {
+          logger.error("Invalid sponsor response", {
+            response: sponsorResponse,
+            context: "Income.loadData"
+          });
+          setError(t("income.fetchFailed"));
+        }
+
+        if ("data" in transferResponse && transferResponse.code === 200) {
+          setTransferRecords(transferResponse.data);
+        } else {
+          logger.error("Invalid transfer response", {
+            response: transferResponse,
+            context: "Income.loadData"
+          });
+          setError(t("income.fetchFailed"));
+        }
       } catch (err) {
+        logger.error("Failed to fetch income data", {
+          error: err,
+          context: "Income.loadData"
+        });
         setError(t("income.fetchFailed"));
-        console.error("Failed to fetch data:", err);
       } finally {
         setIsLoading(false);
       }
@@ -153,15 +181,28 @@ const Income: React.FC = () => {
 
     try {
       const response = await transferToWallet(Number(transferAmount));
-      if (response.code === 200) {
+
+      if ("data" in response && response.code === 200) {
         setTransferSuccess(true);
         setTimeout(() => {
           setShowTransferModal(false);
           setTransferAmount("");
           setTransferSuccess(false);
         }, 2000);
+      } else {
+        logger.error("Transfer failed", {
+          response,
+          amount: transferAmount,
+          context: "Income.handleTransfer"
+        });
+        setTransferError(t("income.transferFailed"));
       }
     } catch (error) {
+      logger.error("Transfer error", {
+        error,
+        amount: transferAmount,
+        context: "Income.handleTransfer"
+      });
       setTransferError(t("income.transferFailed"));
     } finally {
       setIsTransferring(false);
@@ -179,13 +220,21 @@ const Income: React.FC = () => {
   const fetchTotalIncome = async () => {
     try {
       const response = await getUserTotalIncome();
-      console.log("income", response);
 
-      if (response.code === 200) {
+      if ("data" in response && response.code === 200) {
         setTotalIncome(response.data);
+      } else {
+        logger.error("Invalid total income response", {
+          response,
+          context: "Income.fetchTotalIncome"
+        });
+        setError(t("income.fetchTotalIncomeFailed"));
       }
     } catch (err) {
-      console.error("Failed to fetch total income:", err);
+      logger.error("Failed to fetch total income", {
+        error: err,
+        context: "Income.fetchTotalIncome"
+      });
       setError(t("income.fetchTotalIncomeFailed"));
     } finally {
       setIsLoadingIncome(false);

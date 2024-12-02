@@ -62,7 +62,7 @@ const WorkContent: React.FC = () => {
       fetchBooksList(1, 1000, "all")
         .then((response) => {
           if (!ignore) {
-            if (response.code === 200) {
+            if (response.code === 200 && "data" in response) {
               setAllBooks(response.data.dataList);
             } else {
               throw new Error(response.msg || "获取作品列表失败");

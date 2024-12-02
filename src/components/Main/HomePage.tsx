@@ -23,7 +23,7 @@ export default function HomePage({ initialBooks }: HomePageProps) {
   const [books, setBooks] = useState<BookInfo[]>(initialBooks || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [page, setPage] = useState(2); // Start from page 2 since we already have initial books
+  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
   const memoizedBooks = useMemo(() => books, [books]);
@@ -44,21 +44,29 @@ export default function HomePage({ initialBooks }: HomePageProps) {
   );
 
   useEffect(() => {
-    const fetchMoreBooks = async () => {
+    const loadBooks = async () => {
       setLoading(true);
       try {
         const response = await fetchHomepageBooks(page, 20, {
           preferredLanguage: lang,
           browserLanguage
         });
-        setBooks((prevBooks) => {
-          const uniqueIds = new Set(prevBooks.map((book) => book.id));
-          const newBooks = response.data.dataList.filter(
-            (book) => !uniqueIds.has(book.id)
-          );
-          return [...prevBooks, ...newBooks];
-        });
-        setHasMore(response.data.dataList.length > 0);
+
+        if (response.code === 200 && "data" in response) {
+          setBooks((prevBooks) => {
+            if (page === 1) {
+              return response.data.dataList || [];
+            }
+            const newDataList = response.data.dataList || [];
+            const uniqueIds = new Set(prevBooks.map((book) => book.id));
+            const newBooks = newDataList.filter(
+              (book) => !uniqueIds.has(book.id)
+            );
+            return [...prevBooks, ...newBooks];
+          });
+
+          setHasMore((response.data.dataList?.length || 0) >= 20);
+        }
       } catch (err) {
         setError("err");
       } finally {
@@ -66,33 +74,16 @@ export default function HomePage({ initialBooks }: HomePageProps) {
       }
     };
 
-    fetchMoreBooks();
-  }, [page, lang]); // 添加 preferredLanguage 作为依赖
+    loadBooks();
+  }, [page, lang, browserLanguage]);
 
-  // 当语言改变时重新加载内容
+  // 语言改变时重置所有状态
   useEffect(() => {
-    setBooks([]); // 清空现有书籍
-    setPage(1); // 重置页码
-    setHasMore(true); // 重置加载状态
-
-    const loadInitialBooks = async () => {
-      setLoading(true);
-      try {
-        const response = await fetchHomepageBooks(1, 20, {
-          preferredLanguage: lang,
-          browserLanguage
-        });
-        setBooks(response.data.dataList);
-        setHasMore(response.data.dataList.length >= 20);
-      } catch (err) {
-        setError("err");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadInitialBooks();
-  }, [lang]); // 当首选语言改变时重新加载
+    setBooks([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+  }, [lang]);
 
   if (!memoizedBooks) {
     return <BookPreviewCardSkeleton />;

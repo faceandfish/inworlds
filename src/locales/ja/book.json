@@ -16,6 +16,7 @@
   "favoriteBook": "お気に入りに追加",
   "unfavoriteSuccess": "お気に入りを解除しました！",
   "loading": "処理中...",
+  "purchased": "購入済み",
   "unfavoriteBook": "お気に入り解除",
   "alreadyFavorited": "お気に入り済み",
   "pleaseLoginToFavorite": "お気に入りに追加するにはログインしてください",
@@ -26,7 +27,7 @@
   "paidChapter": "これは有料チャプターです。読むには {price} コインが必要です。",
   "payAndRead": "支払って読む",
   "authorNoteTitle": "著者のメモ：",
-  "reward": "報酬",
+  "reward": "投げ銭",
   "firstChapter": "第１話",
   "previousChapter": "前のチャプター",
   "lastChapter": "最終チャプター",
@@ -144,6 +145,7 @@
     "fileSizeError": "ファイルサイズは2MBを超えることはできません。より小さいファイルを選択するか、現在のファイルを圧縮してください。"
   },
   "writingPage": {
+    "noUserInfo": "ユーザー情報が見つかりません",
     "enterTitle": "タイトルを入力してください",
     "enterDescription": "本の説明を入力してください",
     "uploadCover": "表紙画像をアップロードしてください",
@@ -190,5 +192,13 @@
     "characterCount": "{current}/{max}文字",
     "commentTooLong": "コメントは{max}文字を超えることはできません",
     "confirm": "確認"
+  },
+  "errors": {
+    "purchaseCheckFailed": "購入確認に失敗しました",
+    "purchaseError": "購入に失敗しました。後でもう一度お試しください"
+  },
+  "status": {
+    "processing": "処理中...",
+    "completed": "完了"
   }
 }

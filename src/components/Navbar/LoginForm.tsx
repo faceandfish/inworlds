@@ -13,7 +13,7 @@ export function LoginForm() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
   const { refetch } = useUser();
-  const { t } = useTranslation("navbar");
+  const { t, lang } = useTranslation("navbar");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -33,15 +33,30 @@ export function LoginForm() {
     try {
       const response = await login(username, password);
 
-      if (response.code === 200 && response.data) {
+      if (response.code === 200 && "data" in response) {
         setToken(response.data);
-        await refetch();
-        router.push("/");
+        const userResponse = await refetch();
+
+        if (
+          userResponse?.code === 200 &&
+          "data" in userResponse &&
+          userResponse.data?.language
+        ) {
+          // 清除本地存储的语言设置
+          localStorage.removeItem("preferredLanguage");
+
+          await router.push(`/${userResponse.data.language}`);
+          router.refresh();
+        } else {
+          router.push(`/${lang}`);
+        }
       } else {
         setError(response.msg || t("loginError"));
       }
     } catch (error) {
       setError(t("unexpectedError"));
+    } finally {
+      setIsLoading(false);
     }
   };
   if (isLoading) {

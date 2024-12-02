@@ -1,6 +1,11 @@
-// ChapterContent.tsx
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+  useCallback
+} from "react";
 import { ChapterInfo, BookInfo } from "@/app/lib/definitions";
 import {
   ChevronRightIcon,
@@ -12,16 +17,16 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ChapterList } from "./ChapterList";
-import { getChapterList, getPublicChapterList } from "@/app/lib/action";
+import { getPublicChapterList } from "@/app/lib/action";
 import Pagination from "../Main/Pagination";
 import { useTranslation } from "../useTranslation";
 import TipButton from "../Main/TipButton";
-
 import ChapterNavigation from "./NavigationButton";
 import PaidChapterContent from "./PaidChapterContent";
-import { usePurchasedChapters } from "../PurchasedChaptersProvider.tsx";
-import useReadingStats from "../Main/useReadingStats";
 import { useChapterReading } from "./useChapterReading";
+import { usePurchasedChapters } from "../PurchasedChaptersProvider.tsx";
+import { useUser } from "../UserContextProvider";
+import { logger } from "../Main/logger";
 
 interface ChapterContentPageProps {
   chapter: ChapterInfo;
@@ -33,25 +38,123 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
   book
 }) => {
   const router = useRouter();
+  const { user } = useUser();
   const {
     isChapterPurchased,
     fetchPurchasedChapters,
     loading: purchaseLoading,
     error: purchaseError
   } = usePurchasedChapters();
+
   const contentRef = useRef<HTMLDivElement>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [chapters, setChapters] = useState<ChapterInfo[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isPurchased, setIsPurchased] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const itemsPerPage = 10;
   const { t } = useTranslation("book");
-
-  // 添加外部点击处理器的 ref
   const menuRef = useRef<HTMLDivElement>(null);
+  const isInitialMount = useRef(true);
 
-  // 添加点击事件处理
+  // 检查购买状态
+  // 简化为
+  useEffect(() => {
+    const checkPurchaseStatus = async () => {
+      if (!purchaseLoading && isInitialMount.current && user) {
+        try {
+          await fetchPurchasedChapters(book.id);
+          setIsPurchased(isChapterPurchased(book.id, chapter.id));
+        } catch (error) {
+          logger.error("checking purchase status", error, {
+            context: "fetchPurchasedChapters"
+          });
+        } finally {
+          isInitialMount.current = false;
+        }
+      }
+    };
+
+    checkPurchaseStatus();
+  }, [
+    book.id,
+    chapter.id,
+    fetchPurchasedChapters,
+    isChapterPurchased,
+    purchaseLoading,
+    user
+  ]);
+  const fetchChapters = useCallback(
+    async (page: number) => {
+      if (isLoading) return;
+
+      setIsLoading(true);
+      try {
+        const response = await getPublicChapterList(
+          book.id,
+          page,
+          itemsPerPage
+        );
+        if ("data" in response && response.code === 200) {
+          setChapters(response.data.dataList);
+          setTotalPages(response.data.totalPage);
+        } else {
+          throw new Error(response.msg || t("errors.fetchChaptersFailed"));
+        }
+      } catch (err) {
+        setChapters([]);
+        setTotalPages(1);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [book.id]
+  ); // 只依赖必要的参数
+
+  // 只在组件挂载时获取第一页数据
+  useEffect(() => {
+    fetchChapters(1);
+  }, []);
+
+  // 分页变化时再次请求
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchChapters(page);
+  };
+  // 格式化内容
+  const formatContent = useMemo(
+    () => (content: string) => {
+      if (!content) return null;
+      return content.split("\n").map((line, index) => (
+        <React.Fragment key={index}>
+          {line || <br />}
+          <br />
+        </React.Fragment>
+      ));
+    },
+    []
+  );
+
+  const isLastChapter = chapter.chapterNumber === book.latestChapterNumber;
+  const isFirstChapter = chapter.chapterNumber === 1;
+
+  const handlePreviousChapter = useCallback(() => {
+    if (!isFirstChapter) {
+      router.push(`/book/${book.id}/chapter/${chapter.chapterNumber! - 1}`);
+    }
+  }, [book.id, chapter.chapterNumber, isFirstChapter, router]);
+
+  const handleNextChapter = useCallback(() => {
+    if (!isLastChapter) {
+      router.push(`/book/${book.id}/chapter/${chapter.chapterNumber! + 1}`);
+    }
+  }, [book.id, chapter.chapterNumber, isLastChapter, router]);
+
+  const toggleMenu = useCallback(() => {
+    setIsMenuOpen((prev) => !prev);
+  }, []);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -69,83 +172,6 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
     };
   }, [isMenuOpen]);
 
-  useEffect(() => {
-    const checkPurchaseStatus = async () => {
-      if (!purchaseLoading) {
-        // 避免重复请求
-        await fetchPurchasedChapters(book.id);
-        setIsPurchased(isChapterPurchased(book.id, chapter.id));
-      }
-    };
-    checkPurchaseStatus();
-  }, [
-    book.id,
-    chapter.id,
-    fetchPurchasedChapters,
-    isChapterPurchased,
-    purchaseLoading
-  ]);
-
-  useEffect(() => {
-    fetchChapters(currentPage);
-  }, [currentPage, book.id]);
-
-  const formatContent = (content: string) => {
-    return content.split("\n").map((line, index) => (
-      <React.Fragment key={index}>
-        {line}
-        <br />
-      </React.Fragment>
-    ));
-  };
-
-  const fetchChapters = async (page: number) => {
-    try {
-      const response = await getPublicChapterList(book.id, page, itemsPerPage);
-      setChapters(response.data.dataList);
-      setTotalPages(response.data.totalPage);
-    } catch (error) {
-      console.error("Error fetching chapters:", error);
-    }
-  };
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
-  const isLastChapter = chapter.chapterNumber === book.latestChapterNumber;
-  const isFirstChapter = chapter.chapterNumber === 1;
-
-  const handlePreviousChapter = async () => {
-    if (!isFirstChapter) {
-      console.log("Navigating to previous chapter...");
-      try {
-        await router.push(
-          `/book/${book.id}/chapter/${chapter.chapterNumber! - 1}`
-        );
-      } catch (error) {
-        console.error("Navigation error:", error);
-      }
-    }
-  };
-
-  const handleNextChapter = async () => {
-    if (!isLastChapter) {
-      try {
-        console.log("Navigating to next chapter...");
-        await router.push(
-          `/book/${book.id}/chapter/${chapter.chapterNumber! + 1}`
-        );
-      } catch (error) {
-        console.error("Navigation error:", error);
-      }
-    }
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-
   useChapterReading({
     chapter,
     book,
@@ -156,6 +182,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
     <div className="min-h-screen bg-neutral-200 flex flex-col relative md:static md:top-auto">
       <div className="flex-grow flex flex-col items-center bg-neutral-50 justify-between mx-auto w-full md:w-4/5">
         <div className="w-full flex-grow px-4 md:px-20">
+          {/* 导航面包屑 */}
           <div className="flex w-full flex-wrap gap-2 py-4 md:py-8 border-b text-neutral-500 items-center text-sm md:text-base">
             <Link href="/" className="cursor-pointer hover:text-orange-400">
               {t("home")}
@@ -185,21 +212,31 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
                     <p className="text-lg md:text-xl text-neutral-600 bg-neutral-100 py-2 md:py-3 mx-3 md:mx-5 text-center my-3 md:my-5">
                       {t("chapters")}
                     </p>
-                    <ChapterList
-                      chapters={chapters}
-                      book={book}
-                      className="flex-col px-3 md:px-5 flex h-96"
-                    />
-                    <Pagination
-                      currentPage={currentPage}
-                      totalPages={totalPages}
-                      onPageChange={handlePageChange}
-                    />
+                    {isLoading ? (
+                      <div className="flex justify-center py-4">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
+                      </div>
+                    ) : (
+                      <>
+                        <ChapterList
+                          chapters={chapters}
+                          book={book}
+                          className="flex-col px-3 md:px-5 flex h-96"
+                        />
+                        <Pagination
+                          currentPage={currentPage}
+                          totalPages={totalPages}
+                          onPageChange={handlePageChange}
+                        />
+                      </>
+                    )}
                   </div>
                 </>
               )}
             </div>
           </div>
+
+          {/* 章节标题和信息 */}
           <h2 className="text-xl md:text-2xl h-full text-neutral-800 font-medium pt-4 md:pt-8 mb-2 md:mb-3">
             {chapter.chapterNumber} {chapter.title}
           </h2>
@@ -230,6 +267,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
             </div>
           </div>
 
+          {/* 章节内容 */}
           <PaidChapterContent
             chapter={chapter}
             book={book}
@@ -263,6 +301,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
             </>
           )}
 
+          {/* 章节导航 */}
           <ChapterNavigation
             isFirstChapter={isFirstChapter}
             isLastChapter={isLastChapter}

@@ -1,23 +1,21 @@
 import { Locale } from "../i18n-config";
 import {
   CreateUserRequest,
-  LoginRequest,
   UpdateUserRequest,
   ChangePasswordRequest,
   UserInfo,
   ApiResponse,
+  ApiErrorResponse,
+  ApiResult,
   BookInfo,
   PaginatedData,
   ChapterInfo,
   CommentInfo,
   AnalyticsData,
-  Conversation,
   SystemNotification,
-  Message,
   FileUploadData,
   PublicUserInfo,
   SearchResult,
-  PasswordChangeResponse,
   PayPalOrderRequest,
   PayPalOrderResponse,
   ConfirmPayPalOrderResponse,
@@ -42,17 +40,31 @@ import {
   PaginatedWithdrawRecords,
   LikeResponse
 } from "./definitions";
-import safeLocalStorage from "./localStorage";
 import { getToken, removeToken, setToken } from "./token";
-import axios, { AxiosError, AxiosResponse } from "axios";
+import axios, { AxiosResponse } from "axios";
 
-let token: string | null = null;
+// 统一的错误处理工具函数现在返回 ApiErrorResponse
+const handleApiError = (error: any, context: string): ApiErrorResponse => {
+  if (process.env.NODE_ENV === "development") {
+    console.error(`[${context}] Error:`, error);
+  }
+
+  // 检查是否是预期的 API 错误响应
+  if (axios.isAxiosError(error) && error.response?.data?.code) {
+    return error.response.data;
+  }
+
+  // 返回通用错误响应
+  return {
+    code: 500,
+    msg: "An unexpected error occurred"
+  };
+};
 
 // 创建 axios 实例
 const api = axios.create({
   baseURL: "https://api.inworlds.xyz/inworlds/api",
   //baseURL: "http://192.168.0.103:8088/inworlds/api",
-
   headers: {
     "Content-Type": "application/json"
   }
@@ -60,7 +72,6 @@ const api = axios.create({
 
 api.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
-    // 检查是否在浏览器环境
     const token = getToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -73,7 +84,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (typeof window !== "undefined" && error.response?.status === 401) {
-      console.log("401 error, current token:", getToken());
+      removeToken();
     }
     return Promise.reject(error);
   }
@@ -83,7 +94,7 @@ api.interceptors.response.use(
 export const login = async (
   username: string,
   password: string
-): Promise<ApiResponse<string>> => {
+): Promise<ApiResult<string>> => {
   try {
     const formData = new FormData();
     formData.append("username", username);
@@ -103,8 +114,7 @@ export const login = async (
 
     return response.data;
   } catch (error) {
-    console.error("Login error:", error);
-    throw error;
+    return handleApiError(error, "login");
   }
 };
 
@@ -112,99 +122,68 @@ export const handleGoogleLogin = async (
   email: string,
   name: string,
   picture: string
-): Promise<ApiResponse<string>> => {
+): Promise<ApiResult<string>> => {
   try {
-    const response: AxiosResponse<ApiResponse<string>> = await api.post(
-      "/login/google",
-      {
-        email,
-        name,
-        picture
-      },
-      {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      }
-    );
-
+    const response = await api.post("/login/google", { email, name, picture });
     if (response.data.code === 200) {
-      setToken(response.data.data); // 添加这行
-    } else {
-      throw new Error(response.data.msg || "Google 登录失败");
+      setToken(response.data.data);
     }
-
     return response.data;
   } catch (error) {
-    console.error("Google 登录处理出错:", error);
-    throw error;
+    return handleApiError(error, "handleGoogleLogin");
   }
 };
 
-export const getUserInfo = async (): Promise<ApiResponse<UserInfo>> => {
+export const getUserInfo = async (): Promise<ApiResult<UserInfo>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
-    const response: AxiosResponse<ApiResponse<UserInfo>> = await api.get(
-      "/user/principal",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    const response = await api.get("/user/principal", {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    );
-
-    if (response.data.code !== 200) {
-      throw new Error("获取用户信息失败，请登录");
-    }
+    });
 
     return response.data;
   } catch (error) {
-    console.error("获取用户信息时出错:", error);
-    return {
-      code: error instanceof Error && error.message ? 400 : 500,
-      msg: error instanceof Error ? error.message : "获取用户信息时出错",
-      data: null as unknown as UserInfo // 类型断言以满足返回类型要求
-    };
+    return handleApiError(error, "getUserInfo");
   }
 };
 
-export async function logout(): Promise<{ code: number; msg: string }> {
+export const logout = async (): Promise<ApiErrorResponse> => {
   const token = getToken();
   if (!token) {
-    console.error("在localStorage中未找到token");
-    throw new Error("未找到证token");
+    return {
+      code: 200,
+      msg: ""
+    };
   }
 
   try {
-    const response = await api.post<{ code: number; msg: string }>(
-      "/logout",
-      null,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+    const response = await api.post<ApiErrorResponse>("/logout", null, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-    );
+    });
 
     const result = response.data;
-
     removeToken();
-
     return result;
   } catch (error) {
     removeToken();
-
-    return { code: 500, msg: "Logout failed, but local session cleared" };
+    return handleApiError(error, "logout");
   }
-}
+};
 
-export async function register(
+export const register = async (
   credentials: CreateUserRequest
-): Promise<ApiResponse<string>> {
+): Promise<ApiResult<string>> => {
   try {
     const formData = new FormData();
     formData.append("username", credentials.username);
@@ -221,25 +200,22 @@ export async function register(
     );
     return response.data;
   } catch (error) {
-    if (axios.isAxiosError(error) && error.response) {
-      const responseData = error.response.data as ApiResponse<string>;
-      if (responseData.code === 701 || responseData.code === 702) {
-        return responseData;
-      }
-    }
-    console.error("注册失败:", error);
-    throw error;
+    return handleApiError(error, "register");
   }
-}
+};
 
 // 需要token验证的用户语言设置 - 会存储到数据库
 export const updateUserLanguage = async (
   language: Locale
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
-
-    if (!token) throw new Error("Token not available");
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
 
     const response = await api.put<ApiResponse<void>>(
       "/user/language",
@@ -252,42 +228,38 @@ export const updateUserLanguage = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to update language");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("[updateUserLanguage] 错误:", error);
-    throw error;
+    return handleApiError(error, "updateUserLanguage");
   }
 };
 
-// 公开的语言设置 - 不需要token，不存数据库
 export const updatePublicLanguage = async (
   language: Locale
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const response = await api.put<ApiResponse<void>>("/user/public/language", {
       language
     });
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to update language");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("[updatePublicLanguage] 错误:", error);
-    throw error;
+    return handleApiError(error, "updatePublicLanguage");
   }
 };
 
 export const updateProfile = async (
   updateData: UpdateUserRequest
-): Promise<ApiResponse<UserInfo>> => {
+): Promise<ApiResult<UserInfo>> => {
   try {
     const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
+
     const response = await api.put<ApiResponse<UserInfo>>(
       "/user/profile",
       updateData,
@@ -299,24 +271,24 @@ export const updateProfile = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "更新个人资料失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("更新个人资料时出错:", error);
-    throw error;
+    return handleApiError(error, "updateProfile");
   }
 };
 
 export const uploadAvatar = async (
   fileData: FileUploadData
-): Promise<ApiResponse<string>> => {
+): Promise<ApiResult<string>> => {
   try {
     const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
     const formData = new FormData();
-    console.log("Avatar file:", fileData.avatarImage);
 
     if (fileData.avatarImage) {
       formData.append("avatarImage", fileData.avatarImage);
@@ -333,23 +305,24 @@ export const uploadAvatar = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "上传头像失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("上传头像时出错:", error);
-    throw error;
+    return handleApiError(error, "updateProfile");
   }
 };
 
 export const changePassword = async (
   passwordData: ChangePasswordRequest
-): Promise<PasswordChangeResponse> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
-    const response = await api.put<PasswordChangeResponse>(
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
+    const response = await api.put<ApiResponse<void>>(
       "/user/password",
       passwordData,
       {
@@ -360,32 +333,27 @@ export const changePassword = async (
       }
     );
 
-    // 无论响应码如何，都返回响应数据
     return response.data;
   } catch (error) {
-    console.error("修改密码时出错:", error);
-    // 如果发生网络错误或其他异常，返回一个格式化的错误响应
-    return {
-      code: 500,
-      msg: error instanceof Error ? error.message : "修改密码时发生未知错误",
-      data: null
-    };
+    return handleApiError(error, "changePassword");
   }
 };
 
 export const updateUserType = async (
   userId: UserInfo["id"],
   type: string
-): Promise<ApiResponse<UserInfo>> => {
+): Promise<ApiResult<UserInfo>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
-
     const response = await api.put<ApiResponse<UserInfo>>(
       `/user/${userId}/type`,
-      { userType: type }, // 发送正确的请求体
+      { userType: type },
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -394,14 +362,9 @@ export const updateUserType = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "更新用户类型失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("更新用户类型时出错:", error);
-    throw error;
+    return handleApiError(error, "updateUserType");
   }
 };
 
@@ -431,10 +394,17 @@ interface BookUploadData
 
 export const uploadBookDraft = async (
   coverImage: File | null,
-  bookData: BookUploadData,
-  token: string
-): Promise<ApiResponse<BookInfo>> => {
+  bookData: BookUploadData
+): Promise<ApiResult<BookInfo>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
+
     const formData = new FormData();
     const bookDataWithStatus = {
       ...bookData,
@@ -460,23 +430,25 @@ export const uploadBookDraft = async (
       }
     );
 
-    if (response.data.code === 200) {
-      return response.data;
-    } else {
-      throw new Error(response.data.msg || "服务器返回的数据无效");
-    }
+    return response.data;
   } catch (error) {
-    console.error("Error uploading book draft:", error);
-    throw error;
+    return handleApiError(error, "uploadBookDraft");
   }
 };
 
 export const publishBook = async (
   coverImage: File | null,
-  bookData: BookUploadData,
-  token: string
-): Promise<ApiResponse<BookInfo>> => {
+  bookData: BookUploadData
+): Promise<ApiResult<BookInfo>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
+
     const formData = new FormData();
     const bookDataWithStatus = {
       ...bookData,
@@ -502,14 +474,9 @@ export const publishBook = async (
       }
     );
 
-    if (response.data.code === 200) {
-      return response.data;
-    } else {
-      throw new Error(response.data.msg || "服务器返回的数据无效");
-    }
+    return response.data;
   } catch (error) {
-    console.error("Error publishing book:", error);
-    throw error;
+    return handleApiError(error, "publishBook");
   }
 };
 
@@ -517,11 +484,14 @@ export const fetchBooksList = async (
   currentPage: number,
   pageSize: number,
   checkStatus: string
-): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
+): Promise<ApiResult<PaginatedData<BookInfo>>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const params = new URLSearchParams({
@@ -538,81 +508,63 @@ export const fetchBooksList = async (
       }
     });
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取作品列表失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取作品列表时出错:", error);
-    throw error;
+    return handleApiError(error, "fetchBooksList");
   }
 };
 
 export const fetchPublicBooksList = async (
   authorId: string
-): Promise<ApiResponse<BookInfo[]>> => {
+): Promise<ApiResult<BookInfo[]>> => {
   try {
-    const response = await api.get(`/public/books/${authorId}`);
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取作品列表失败");
-    }
+    const response = await api.get<ApiResponse<BookInfo[]>>(
+      `/public/books/${authorId}`
+    );
     return response.data;
   } catch (error) {
-    console.error("Error fetching public books list:", error);
-    throw error;
+    return handleApiError(error, "fetchBooksList");
   }
 };
 
-export const deleteBook = async (
-  bookId: number
-): Promise<ApiResponse<null>> => {
+export const deleteBook = async (bookId: number): Promise<ApiResult<void>> => {
   try {
-    const response = await api.delete<ApiResponse<null>>(`/book/${bookId}`, {
+    const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
+
+    const response = await api.delete<ApiResponse<void>>(`/book/${bookId}`, {
       headers: {
-        Authorization: `Bearer ${getToken()}`
+        Authorization: `Bearer ${token}`
       }
     });
 
-    if (response.data.code === 200) {
-      return response.data;
-    } else {
-      throw new Error(response.data.msg || "删除作品失败");
-    }
-  } catch (error) {
-    console.error("删除作品时出错:", error);
-    if (error instanceof Error) {
-      throw new Error(`删除作品失败: ${error.message}`);
-    } else {
-      throw new Error("删除作品时发生未知错误");
-    }
-  }
-};
-
-// 需要token的获取书籍详情函数
-export const getBookDetails = async (
-  bookId: number
-): Promise<ApiResponse<BookInfo>> => {
-  try {
-    const response = await api.get<ApiResponse<BookInfo>>(`/book/${bookId}`);
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取书籍详情失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取书籍详情时出错:", error);
-    throw error;
+    return handleApiError(error, "deleteBook");
   }
 };
 
-// 获取章节列表
+export const getBookDetails = async (
+  bookId: number
+): Promise<ApiResult<BookInfo>> => {
+  try {
+    const response = await api.get<ApiResponse<BookInfo>>(`/book/${bookId}`);
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "getBookDetails");
+  }
+};
+
 export const getPublicChapterList = async (
   bookId: number,
   currentPage: number = 1,
   pageSize: number = 20
-): Promise<ApiResponse<PaginatedData<ChapterInfo>>> => {
+): Promise<ApiResult<PaginatedData<ChapterInfo>>> => {
   try {
     const response = await api.get<ApiResponse<PaginatedData<ChapterInfo>>>(
       `/book/public/${bookId}/chapters`,
@@ -621,91 +573,73 @@ export const getPublicChapterList = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取章节列表失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取章节列表时出错:", error);
-    throw error;
+    return handleApiError(error, "getPublicChapterList");
   }
 };
-
 export const getChapterList = async (
   bookId: number,
   currentPage: number = 1,
   pageSize: number = 20
-): Promise<ApiResponse<PaginatedData<ChapterInfo>>> => {
+): Promise<ApiResult<PaginatedData<ChapterInfo>>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
     const response = await api.get<ApiResponse<PaginatedData<ChapterInfo>>>(
       `/book/${bookId}/chapters`,
       {
         params: { currentPage, pageSize },
         headers: {
-          Authorization: `Bearer ${getToken()}`
+          Authorization: `Bearer ${token}`
         }
       }
     );
-    console.log("list", response);
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取章节列表失败");
-    }
 
     return response.data;
   } catch (error) {
-    console.error("获取章节列表时出错:", error);
-    throw error;
+    return handleApiError(error, "getChapterList");
   }
 };
 
-// 获取章节内容
 export const getChapterContent = async (
   bookId: number,
   chapterNumber: number
-): Promise<ApiResponse<ChapterInfo>> => {
+): Promise<ApiResult<ChapterInfo>> => {
   try {
     const response = await api.get<ApiResponse<ChapterInfo>>(
       `/book/${bookId}/chapter/${chapterNumber}`
     );
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取章节内容失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取章节内容时出错:", error);
-    throw error;
+    return handleApiError(error, "getChapterContent");
   }
 };
+
 export const getPublicChapterContent = async (
   bookId: number,
   chapterNumber: number
-): Promise<ApiResponse<ChapterInfo>> => {
+): Promise<ApiResult<ChapterInfo>> => {
   try {
     const response = await api.get<ApiResponse<ChapterInfo>>(
       `/book/public/${bookId}/chapter/${chapterNumber}`
     );
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取章节内容失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取章节内容时出错:", error);
-    throw error;
+    return handleApiError(error, "getPublicChapterContent");
   }
 };
 
-//获取书籍评论
 export const getBookComments = async (
   bookId: number,
   currentPage: number,
   pageSize: number
-): Promise<ApiResponse<PaginatedData<CommentInfo>>> => {
+): Promise<ApiResult<PaginatedData<CommentInfo>>> => {
   try {
     const response = await api.get<ApiResponse<PaginatedData<CommentInfo>>>(
       `/book/${bookId}/comments`,
@@ -713,27 +647,23 @@ export const getBookComments = async (
         params: { currentPage, pageSize }
       }
     );
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取评论失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取评论时出错:", error);
-    throw error;
+    return handleApiError(error, "getBookComments");
   }
 };
 
-// 点赞评论
 export const likeComment = async (
   commentId: number,
   isLiked: boolean
-): Promise<ApiResponse<LikeResponse>> => {
+): Promise<ApiResult<LikeResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Please login");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<LikeResponse>>(
@@ -748,21 +678,22 @@ export const likeComment = async (
     );
     return response.data;
   } catch (error) {
-    console.error("点赞评论失败:", error);
-    throw error;
+    return handleApiError(error, "likeComment");
   }
 };
 
-// 回复评论或添加评论
 export const addCommentOrReply = async (
   bookId: number,
   content: string,
   parentCommentId?: number
-): Promise<ApiResponse<CommentInfo>> => {
+): Promise<ApiResult<CommentInfo>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error(" Please login again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const url = parentCommentId
@@ -780,25 +711,22 @@ export const addCommentOrReply = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to add comment or reply");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error adding comment or reply:", error);
-    throw error;
+    return handleApiError(error, "addCommentOrReply");
   }
 };
 
-// 删除评论
 export const deleteComment = async (
   commentId: number
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.delete<ApiResponse<void>>(
@@ -812,25 +740,26 @@ export const deleteComment = async (
     );
     return response.data;
   } catch (error) {
-    console.error("删除评论失败:", error);
-    throw error;
+    return handleApiError(error, "deleteComment");
   }
 };
 
-// 拉黑用户
 export const blockUserInBook = async (
   userId: number,
   bookId: number
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<void>>(
       `/book/${bookId}/user/${userId}/block`,
-      {}, // 空对象作为请求体
+      {},
       {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -840,40 +769,34 @@ export const blockUserInBook = async (
     );
     return response.data;
   } catch (error) {
-    console.error(
-      `拉黑用户失败 (用户ID: ${userId}, 书籍ID: ${bookId}):`,
-      error
-    );
-    throw error;
+    return handleApiError(error, "blockUserInBook");
   }
 };
 
-//获取书籍观看数据
 export const fetchSingleBookAnalytics = async (
   bookId: number
-): Promise<ApiResponse<AnalyticsData>> => {
+): Promise<ApiResult<AnalyticsData>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
-    const url = `/book/${bookId}/analytics`;
-
-    const response = await api.get<ApiResponse<AnalyticsData>>(url, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    const response = await api.get<ApiResponse<AnalyticsData>>(
+      `/book/${bookId}/analytics`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
       }
-    });
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取书籍分析数据失败");
-    }
+    );
 
     return response.data;
   } catch (error) {
-    console.error(`获取书籍 ${bookId} 的分析数据时出错:`, error);
-    throw error;
+    return handleApiError(error, "fetchSingleBookAnalytics");
   }
 };
 
@@ -881,16 +804,13 @@ interface LanguageParams {
   preferredLanguage?: string | null;
   browserLanguage?: string | null;
 }
-//首页内容api
+
 export const fetchHomepageBooks = async (
   page: number,
   limit: number = 20,
   languages?: LanguageParams
-): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
+): Promise<ApiResult<PaginatedData<BookInfo>>> => {
   try {
-    const url = `/books/homepage`;
-
-    // 1. 首选: URL参数指定的语言
     const params: Record<string, any> = {
       page,
       limit
@@ -901,143 +821,77 @@ export const fetchHomepageBooks = async (
     }
 
     const defaultLang = "en";
-
-    const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(url, {
-      params,
-      headers: {
-        // 将所有语言偏好按优先级排序发送给后端
-        "Accept-Language": [
-          languages?.preferredLanguage,
-          languages?.browserLanguage,
-          defaultLang
-        ]
-          .filter(Boolean)
-          .join(",")
+    const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(
+      "/books/homepage",
+      {
+        params,
+        headers: {
+          "Accept-Language": [
+            languages?.preferredLanguage,
+            languages?.browserLanguage,
+            defaultLang
+          ]
+            .filter(Boolean)
+            .join(",")
+        }
       }
-    });
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取书籍列表失败");
-    }
+    );
 
     return response.data;
   } catch (error) {
-    console.error("获取书籍列表时出错:", error);
-    throw error;
+    return handleApiError(error, "fetchHomepageBooks");
   }
 };
 
-//message:
-// // 获取对话列表
-// export const fetchConversations = async (
-//   page: number = 1,
-//   pageSize: number = 20
-// ): Promise<PaginatedData<Conversation>> => {
-//   const response = await api.get<ApiResponse<PaginatedData<Conversation>>>(
-//     "/conversations",
-//     {
-//       params: { page, pageSize },
-//       headers: { Authorization: `Bearer ${getToken()}` }
-//     }
-//   );
-//   return response.data.data;
-// };
-
-// // 获取特定对话的消息
-// export const fetchMessages = async (
-//   conversationId: number,
-//   page: number = 1,
-//   pageSize: number = 20
-// ): Promise<PaginatedData<Message>> => {
-//   const response = await api.get<ApiResponse<PaginatedData<Message>>>(
-//     `/conversations/${conversationId}/messages`,
-//     {
-//       params: { page, pageSize },
-//       headers: { Authorization: `Bearer ${getToken()}` }
-//     }
-//   );
-//   return response.data.data;
-// };
-
-// // 发送新消息
-// export const sendMessage = async (message: {
-//   senderId: number;
-//   receiverId: number;
-//   content: string;
-// }): Promise<Message> => {
-//   const response = await api.post<ApiResponse<Message>>("/messages", message, {
-//     headers: { Authorization: `Bearer ${getToken()}` }
-//   });
-//   return response.data.data;
-// };
-
-// // 获取当前用户信息
-// export const getCurrentUser = async (): Promise<UserInfo> => {
-//   const response = await api.get<ApiResponse<UserInfo>>("/user/principal");
-//   return response.data.data;
-// };
-
-// // 标记对话为已读
-// export const markConversationAsRead = async (
-//   conversationId: number
-// ): Promise<void> => {
-//   await api.put<ApiResponse<void>>(`/conversations/${conversationId}/read`);
-// };
-
-// 获取其他用户的信息
-export const getUserById = async (userId: number): Promise<PublicUserInfo> => {
+export const getUserById = async (
+  userId: number
+): Promise<ApiResult<PublicUserInfo>> => {
   try {
     const response = await api.get<ApiResponse<PublicUserInfo>>(
       `/user/${userId}`
     );
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取用户信息失败");
-    }
-    return response.data.data;
+    return response.data;
   } catch (error) {
-    console.error("获取用户信息时出错:", error);
-    throw error;
+    return handleApiError(error, "getUserById");
   }
 };
 
-// 获取系统通知
 export const fetchSystemNotifications = async (
   currentPage: number = 1,
   pageSize: number = 20
-): Promise<PaginatedData<SystemNotification>> => {
-  const token = getToken();
-  if (!token) {
-    throw new Error("No authentication token available");
-  }
-
+): Promise<ApiResult<PaginatedData<SystemNotification>>> => {
   try {
+    const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
+
     const response = await api.get<
       ApiResponse<PaginatedData<SystemNotification>>
-    >(`/system/notifications?currentPage=${currentPage}&pageSize=${pageSize}`, {
+    >(`/system/notifications`, {
+      params: { currentPage, pageSize },
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
 
-    if (response.data.code !== 200) {
-      throw new Error(
-        response.data.msg || "Failed to fetch system notifications"
-      );
-    }
-
-    return response.data.data;
+    return response.data;
   } catch (error) {
-    console.error("Error fetching system notifications:", error);
-    throw error;
+    return handleApiError(error, "fetchSystemNotifications");
   }
 };
 
-// action.ts
-export const markNotificationAsRead = async (): Promise<ApiResponse<void>> => {
+export const markNotificationAsRead = async (): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.put<ApiResponse<void>>(
@@ -1051,19 +905,20 @@ export const markNotificationAsRead = async (): Promise<ApiResponse<void>> => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error marking notifications as read:", error);
-    throw error;
+    return handleApiError(error, "markNotificationAsRead");
   }
 };
 
-// 获取未读消息数量
 export const getUnreadNotificationCount = async (): Promise<
-  ApiResponse<number>
+  ApiResult<number>
 > => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<number>>(
@@ -1076,48 +931,47 @@ export const getUnreadNotificationCount = async (): Promise<
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching unread notification count:", error);
-    throw error;
+    return handleApiError(error, "getUnreadNotificationCount");
   }
 };
 
-// Fetch followed authors
 export const fetchFollowedAuthors = async (
   currentPage: number = 1,
   pageSize: number = 20
-): Promise<ApiResponse<PaginatedData<PublicUserInfo>>> => {
+): Promise<ApiResult<PaginatedData<PublicUserInfo>>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<PaginatedData<PublicUserInfo>>>(
-      `/user/following?currentPage=${currentPage}&pageSize=${pageSize}`,
+      "/user/following",
       {
+        params: { currentPage, pageSize },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to fetch followed authors");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error fetching followed authors:", error);
-    throw error;
+    return handleApiError(error, "fetchFollowedAuthors");
   }
 };
-
-//关注
-export const followUser = async (
-  userId: number
-): Promise<ApiResponse<void>> => {
+export const followUser = async (userId: number): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
     const response = await api.post<ApiResponse<void>>(
       `/user/${userId}/follow`,
       {},
@@ -1128,22 +982,23 @@ export const followUser = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "关注用户失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("关注用户时出错:", error);
-    throw error;
+    return handleApiError(error, "followUser");
   }
 };
 
 export const unfollowUser = async (
   userId: number
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
     const response = await api.post<ApiResponse<void>>(
       `/user/${userId}/unfollow`,
       {},
@@ -1154,20 +1009,23 @@ export const unfollowUser = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "取消关注用户失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("取消关注用户时出错:", error);
-    throw error;
+    return handleApiError(error, "unfollowUser");
   }
 };
 
-export const checkFollowStatus = async (userId: number): Promise<boolean> => {
+export const checkFollowStatus = async (
+  userId: number
+): Promise<ApiResult<boolean>> => {
   try {
     const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
     const response = await api.get<ApiResponse<{ isFollowing: boolean }>>(
       `/user/${userId}/followstatus`,
       {
@@ -1177,46 +1035,40 @@ export const checkFollowStatus = async (userId: number): Promise<boolean> => {
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取关注状态失败");
-    }
-
-    return response.data.data.isFollowing;
+    return {
+      code: response.data.code,
+      msg: response.data.msg,
+      data: response.data.data.isFollowing
+    };
   } catch (error) {
-    console.error("获取关注状态时出错:", error);
-    throw error;
+    return handleApiError(error, "checkFollowStatus");
   }
 };
 
-// 获取公开用户信息
 export const fetchUserInfo = async (
   userId: string
-): Promise<ApiResponse<PublicUserInfo>> => {
+): Promise<ApiResult<PublicUserInfo>> => {
   try {
     const response = await api.get<ApiResponse<PublicUserInfo>>(
       `/user/${userId}`
     );
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取用户信息失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取用户信息时出错:", error);
-    throw error;
+    return handleApiError(error, "fetchUserInfo");
   }
 };
 
-// 更新书籍基本信息
 export const updateBookDetails = async (
   bookId: number,
   updateData: Partial<BookInfo>
-): Promise<ApiResponse<BookInfo>> => {
+): Promise<ApiResult<BookInfo>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.put<ApiResponse<BookInfo>>(
@@ -1228,27 +1080,24 @@ export const updateBookDetails = async (
         }
       }
     );
-    console.log("API response:", response.data);
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "更新书籍信息失败");
-    }
 
     return response.data;
   } catch (error) {
-    console.error("更新书籍信息时出错:", error);
-    throw error;
+    return handleApiError(error, "updateBookDetails");
   }
 };
 
-// 更新书籍封面
 export const updateBookCover = async (
   bookId: number,
   coverImage: File
-): Promise<ApiResponse<string>> => {
+): Promise<ApiResult<string>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const formData = new FormData();
@@ -1265,27 +1114,24 @@ export const updateBookCover = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "更新书籍封面失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("更新书籍封面时出错:", error);
-    throw error;
+    return handleApiError(error, "updateBookCover");
   }
 };
 
-// 更新章节内容
 export const updateChapter = async (
   bookId: number,
   chapterNumber: number,
   chapterData: Partial<ChapterInfo>
-): Promise<ApiResponse<ChapterInfo>> => {
+): Promise<ApiResult<ChapterInfo>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.put<ApiResponse<ChapterInfo>>(
@@ -1299,14 +1145,9 @@ export const updateChapter = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "更新章节内容失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("更新章节内容时出错:", error);
-    throw error;
+    return handleApiError(error, "updateChapter");
   }
 };
 
@@ -1322,11 +1163,14 @@ export const addNewChapter = async (
     | "totalIncome"
     | "donationIncome"
   >
-): Promise<ApiResponse<ChapterInfo>> => {
+): Promise<ApiResult<ChapterInfo>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<ChapterInfo>>(
@@ -1340,23 +1184,20 @@ export const addNewChapter = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to add new chapter");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error adding new chapter:", error);
-    throw error;
+    return handleApiError(error, "addNewChapter");
   }
 };
 
-// 获取用户总收入
-export const getUserTotalIncome = async (): Promise<ApiResponse<number>> => {
+export const getUserTotalIncome = async (): Promise<ApiResult<number>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
     const response = await api.get<ApiResponse<number>>(
       "/user/wallet/earnings",
@@ -1368,19 +1209,21 @@ export const getUserTotalIncome = async (): Promise<ApiResponse<number>> => {
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching total income:", error);
-    throw error;
+    return handleApiError(error, "getUserTotalIncome");
   }
 };
 
 export const fetchIncomeData = async (
   currentPage: number = 1,
   pageSize: number = 5
-): Promise<ApiResponse<PaginatedData<IncomeBookInfo>>> => {
+): Promise<ApiResult<PaginatedData<IncomeBookInfo>>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<PaginatedData<IncomeBookInfo>>>(
@@ -1393,27 +1236,22 @@ export const fetchIncomeData = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to fetch income data");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error fetching income data:", error);
-    throw error;
+    return handleApiError(error, "fetchIncomeData");
   }
 };
 
-//收藏书籍
-// 在 action.ts 文件中添加以下函数
-
 export const favoriteBook = async (
   bookId: number
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<void>>(
@@ -1426,25 +1264,22 @@ export const favoriteBook = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "收藏书籍失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("收藏书籍时出错:", error);
-    throw error;
+    return handleApiError(error, "favoriteBook");
   }
 };
 
-// 取消收藏书籍
 export const unfavoriteBook = async (
   bookId: number
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<void>>(
@@ -1457,55 +1292,51 @@ export const unfavoriteBook = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "取消收藏书籍失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("取消收藏书籍时出错:", error);
-    throw error;
+    return handleApiError(error, "unfavoriteBook");
   }
 };
 
-// 获取用户收藏列表
 export const getUserFavorites = async (
   currentPage: number = 1,
   pageSize: number = 20
-): Promise<ApiResponse<PaginatedData<BookInfo>>> => {
+): Promise<ApiResult<PaginatedData<BookInfo>>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<PaginatedData<BookInfo>>>(
-      `/user/favorites?currentPage=${currentPage}&pageSize=${pageSize}`,
+      "/user/favorites",
       {
+        params: { currentPage, pageSize },
         headers: {
           Authorization: `Bearer ${token}`
         }
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取收藏列表失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取收藏列表时出错:", error);
-    throw error;
+    return handleApiError(error, "getUserFavorites");
   }
 };
 
 export const checkBookFavoriteStatus = async (
   bookId: number
-): Promise<ApiResponse<boolean>> => {
+): Promise<ApiResult<boolean>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<boolean>>(
@@ -1517,71 +1348,58 @@ export const checkBookFavoriteStatus = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取书籍收藏状态失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取书籍收藏状态时出错:", error);
-    throw error;
+    return handleApiError(error, "checkBookFavoriteStatus");
   }
 };
 
-// 搜索
 export const publicSearchBooks = async (
   query: string
-): Promise<ApiResponse<SearchResult>> => {
+): Promise<ApiResult<SearchResult>> => {
   try {
     const response = await api.get<ApiResponse<SearchResult>>("/search", {
-      params: { query }
+      params: { query: query }
     });
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "找不到相关内容");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("搜索书籍时出错:", error);
-    throw error;
+    return handleApiError(error, "publicSearchBooks");
   }
 };
 
 export const searchBooks = async (
   query: string
-): Promise<ApiResponse<SearchResult>> => {
+): Promise<ApiResult<SearchResult>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
-
     const response = await api.get<ApiResponse<SearchResult>>("/user/search", {
-      params: { query },
+      params: { query: query },
       headers: {
         Authorization: `Bearer ${token}`
       }
     });
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "找不到相关内容");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("搜索书籍时出错:", error);
-    throw error;
+    return handleApiError(error, "searchBooks");
   }
 };
 
 export const getSearchHistory = async (): Promise<
-  ApiResponse<SearchHistoryItem[]>
+  ApiResult<SearchHistoryItem[]>
 > => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<SearchHistoryItem[]>>(
@@ -1593,25 +1411,22 @@ export const getSearchHistory = async (): Promise<
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to fetch search history");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error fetching search history:", error);
-    throw error;
+    return handleApiError(error, "getSearchHistory");
   }
 };
 
-//paypal
 export const createPayPalOrder = async (
   orderData: PayPalOrderRequest
-): Promise<ApiResponse<PayPalOrderResponse>> => {
+): Promise<ApiResult<PayPalOrderResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<PayPalOrderResponse>>(
@@ -1625,25 +1440,21 @@ export const createPayPalOrder = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      console.error("API Error Response:", response.data);
-      throw new Error(response.data.msg || "Failed to create PayPal order");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error creating PayPal order:", error);
-    throw error;
+    return handleApiError(error, "createPayPalOrder");
   }
 };
-
 export const confirmPayPalOrder = async (
   orderData: ConfirmPayPalOrderRequest
-): Promise<ApiResponse<ConfirmPayPalOrderResponse>> => {
+): Promise<ApiResult<ConfirmPayPalOrderResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<ConfirmPayPalOrderResponse>>(
@@ -1657,23 +1468,20 @@ export const confirmPayPalOrder = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to confirm PayPal order");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error confirming PayPal order:", error);
-    throw error;
+    return handleApiError(error, "confirmPayPalOrder");
   }
 };
 
-// 获取用户��额
-export const getUserBalance = async (): Promise<ApiResponse<UserBalance>> => {
+export const getUserBalance = async (): Promise<ApiResult<UserBalance>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<UserBalance>>("/user/balance", {
@@ -1682,26 +1490,23 @@ export const getUserBalance = async (): Promise<ApiResponse<UserBalance>> => {
       }
     });
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取用户余额失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取用户余额时出错:", error);
-    throw error;
+    return handleApiError(error, "getUserBalance");
   }
 };
 
-// 获取购买历史
 export const getPurchaseHistory = async (
   currentPage: number = 1,
   pageSize: number = 20
-): Promise<ApiResponse<PaginatedData<PurchaseHistory>>> => {
+): Promise<ApiResult<PaginatedData<PurchaseHistory>>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<PaginatedData<PurchaseHistory>>>(
@@ -1714,26 +1519,23 @@ export const getPurchaseHistory = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取购买历史失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取购买历史时出错:", error);
-    throw error;
+    return handleApiError(error, "getPurchaseHistory");
   }
 };
 
-// 获取打赏历史
 export const getDonationHistory = async (
   currentPage: number = 1,
   pageSize: number = 5
-): Promise<ApiResponse<PaginatedData<DonationHistory>>> => {
+): Promise<ApiResult<PaginatedData<DonationHistory>>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token 不可用，请重新登录");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<ApiResponse<PaginatedData<DonationHistory>>>(
@@ -1746,14 +1548,9 @@ export const getDonationHistory = async (
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "获取打赏历史失败");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("获取打赏历史时出错:", error);
-    throw error;
+    return handleApiError(error, "getDonationHistory");
   }
 };
 
@@ -1761,33 +1558,32 @@ export const getSponsorList = async (
   userId: string,
   currentPage: number = 1,
   pageSize: number = 20
-): Promise<ApiResponse<PaginatedData<SponsorInfo>>> => {
+): Promise<ApiResult<PaginatedData<SponsorInfo>>> => {
   try {
-    const response: AxiosResponse<ApiResponse<PaginatedData<SponsorInfo>>> =
-      await api.get(`/user/${userId}/donation/list`, {
+    const response = await api.get<ApiResponse<PaginatedData<SponsorInfo>>>(
+      `/user/${userId}/donation/list`,
+      {
         params: { currentPage, pageSize }
-      });
-
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to fetch sponsor list");
-    }
+      }
+    );
 
     return response.data;
   } catch (error) {
-    console.error("Error fetching sponsor list:", error);
-    throw error;
+    return handleApiError(error, "getSponsorList");
   }
 };
 
-// Pay for a chapter
 export const payForChapter = async (
   bookId: number,
   chapterId: number
-): Promise<ApiResponse<ChapterPaymentResponse>> => {
+): Promise<ApiResult<ChapterPaymentResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<ChapterPaymentResponse>>(
@@ -1801,31 +1597,23 @@ export const payForChapter = async (
       }
     );
 
-    switch (response.data.code) {
-      case 200:
-        return response.data; // 付费成功
-      case 601:
-        return response.data; // 返回已购买的响应
-      case 602:
-        return response.data;
-      default:
-        throw new Error(response.data.msg || "Failed to pay for chapter");
-    }
+    return response.data;
   } catch (error) {
-    console.error("Error paying for chapter:", error);
-    throw error;
+    return handleApiError(error, "payForChapter");
   }
 };
 
-// Tip (donate to) an author
 export const tipAuthor = async (
   authorId: number,
   coins: number
-): Promise<ApiResponse<TipResponse>> => {
+): Promise<ApiResult<TipResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<TipResponse>>(
@@ -1839,17 +1627,9 @@ export const tipAuthor = async (
       }
     );
 
-    switch (response.data.code) {
-      case 200:
-        return response.data; // 付费成功
-      case 602:
-        return response.data;
-      default:
-        return response.data;
-    }
+    return response.data;
   } catch (error) {
-    console.error("Error tipping author:", error);
-    throw error;
+    return handleApiError(error, "tipAuthor");
   }
 };
 
@@ -1857,12 +1637,14 @@ export const tipChapter = async (
   coins: number,
   bookId: number,
   chapterId: number
-): Promise<ApiResponse<TipResponse>> => {
-  console.log("tipChapter called with:", { coins, bookId, chapterId });
+): Promise<ApiResult<TipResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available. Please log in again.");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.post<ApiResponse<TipResponse>>(
@@ -1875,32 +1657,25 @@ export const tipChapter = async (
         }
       }
     );
-    console.log("tipChapter response:", response);
 
-    switch (response.data.code) {
-      case 200:
-        return response.data; // 付费成功
-      case 602:
-        return response.data;
-      default:
-        return response.data;
-    }
+    return response.data;
   } catch (error) {
-    console.error("Error tipping author:", error);
-    throw error;
+    return handleApiError(error, "tipChapter");
   }
 };
 
-//章节购买记录
 export const getBookPurchasedChapters = async (
   currentPage: number = 1,
   pageSize: number = 5,
   bookId?: number
-): Promise<ApiResponse<PaginatedData<PurchasedChapterInfo>>> => {
+): Promise<ApiResult<PaginatedData<PurchasedChapterInfo>>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error(" Please login ");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
 
     const response = await api.get<
@@ -1912,73 +1687,55 @@ export const getBookPurchasedChapters = async (
       }
     });
 
-    if (response.data.code !== 200) {
-      throw new Error(
-        response.data.msg || "Failed to fetch purchased chapters"
-      );
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error fetching purchased chapters:", error);
-    throw error;
+    return handleApiError(error, "getBookPurchasedChapters");
   }
 };
 
-// 更新/完成阅读进度
-// 1. 匿名统计API - 记录所有用户的阅读行为
+// Reading progress APIs
 const updateAnonymousReadingStats = async (
   data: ReadingStats & { isValidReading: boolean }
-): Promise<ApiResponse<any>> => {
-  const isCompleted = data.isValidReading && data.readingProgress >= 95;
-
+): Promise<ApiResult<void>> => {
   try {
-    const response = await api.post<ApiResponse<any>>("/reading/stats", {
-      bookId: data.bookId,
-      chapterId: data.chapterId,
-      startTime: data.startTime,
-      activeTime: data.activeTime,
-      readingProgress: data.readingProgress,
-      totalWords: data.totalWords,
-      isActive: data.isActive,
-      isValidReading: data.isValidReading,
+    const isCompleted = data.isValidReading && data.readingProgress >= 95;
+
+    const response = await api.post<ApiResponse<void>>("/reading/stats", {
+      ...data,
       isCompleted
     });
+
     return response.data;
   } catch (error) {
-    console.error("Error updating anonymous reading stats:", error);
-    throw error;
+    return handleApiError(error, "updateAnonymousReadingStats");
   }
 };
 
-// 2. 个人化进度API - 保存用户的阅读进度
 const updateUserReadingProgress = async (
   data: ReadingStats & { isValidReading: boolean }
-): Promise<ApiResponse<any>> => {
-  const token = getToken();
-  const isCompleted = data.isValidReading && data.readingProgress >= 95;
-
-  // 未登录用户使用localStorage
-  if (!token) {
-    const storageKey = `reading_progress_${data.bookId}_${data.chapterId}`;
-    localStorage.setItem(
-      storageKey,
-      JSON.stringify({
-        ...data,
-        isCompleted,
-        timestamp: Date.now()
-      })
-    );
-    return {
-      code: 200,
-      msg: "Reading progress saved locally",
-      data: null
-    };
-  }
-
-  // 已登录用户使用API
+): Promise<ApiResult<void>> => {
   try {
-    const response = await api.post<ApiResponse<any>>(
+    const token = getToken();
+    const isCompleted = data.isValidReading && data.readingProgress >= 95;
+
+    if (!token) {
+      const storageKey = `reading_progress_${data.bookId}_${data.chapterId}`;
+      localStorage.setItem(
+        storageKey,
+        JSON.stringify({
+          ...data,
+          isCompleted,
+          timestamp: Date.now()
+        })
+      );
+      return {
+        code: 200,
+        msg: "Reading progress saved locally",
+        data: undefined
+      };
+    }
+
+    const response = await api.post<ApiResponse<void>>(
       "/reading/progress",
       {
         ...data,
@@ -1992,100 +1749,84 @@ const updateUserReadingProgress = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error updating user reading progress:", error);
-    throw error;
+    return handleApiError(error, "updateUserReadingProgress");
   }
 };
 
-// 获取用户阅读进度
 export const getUserReadingProgress = async (
   bookId: number,
   chapterId: number
-): Promise<ApiResponse<ReadingStats>> => {
-  const token = getToken();
+): Promise<ApiResult<ReadingStats>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      const storageKey = `reading_progress_${bookId}_${chapterId}`;
+      const savedProgress = localStorage.getItem(storageKey);
 
-  // 未登录用户从localStorage获取
-  if (!token) {
-    const storageKey = `reading_progress_${bookId}_${chapterId}`;
-    const savedProgress = localStorage.getItem(storageKey);
-    if (savedProgress) {
+      if (savedProgress) {
+        return {
+          code: 200,
+          msg: "Reading progress retrieved from local storage",
+          data: JSON.parse(savedProgress)
+        };
+      }
+
       return {
         code: 200,
-        msg: "Reading progress retrieved from local storage",
-        data: JSON.parse(savedProgress)
+        msg: "No reading progress found",
+        data: {
+          bookId,
+          chapterId,
+          startTime: 0,
+          activeTime: 0,
+          readingProgress: 0,
+          totalWords: 0,
+          isActive: false,
+          isValidReading: false
+        }
       };
     }
-    return {
-      code: 200,
-      msg: "No reading progress found",
-      data: {
-        bookId,
-        chapterId,
-        startTime: 0,
-        activeTime: 0,
-        readingProgress: 0,
-        totalWords: 0,
-        isActive: false,
-        isValidReading: false
-      }
-    };
-  }
 
-  // 已登录用户使用API
-  try {
     const response = await api.get<ApiResponse<ReadingStats>>(
-      `/reading/progress`,
+      "/reading/progress",
       {
         params: { bookId, chapterId },
         headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
+          Authorization: `Bearer ${token}`
         }
       }
     );
 
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Failed to get reading progress");
-    }
-
     return response.data;
   } catch (error) {
-    console.error("Error getting reading progress:", error);
-    throw error;
+    return handleApiError(error, "getUserReadingProgress");
   }
 };
 
-// 组合使用这两个API的函数
 const updateReadingStats = async (
   data: ReadingStats & { isValidReading: boolean }
-): Promise<ApiResponse<any>> => {
+): Promise<ApiResult<void>> => {
   try {
     // 1. 更新匿名统计数据
     await updateAnonymousReadingStats(data);
-
     // 2. 更新用户阅读进度
     const response = await updateUserReadingProgress(data);
-
     return response;
   } catch (error) {
-    console.error("Error updating reading stats:", error);
-    throw error;
+    return handleApiError(error, "updateReadingStats");
   }
-};
-
-export {
-  updateReadingStats,
-  updateAnonymousReadingStats,
-  updateUserReadingProgress
 };
 
 export const transferToWallet = async (
   amount: number
-): Promise<ApiResponse<TransferToWalletResponse>> => {
+): Promise<ApiResult<TransferToWalletResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
     const response = await api.post<ApiResponse<TransferToWalletResponse>>(
       "/user/transfer/wallet",
@@ -2097,29 +1838,30 @@ export const transferToWallet = async (
         }
       }
     );
-    if (response.data.code !== 200) {
-      throw new Error(response.data.msg || "Transfer failed");
-    }
 
     return response.data;
   } catch (error) {
-    console.error("Error transferring to wallet:", error);
-    throw error;
+    return handleApiError(error, "transferToWallet");
   }
 };
 
 export const getTransferRecords = async (
   page: number,
   pageSize: number
-): Promise<ApiResponse<PaginatedTransferRecords>> => {
+): Promise<ApiResult<PaginatedTransferRecords>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
+
     const response = await api.get<ApiResponse<PaginatedTransferRecords>>(
-      `/user/transfer/records?page=${page}&pageSize=${pageSize}`,
+      "/user/transfer/records",
       {
+        params: { page, pageSize },
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -2127,19 +1869,20 @@ export const getTransferRecords = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching transfer records:", error);
-    throw error;
+    return handleApiError(error, "getTransferRecords");
   }
 };
 
-// 银行卡相关 API
 export const getBankCards = async (): Promise<
-  ApiResponse<PaginatedBankCards>
+  ApiResult<PaginatedBankCards>
 > => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
     const response = await api.get<ApiResponse<PaginatedBankCards>>(
       "/user/bankcards",
@@ -2151,18 +1894,20 @@ export const getBankCards = async (): Promise<
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching bank cards:", error);
-    throw error;
+    return handleApiError(error, "getBankCards");
   }
 };
 
 export const addBankCard = async (
   card: AddBankCardRequest
-): Promise<ApiResponse<BankCard>> => {
+): Promise<ApiResult<BankCard>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
     const response = await api.post<ApiResponse<BankCard>>(
       "/user/bankcard",
@@ -2176,19 +1921,20 @@ export const addBankCard = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error adding bank card:", error);
-    throw error;
+    return handleApiError(error, "addBankCard");
   }
 };
 
-// 提现申请 API
 export const submitWithdrawRequest = async (
   request: WithdrawRequest
-): Promise<ApiResponse<WithdrawResponse>> => {
+): Promise<ApiResult<WithdrawResponse>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
     const response = await api.post<ApiResponse<WithdrawResponse>>(
       "/user/withdraw",
@@ -2202,20 +1948,21 @@ export const submitWithdrawRequest = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error submitting withdraw request:", error);
-    throw error;
+    return handleApiError(error, "submitWithdrawRequest");
   }
 };
 
-// 获取提现记录
 export const getWithdrawHistory = async (
   currentPage: number = 1,
   pageSize: number = 10
-): Promise<ApiResponse<PaginatedWithdrawRecords>> => {
+): Promise<ApiResult<PaginatedWithdrawRecords>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
     const response = await api.get<ApiResponse<PaginatedWithdrawRecords>>(
       "/user/withdraw/records",
@@ -2228,19 +1975,20 @@ export const getWithdrawHistory = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error fetching withdraw records:", error);
-    throw error;
+    return handleApiError(error, "getWithdrawHistory");
   }
 };
 
-// 删除银行卡 API
 export const deleteBankCard = async (
   cardId: string
-): Promise<ApiResponse<void>> => {
+): Promise<ApiResult<void>> => {
   try {
     const token = getToken();
     if (!token) {
-      throw new Error("Token not available");
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
     }
     const response = await api.delete<ApiResponse<void>>(
       `/user/bankcard/${cardId}`,
@@ -2252,7 +2000,12 @@ export const deleteBankCard = async (
     );
     return response.data;
   } catch (error) {
-    console.error("Error deleting bank card:", error);
-    throw error;
+    return handleApiError(error, "deleteBankCard");
   }
+};
+
+export {
+  updateReadingStats,
+  updateAnonymousReadingStats,
+  updateUserReadingProgress
 };

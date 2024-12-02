@@ -5,6 +5,7 @@ import { useUser } from "../UserContextProvider";
 import { useRouter } from "next/navigation";
 import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
+import { logger } from "../Main/logger";
 
 interface FollowButtonProps {
   userId: number;
@@ -28,14 +29,27 @@ const FollowButton: React.FC<FollowButtonProps> = ({
   const isLoggedIn = !!user;
 
   useEffect(() => {
-    if (isLoggedIn) {
-      checkFollowStatus(userId)
-        .then((status) => {
-          setIsFollowing(status);
-          if (onFollowStatusChange) onFollowStatusChange(status);
-        })
-        .catch(console.error);
-    }
+    const checkStatus = async () => {
+      if (isLoggedIn) {
+        try {
+          const response = await checkFollowStatus(userId);
+          if (response.code === 200 && "data" in response) {
+            setIsFollowing(response.data);
+            if (onFollowStatusChange) onFollowStatusChange(response.data);
+          } else {
+            logger.warn("Failed to check follow status:", response, {
+              context: "FollowButton"
+            });
+          }
+        } catch (error) {
+          logger.error("Error checking follow status:", error, {
+            context: "FollowButton"
+          });
+        }
+      }
+    };
+
+    checkStatus();
   }, [userId, onFollowStatusChange, isLoggedIn]);
 
   const handleFollowClick = async () => {
@@ -51,17 +65,30 @@ const FollowButton: React.FC<FollowButtonProps> = ({
 
     setIsLoading(true);
     try {
-      await (isFollowing ? unfollowUser : followUser)(userId);
-      const newFollowStatus = !isFollowing;
-      setIsFollowing(newFollowStatus);
-      if (onFollowStatusChange) onFollowStatusChange(newFollowStatus);
-      setAlert({
-        message: newFollowStatus
-          ? t("followButton.followSuccess")
-          : t("followButton.unfollowSuccess"),
-        type: "success"
-      });
+      const response = await (isFollowing ? unfollowUser : followUser)(userId);
+      if (response.code === 200) {
+        const newFollowStatus = !isFollowing;
+        setIsFollowing(newFollowStatus);
+        if (onFollowStatusChange) onFollowStatusChange(newFollowStatus);
+        setAlert({
+          message: newFollowStatus
+            ? t("followButton.followSuccess")
+            : t("followButton.unfollowSuccess"),
+          type: "success"
+        });
+      } else {
+        logger.warn("Failed to update follow status:", response, {
+          context: "FollowButton"
+        });
+        setAlert({
+          message: t("followButton.operationFailed"),
+          type: "error"
+        });
+      }
     } catch (error) {
+      logger.error("Error updating follow status:", error, {
+        context: "FollowButton"
+      });
       setAlert({
         message: t("followButton.operationFailed"),
         type: "error"

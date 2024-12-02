@@ -10,6 +10,7 @@ import Alert from "./Alert";
 import { useTranslation } from "../useTranslation";
 import { updateUserType } from "@/app/lib/action";
 import { useUser } from "../UserContextProvider";
+import { logger } from "./logger";
 
 interface BecomeCreatorModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ export const BecomeCreatorModal: React.FC<BecomeCreatorModalProps> = ({
   } | null>(null);
 
   if (!isOpen || !user) return null;
+
   const handleBecomeCreator = async () => {
     if (user.userType === "creator") {
       setAlert({
@@ -61,7 +63,10 @@ export const BecomeCreatorModal: React.FC<BecomeCreatorModalProps> = ({
         }, 1000);
       }
     } catch (error) {
-      console.error("Failed to become a creator:", error);
+      logger.error("Failed to become a creator:", error, {
+        context: "handleBecomeCreator"
+      });
+
       setAlert({
         message: t("newUserView.becomeCreatorFailed"),
         type: "error"

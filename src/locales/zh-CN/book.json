@@ -3,6 +3,8 @@
   "views": "人在看",
   "adultContentWarning": "包含成人内容。您确定要继续吗？",
   "author": "作者",
+  "purchased": "已购买",
+  "purchaseSuccessDetail": "支付成功！\n您支付了 {coins} 墨币。\n当前余额为 {newBalance} 墨币。",
   "userLazy": "这个用户很懒，还没有写自我介绍。",
   "peopleFollowing": "关注",
   "comments": "评论",
@@ -143,6 +145,7 @@
     "fileSizeError": "文件大小不能超过 2 MB。请选择一个较小的文件或压缩当前文件。"
   },
   "writingPage": {
+    "noUserInfo": "没有用户信息",
     "enterTitle": "请输入标题",
     "enterDescription": "请输入书籍描述",
     "uploadCover": "请上传封面图片",
@@ -189,5 +192,13 @@
     "characterCount": "{current}/{max}字",
     "commentTooLong": "评论不能超过{max}字",
     "confirm": "确认"
+  },
+  "errors": {
+    "purchaseCheckFailed": "购买验证失败",
+    "purchaseError": "购买失败，请稍后重试"
+  },
+  "status": {
+    "processing": "处理中...",
+    "completed": "完成"
   }
 }

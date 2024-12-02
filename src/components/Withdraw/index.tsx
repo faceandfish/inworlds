@@ -17,6 +17,7 @@ import {
 import Alert from "../Main/Alert";
 import { WithdrawHistory } from "./WithdrawHistory";
 import WithdrawSkeleton from "./WithdrawSkeleton";
+import { logger } from "@/components/Main/logger";
 
 const EXCHANGE_RATE = 0.01;
 
@@ -48,7 +49,7 @@ export default function Withdraw() {
       try {
         // 获取银行卡
         const cardsResponse = await getBankCards();
-        if (cardsResponse.code === 200) {
+        if (cardsResponse.code === 200 && "data" in cardsResponse) {
           setSavedCards(cardsResponse.data.dataList || []);
           const defaultCard = cardsResponse.data.dataList?.find(
             (card) => card.isDefault
@@ -56,26 +57,37 @@ export default function Withdraw() {
           if (defaultCard) {
             setSelectedCard(defaultCard.id);
           }
+        } else {
+          logger.error("Invalid bank cards response", {
+            response: cardsResponse,
+            context: "Withdraw.fetchData"
+          });
         }
 
         // 获取总收入
         const incomeResponse = await getUserTotalIncome();
-        if (incomeResponse.code === 200) {
+        if (incomeResponse.code === 200 && "data" in incomeResponse) {
           setTotalIncome(incomeResponse.data);
+        } else {
+          logger.error("Invalid income response", {
+            response: incomeResponse,
+            context: "Withdraw.fetchData"
+          });
         }
 
-        // 所有数据加载完成后，设置 loading 为 false
         setIsLoading(false);
       } catch (err) {
-        console.error("Error fetching data:", err);
+        logger.error("Failed to fetch initial data", {
+          error: err,
+          context: "Withdraw.fetchData"
+        });
         setCardError(t("wallet.withdraw.errors.fetchIncomeFailed"));
-        // 即使出错也要设置 loading 为 false
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [t]);
 
   // 金额计算
   const availableUSD = useMemo(() => {
@@ -112,15 +124,13 @@ export default function Withdraw() {
     setCardError("");
 
     try {
-      // 添加新银行卡
       const cardResponse = await addBankCard(newCard);
-      if (cardResponse.code === 200) {
+      if (cardResponse.code === 200 && "data" in cardResponse) {
         const savedCard = cardResponse.data;
         setSavedCards((prev) => [...prev, savedCard]);
         setSelectedCard(savedCard.id);
-        setShowNewCardForm(false); // 保存成功后切换回卡片列表
+        setShowNewCardForm(false);
         setNewCard({
-          // 重置表单
           bankName: "",
           cardNumber: "",
           holderName: "",
@@ -130,10 +140,18 @@ export default function Withdraw() {
           bankAddress: ""
         });
       } else {
+        logger.error("Failed to save bank card", {
+          response: cardResponse,
+          context: "Withdraw.handleSaveNewCard"
+        });
         throw new Error(cardResponse.msg || "Failed to save bank card");
       }
     } catch (err) {
-      console.error("Save card error:", err);
+      logger.error("Save card error", {
+        error: err,
+        context: "Withdraw.handleSaveNewCard",
+        cardData: { ...newCard, cardNumber: "***" } // 隐藏敏感信息
+      });
       setCardError(
         err instanceof Error
           ? err.message
@@ -149,13 +167,11 @@ export default function Withdraw() {
     e.preventDefault();
     setSubmitError("");
 
-    // 金额验证
     if (!amount || Number(amount) <= 0) {
       setSubmitError(t("wallet.withdraw.errors.invalidAmount"));
       return;
     }
 
-    // 验证是否选择了银行卡
     if (!selectedCard) {
       setSubmitError(t("wallet.withdraw.errors.selectCard"));
       return;
@@ -172,28 +188,39 @@ export default function Withdraw() {
 
       const response = await submitWithdrawRequest(withdrawRequest);
 
-      switch (response.code) {
-        case 200:
-          setShowSuccessAlert(true);
-          // 清空表单
-          setAmount("");
-          break;
-        case 4001:
-          setSubmitError(t("wallet.withdraw.errors.amountTooSmall"));
-          break;
-        case 402:
-          setSubmitError(t("wallet.withdraw.errors.insufficientBalance"));
-          break;
-        case 405:
-          setSubmitError(t("wallet.withdraw.errors.pendingWithdraw"));
-          break;
-        default:
-          setSubmitError(
-            response.msg || t("wallet.withdraw.errors.submitFailed")
-          );
+      if (response.code === 200 && "data" in response) {
+        setShowSuccessAlert(true);
+        setAmount("");
+      } else {
+        logger.error("Withdraw request failed", {
+          response,
+          request: withdrawRequest,
+          context: "Withdraw.handleSubmit"
+        });
+
+        switch (response.code) {
+          case 4001:
+            setSubmitError(t("wallet.withdraw.errors.amountTooSmall"));
+            break;
+          case 402:
+            setSubmitError(t("wallet.withdraw.errors.insufficientBalance"));
+            break;
+          case 405:
+            setSubmitError(t("wallet.withdraw.errors.pendingWithdraw"));
+            break;
+          default:
+            setSubmitError(
+              response.msg || t("wallet.withdraw.errors.submitFailed")
+            );
+        }
       }
     } catch (err) {
-      console.error("Submit error:", err);
+      logger.error("Submit withdraw error", {
+        error: err,
+        amount,
+        inkAmount: inkTokenAmount,
+        context: "Withdraw.handleSubmit"
+      });
       setSubmitError(t("wallet.withdraw.errors.submitFailed"));
     } finally {
       setIsSubmitting(false);
@@ -204,12 +231,20 @@ export default function Withdraw() {
   const refreshBankCards = async () => {
     try {
       const response = await getBankCards();
-      if (response.code === 200) {
+      if (response.code === 200 && "data" in response) {
         setSavedCards(response.data.dataList || []);
         setCardError("");
+      } else {
+        logger.error("Failed to refresh bank cards", {
+          response,
+          context: "Withdraw.refreshBankCards"
+        });
       }
     } catch (err) {
-      console.error("Error refreshing bank cards:", err);
+      logger.error("Refresh bank cards error", {
+        error: err,
+        context: "Withdraw.refreshBankCards"
+      });
     }
   };
 

@@ -4,6 +4,7 @@ import { i18n, Locale } from "@/app/i18n-config";
 import { useTranslation } from "../useTranslation";
 import { useLanguageHandler } from "../useLanguageHandler";
 import { FaChevronRight } from "react-icons/fa";
+import { logger } from "../Main/logger";
 
 interface MenuLanguageOptionProps {
   variant: "mobile" | "desktop" | "auth-desktop";
@@ -26,7 +27,9 @@ const MenuLanguageOption: React.FC<MenuLanguageOptionProps> = ({ variant }) => {
       if (!result || result.code !== 200) {
       }
     } catch (error) {
-      console.error("Language change error:", error);
+      logger.error("Language change error:", error, {
+        context: "onLanguageChange"
+      });
     }
   };
 

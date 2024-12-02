@@ -230,6 +230,13 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface ApiErrorResponse {
+  code: number;
+  msg: string;
+}
+
+export type ApiResult<T> = ApiResponse<T> | ApiErrorResponse;
+
 export interface PasswordChangeResponse {
   code: number;
   msg: string;
@@ -408,7 +415,7 @@ export interface PurchasedChapterInfo {
   authorId: number;
   authorName: string;
   createAt: string;
-  coins: number;
+  coinsPaid: number;
 }
 
 export interface SearchHistoryItem {

@@ -31,8 +31,12 @@ const Header: React.FC = () => {
       }
 
       try {
-        const userInfo = await getUserById(Number(userId));
-        setUser(userInfo);
+        const response = await getUserById(Number(userId));
+        if (response.code === 200 && "data" in response) {
+          setUser(response.data);
+        } else {
+          setError(response.msg || t("header.fetchUserError"));
+        }
       } catch (err) {
         setError(t("header.fetchUserError"));
       } finally {

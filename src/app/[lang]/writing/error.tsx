@@ -1,5 +1,6 @@
 "use client";
 
+import { logger } from "@/components/Main/logger";
 import { useEffect } from "react";
 
 export default function Error({
@@ -10,8 +11,13 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Optionally log the error to an error reporting service
-    console.error(error);
+    // Log the error with additional context
+    logger.error("Studio page error", {
+      error: error.message,
+      digest: error.digest,
+      stack: error.stack,
+      timestamp: new Date().toISOString()
+    });
   }, [error]);
 
   return (
@@ -19,10 +25,7 @@ export default function Error({
       <h2 className="text-center">Something went wrong!</h2>
       <button
         className="mt-4 rounded-md bg-orange-400 px-4 py-2 text-sm text-white transition-colors hover:bg-orange-500"
-        onClick={
-          // Attempt to recover by trying to re-render the invoices route
-          () => reset()
-        }
+        onClick={() => reset()}
       >
         Try again
       </button>

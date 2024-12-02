@@ -10,6 +10,7 @@ import {
   updateChapter
 } from "@/app/lib/action";
 import { useTranslation } from "../useTranslation";
+import { logger } from "../Main/logger";
 
 const ChapterEditPage: React.FC = () => {
   const params = useParams();
@@ -21,7 +22,6 @@ const ChapterEditPage: React.FC = () => {
   const [book, setBook] = useState<BookInfo | null>(null);
   const [chapter, setChapter] = useState<ChapterInfo | null>(null);
   const [localChapter, setLocalChapter] = useState<ChapterInfo | null>(null);
-
   const [error, setError] = useState<string | null>(null);
   const [alert, setAlert] = useState<{
     message: string;
@@ -36,13 +36,13 @@ const ChapterEditPage: React.FC = () => {
           getChapterContent(bookId, chapterNumber)
         ]);
 
-        if (bookResponse.code === 200 && bookResponse.data) {
+        if (bookResponse.code === 200 && "data" in bookResponse) {
           setBook(bookResponse.data);
         } else {
           throw new Error(bookResponse.msg || "获取书籍信息失败");
         }
 
-        if (chapterResponse.code === 200 && chapterResponse.data) {
+        if (chapterResponse.code === 200 && "data" in chapterResponse) {
           setChapter(chapterResponse.data);
           setLocalChapter(chapterResponse.data);
         } else {
@@ -75,25 +75,23 @@ const ChapterEditPage: React.FC = () => {
         chapterNumber,
         updatedChapter
       );
-      if (response.code === 200) {
+
+      if (response.code === 200 && "data" in response) {
         setChapter(response.data);
         setLocalChapter(response.data);
         setAlert({ message: t("chapterEdit.updateSuccess"), type: "success" });
 
         if (publishStatus === "published") {
-          // 设置一个短暂的延迟，以确保用户能看到成功消息
           setTimeout(() => {
             router.push(`/writing/${bookId}?section=chapters`);
-          }, 1500); // 1.5秒后跳转
+          }, 1500);
         }
       } else {
-        throw new Error(response.msg || t("chapterEdit.updateFail"));
+        throw new Error(t("chapterEdit.updateFail"));
       }
-    } catch (err) {
-      setAlert({
-        message:
-          err instanceof Error ? err.message : t("chapterEdit.updateError"),
-        type: "error"
+    } catch (error) {
+      logger.error(t("chapterEdit.updateFail"), error, {
+        context: "updatedChapter"
       });
     }
   };
@@ -108,6 +106,7 @@ const ChapterEditPage: React.FC = () => {
   if (error)
     return <div className="text-center py-10 text-red-500">{error}</div>;
   if (!book || !localChapter) return null;
+
   return (
     <div className="container mx-auto bg-white px-20 py-20">
       <h1 className="text-2xl bg-orange-100 py-2 text-center text-neutral-600 font-bold mb-4">

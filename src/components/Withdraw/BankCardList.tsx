@@ -4,6 +4,7 @@ import { useState } from "react";
 import { deleteBankCard } from "@/app/lib/action";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import Alert from "../Main/Alert";
+import { logger } from "../Main/logger";
 
 interface BankCardListProps {
   cards: BankCard[];
@@ -55,7 +56,9 @@ export const BankCardList: React.FC<BankCardListProps> = ({
         );
       }
     } catch (err) {
-      console.error("Delete card error:", err);
+      logger.error("Delete card error", {
+        context: "deleteBankCard"
+      });
       setResultType("error");
       setResultMessage(t("wallet.withdraw.errors.deleteFailed"));
     } finally {

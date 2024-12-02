@@ -1,6 +1,6 @@
 // PaidChapterContent.tsx
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import { ChapterInfo, BookInfo } from "@/app/lib/definitions";
 import Alert from "../Main/Alert";
 import { useRouter } from "next/navigation";
@@ -16,142 +16,176 @@ interface PaidChapterContentProps {
   onPurchaseSuccess: () => void;
 }
 
-const PaidChapterContent: React.FC<PaidChapterContentProps> = ({
-  chapter,
-  book,
-  isPurchased,
-  onPurchaseSuccess
-}) => {
-  const { t } = useTranslation("book");
-  const { user } = useUser();
-  const router = useRouter();
-  const {
-    addPurchasedChapter,
-    loading: purchaseLoading,
-    error: purchaseError,
-    clearError
-  } = usePurchasedChapters();
+const PaidChapterContent: React.FC<PaidChapterContentProps> = React.memo(
+  ({ chapter, book, isPurchased, onPurchaseSuccess }) => {
+    const { t } = useTranslation("book");
+    const { user } = useUser();
+    const router = useRouter();
+    const {
+      addPurchasedChapter,
+      error: purchaseError,
+      clearError
+    } = usePurchasedChapters();
 
-  const [showPaymentAlert, setShowPaymentAlert] = useState(false);
-  const [showLoginAlert, setShowLoginAlert] = useState(false);
-  const [showInsufficientBalanceAlert, setShowInsufficientBalanceAlert] =
-    useState(false);
-  const [alertMessage, setAlertMessage] = useState("");
+    const [showPaymentAlert, setShowPaymentAlert] = useState(false);
+    const [paymentStatus, setPaymentStatus] = useState<number | null>(null);
+    const [showLoginAlert, setShowLoginAlert] = useState(false);
+    const [showInsufficientBalanceAlert, setShowInsufficientBalanceAlert] =
+      useState(false);
+    const [paymentLoading, setPaymentLoading] = useState(false);
+    const [alertMessage, setAlertMessage] = useState("");
 
-  // 处理购买功能的错误显示
-  React.useEffect(() => {
-    if (purchaseError) {
-      setAlertMessage(purchaseError);
-      setShowPaymentAlert(true);
-      clearError();
-    }
-  }, [purchaseError, clearError]);
+    const isAuthor = useMemo(
+      () => user?.id === book.authorId,
+      [user?.id, book.authorId]
+    );
 
-  const handleBuyCoins = () => {
-    if (user && user.id) {
-      router.push(`/user/${user.id}/wallet`);
-    } else {
-      setShowLoginAlert(true);
-      setShowInsufficientBalanceAlert(false);
-    }
-  };
-
-  const handleLogin = () => {
-    router.push("/login");
-    setShowLoginAlert(false);
-  };
-
-  const handleChapterPayment = async () => {
-    try {
-      const response = await payForChapter(book.id, chapter.id);
-
-      switch (response.code) {
-        case 200:
-        case 601:
-          setAlertMessage(
-            response.code === 200 ? t("purchaseSuccess") : t("alreadyPurchased")
-          );
-          addPurchasedChapter(book.id, chapter.id);
-          onPurchaseSuccess();
-          setShowPaymentAlert(true);
-          break;
-        case 602:
-          setShowInsufficientBalanceAlert(true);
-          break;
-        default:
-          throw new Error(response.msg || "Failed to pay for chapter");
+    useEffect(() => {
+      if (purchaseError) {
+        setAlertMessage(purchaseError);
+        setShowPaymentAlert(true);
+        clearError();
       }
-    } catch (error) {
-      console.error("Error paying for chapter:", error);
-      setAlertMessage(t("purchaseError"));
-      setShowPaymentAlert(true);
-    }
-  };
+    }, [purchaseError, clearError]);
 
-  if (!chapter.isPaid || isPurchased) {
-    return null;
-  }
+    const handleBuyCoins = () => {
+      if (user?.id) {
+        router.push(`/user/${user.id}/wallet`);
+      } else {
+        setShowLoginAlert(true);
+        setShowInsufficientBalanceAlert(false);
+      }
+    };
 
-  return (
-    <>
-      <div className="w-full text-center border bg-orange-100 shadow-md py-10">
-        <p className="text-lg text-neutral-600 mb-4">
-          {t("paidChapter", { price: chapter.price })}
-        </p>
-        <button
-          onClick={handleChapterPayment}
-          disabled={purchaseLoading}
-          className={`${
-            purchaseLoading
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-orange-400 hover:bg-orange-500"
-          } text-white px-6 py-2 rounded-full transition duration-300`}
-        >
-          {purchaseLoading ? t("processing") : t("payAndRead")}
-        </button>
-      </div>
+    const handleLogin = () => {
+      router.push("/login");
+      setShowLoginAlert(false);
+    };
 
-      {showPaymentAlert && (
-        <Alert
-          message={alertMessage}
-          type={
-            alertMessage === t("purchaseSuccess") ||
-            alertMessage === t("alreadyPurchased")
-              ? "success"
-              : "error"
+    const handleChapterPayment = async () => {
+      if (paymentLoading) return;
+      setPaymentLoading(true);
+      setShowPaymentAlert(false);
+      setShowInsufficientBalanceAlert(false);
+
+      try {
+        const response = await payForChapter(book.id, chapter.id);
+
+        setPaymentStatus(response.code);
+
+        if ("data" in response) {
+          switch (response.code) {
+            case 200:
+              if (response.data) {
+                setAlertMessage(
+                  t("purchaseSuccessDetail", {
+                    coins: response.data.coinsPaid,
+                    newBalance: response.data.newBalance
+                  })
+                );
+                addPurchasedChapter(book.id, chapter.id);
+                onPurchaseSuccess();
+                setShowPaymentAlert(true);
+              } else {
+                setAlertMessage(t("purchaseError"));
+                setShowPaymentAlert(true);
+              }
+              break;
+            case 601:
+              setAlertMessage(t("alreadyPurchased"));
+              addPurchasedChapter(book.id, chapter.id);
+              onPurchaseSuccess();
+              setShowPaymentAlert(true);
+              break;
+            case 602:
+              setShowInsufficientBalanceAlert(true);
+              break;
+            default:
+              setAlertMessage(response.msg || t("purchaseError"));
+              setShowPaymentAlert(true);
           }
-          onClose={() => setShowPaymentAlert(false)}
-          autoClose={true}
-        />
-      )}
+        }
+      } catch (err) {
+        setPaymentStatus(null);
+        setAlertMessage(t("purchaseError"));
+        setShowPaymentAlert(true);
+      } finally {
+        setPaymentLoading(false);
+      }
+    };
 
-      {showInsufficientBalanceAlert && (
-        <Alert
-          message={t("insufficientBalance")}
-          type="error"
-          onClose={() => setShowInsufficientBalanceAlert(false)}
-          customButton={{
-            text: t("buyCoins"),
-            onClick: handleBuyCoins
-          }}
-          autoClose={false}
-        />
-      )}
+    const alertElements = (
+      <>
+        {showPaymentAlert && (
+          <Alert
+            message={alertMessage}
+            type={
+              paymentStatus === 200 || paymentStatus === 601
+                ? "success"
+                : "error"
+            }
+            onClose={() => {
+              setShowPaymentAlert(false);
+              setPaymentStatus(null);
+            }}
+            autoClose={true}
+          />
+        )}
 
-      {showLoginAlert && (
-        <Alert
-          message={t("loginRequired")}
-          type="error"
-          onClose={() => setShowLoginAlert(false)}
-          customButton={{
-            text: t("goToLogin"),
-            onClick: handleLogin
-          }}
-          autoClose={false}
-        />
-      )}
-    </>
-  );
-};
+        {showInsufficientBalanceAlert && (
+          <Alert
+            message={t("insufficientBalance")}
+            type="error"
+            onClose={() => setShowInsufficientBalanceAlert(false)}
+            customButton={{
+              text: t("buyCoins"),
+              onClick: handleBuyCoins
+            }}
+            autoClose={false}
+          />
+        )}
+
+        {showLoginAlert && (
+          <Alert
+            message={t("loginRequired")}
+            type="error"
+            onClose={() => setShowLoginAlert(false)}
+            customButton={{
+              text: t("goToLogin"),
+              onClick: handleLogin
+            }}
+            autoClose={false}
+          />
+        )}
+      </>
+    );
+
+    if (!chapter.isPaid || isPurchased || isAuthor) {
+      return alertElements;
+    }
+
+    return (
+      <>
+        <div className="w-full text-center border bg-orange-100 shadow-md py-10">
+          <p className="text-lg text-neutral-600 mb-4">
+            {t("paidChapter", { price: chapter.price })}
+          </p>
+          <button
+            onClick={handleChapterPayment}
+            disabled={paymentLoading}
+            className={`${
+              paymentLoading
+                ? "bg-gray-400 cursor-not-allowed"
+                : "bg-orange-400 hover:bg-orange-500"
+            } text-white px-6 py-2 rounded-full transition duration-300`}
+          >
+            {paymentLoading ? t("processing") : t("payAndRead")}
+          </button>
+        </div>
+        {alertElements}
+      </>
+    );
+  }
+);
 
 export default PaidChapterContent;

@@ -2,6 +2,8 @@
   "ageConfirmation": "年齡確認",
   "adultContentWarning": "包含成人內容。您確定要繼續嗎？",
   "author": "作者",
+  "purchased": "已購買",
+  "purchaseSuccessDetail": "支付成功！\n您支付了 {coins} 墨幣。\n當前餘額為 {newBalance} 墨幣。",
   "userLazy": "這個用戶很懶，還沒有寫自我介紹。",
   "peopleFollowing": "關注",
   "comments": "評論",
@@ -143,6 +145,7 @@
     "fileSizeError": "文件大小不能超過 2 MB。請選擇一個較小的文件或壓縮當前文件。"
   },
   "writingPage": {
+    "noUserInfo": "沒有用戶信息",
     "enterTitle": "請輸入標題",
     "enterDescription": "請輸入書籍描述",
     "uploadCover": "請上傳封面圖片",
@@ -189,5 +192,13 @@
     "characterCount": "{current}/{max}字",
     "commentTooLong": "評論不能超過{max}字",
     "confirm": "確認"
+  },
+  "errors": {
+    "purchaseCheckFailed": "購買驗證失敗",
+    "purchaseError": "購買失敗，請稍後重試"
+  },
+  "status": {
+    "processing": "處理中...",
+    "completed": "完成"
   }
 }

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useTranslation } from "../useTranslation";
 import GoogleLogo from "../../../public/google.png";
 import { useUser } from "../UserContextProvider";
+import { logger } from "../Main/logger";
 
 export const GoogleLoginButtonInner = () => {
   const router = useRouter();
@@ -20,11 +21,13 @@ export const GoogleLoginButtonInner = () => {
   useEffect(() => {
     const handleSession = async () => {
       if (status === "authenticated" && session?.user && !isProcessing) {
-        setIsProcessing(true); // 防止重复处理
+        setIsProcessing(true);
         try {
           await handleAuthentication(session.user);
         } catch (error) {
-          console.error("Authentication error:", error);
+          logger.error("Authentication error:", error, {
+            context: "GoogleLoginButton"
+          });
           setError(t("unexpectedError"));
         }
         setIsProcessing(false);
@@ -42,18 +45,26 @@ export const GoogleLoginButtonInner = () => {
         user.image as string
       );
 
-      console.log("Server response:", response);
+      logger.info("Server response:", response, {
+        context: "GoogleLoginButton"
+      });
 
-      if (response.code === 200 && response.data) {
+      if (response.code === 200 && "data" in response && response.data) {
         setToken(response.data);
         await refetch();
         await new Promise((resolve) => setTimeout(resolve, 1000));
         router.refresh();
         await router.replace("/");
       } else {
-        setError("Failed to authenticate with our server. Please try again.");
+        setError(
+          response.msg ||
+            "Failed to authenticate with our server. Please try again."
+        );
       }
     } catch (error) {
+      logger.error("Login processing error:", error, {
+        context: "GoogleLoginButton"
+      });
       setError(
         "An error occurred while processing your login. Please try again."
       );

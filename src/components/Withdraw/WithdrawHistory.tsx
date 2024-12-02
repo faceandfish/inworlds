@@ -3,6 +3,7 @@ import { useTranslation } from "../useTranslation";
 import { ArrowPathIcon } from "@heroicons/react/24/outline";
 import Pagination from "../Main/Pagination";
 import { getWithdrawHistory } from "@/app/lib/action";
+import { logger } from "@/components/Main/logger";
 import {
   PaginatedWithdrawRecords,
   WithdrawRecord
@@ -16,30 +17,72 @@ export const WithdrawHistory: React.FC = () => {
     useState<PaginatedWithdrawRecords | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString();
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString();
+    } catch (err) {
+      logger.error("Date formatting error", {
+        dateString,
+        error: err,
+        context: "WithdrawHistory.formatDate"
+      });
+      return dateString; // 返回原始字符串作为后备
+    }
   };
 
   useEffect(() => {
     const fetchWithdrawRecords = async () => {
       setIsLoading(true);
+      setError(null);
+
       try {
         const response = await getWithdrawHistory(currentPage, ITEMS_PER_PAGE);
-        console.log("withdraw", response);
-        if (response.code === 200) {
+
+        if (response.code === 200 && "data" in response) {
           setWithdrawRecords(response.data);
+        } else {
+          logger.error("Invalid withdraw history response", {
+            response,
+            context: "WithdrawHistory.fetchWithdrawRecords",
+            page: currentPage
+          });
+          setError(t("wallet.withdraw.errors.fetchFailed"));
         }
       } catch (err) {
-        console.error("Error fetching withdraw records:", err);
+        logger.error("Failed to fetch withdraw records", {
+          error: err,
+          context: "WithdrawHistory.fetchWithdrawRecords",
+          page: currentPage
+        });
+        setError(t("wallet.withdraw.errors.fetchFailed"));
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchWithdrawRecords();
-  }, [currentPage]);
+  }, [currentPage, t]);
+
+  const getStatusClassName = (status: WithdrawRecord["status"]) => {
+    switch (status) {
+      case "completed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+      case "processing":
+        return "bg-yellow-100 text-yellow-800";
+      case "failed":
+        return "bg-red-100 text-red-800";
+      default:
+        logger.warn("Unknown withdraw status", {
+          status,
+          context: "WithdrawHistory.getStatusClassName"
+        });
+        return "bg-gray-100 text-gray-800";
+    }
+  };
 
   if (isLoading) {
     return (
@@ -47,6 +90,10 @@ export const WithdrawHistory: React.FC = () => {
         <ArrowPathIcon className="animate-spin h-5 w-5 mx-auto text-gray-400" />
       </div>
     );
+  }
+
+  if (error) {
+    return <div className="text-center py-4 text-red-500">{error}</div>;
   }
 
   if (!withdrawRecords?.dataList.length) {
@@ -58,7 +105,7 @@ export const WithdrawHistory: React.FC = () => {
   }
 
   return (
-    <div className="bg-white  shadow-sm border-b border-gray-200">
+    <div className="bg-white shadow-sm border-b border-gray-200">
       <div className="p-6">
         <h2 className="text-lg font-medium text-gray-900 mb-4">
           {t("wallet.withdraw.history")}
@@ -100,14 +147,7 @@ export const WithdrawHistory: React.FC = () => {
               <div className="col-span-2 text-center">
                 <span
                   className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs
-                    ${
-                      record.status === "completed"
-                        ? "bg-green-100 text-green-800"
-                        : record.status === "pending" ||
-                          record.status === "processing"
-                        ? "bg-yellow-100 text-yellow-800"
-                        : "bg-red-100 text-red-800"
-                    }`}
+                    ${getStatusClassName(record.status)}`}
                 >
                   {t(`wallet.withdraw.status.${record.status}`)}
                   {record.failReason && (

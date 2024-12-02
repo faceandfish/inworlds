@@ -15,9 +15,7 @@ import CategorySelect from "@/components/WritingPage/CategorySelect";
 import AgeRating from "@/components/WritingPage/AgeRating";
 import ContentEditor from "@/components/WritingPage/ContentEditor";
 import AuthorNote from "@/components/WritingPage/AuthorNote";
-
 import { publishBook, uploadBookDraft } from "@/app/lib/action";
-
 import BookStatusSelector from "./BookStatusSelector";
 import { getToken } from "@/app/lib/token";
 import { useUser } from "../UserContextProvider";
@@ -27,7 +25,9 @@ import Alert from "../Main/Alert";
 
 const WritingPage: React.FC = () => {
   const router = useRouter();
-  const { user, loading, error: userError, updateUser } = useUser();
+  const { user, error: userError } = useUser();
+  const { t } = useTranslation("book");
+
   const [isMobile, setIsMobile] = useState(false);
   const [bookData, setBookData] = useState<Partial<BookInfo>>({
     title: "",
@@ -41,7 +41,6 @@ const WritingPage: React.FC = () => {
     authorId: user?.id
   });
 
-  const { t } = useTranslation("book");
   const [fileData, setFileData] = useState<FileUploadData>({
     coverImage: undefined
   });
@@ -62,7 +61,7 @@ const WritingPage: React.FC = () => {
 
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 假设小于 768px 为移动设备
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkMobile();
@@ -166,135 +165,120 @@ const WritingPage: React.FC = () => {
   };
 
   const saveOrPublishBook = async (publishStatus: "draft" | "published") => {
-    console.log("Starting saveOrPublishBook function", { publishStatus });
+    if (!validateForm()) return;
 
-    if (validateForm()) {
-      try {
-        if (!user) {
-          throw new Error("用户未登录");
-        }
+    try {
+      let coverImageFile: File | null = null;
+      let coverImageUrl: string | undefined = undefined;
 
-        const token = getToken();
-        if (!token) {
-          throw new Error("未找到认证token");
-        }
+      if (fileData.coverImage) {
+        coverImageFile = fileData.coverImage;
+      } else if (bookData.coverImageUrl) {
+        coverImageUrl = bookData.coverImageUrl;
+      } else {
+        showError(t("writingPage.uploadCover"));
+        return;
+      }
 
-        let coverImageFile: File | null = null;
-        let coverImageUrl: string | undefined = undefined;
-        if (fileData.coverImage) {
-          coverImageFile = fileData.coverImage;
-        } else if (bookData.coverImageUrl) {
-          coverImageUrl = bookData.coverImageUrl;
-        } else {
-          throw new Error(t("writingPage.uploadCover"));
-        }
+      const bookDataToSave: Omit<
+        BookInfo,
+        | "id"
+        | "lastSaved"
+        | "createdAt"
+        | "latestChapterNumber"
+        | "latestChapterTitle"
+        | "followersCount"
+        | "commentsCount"
+        | "authorAvatarUrl"
+        | "favoritesCount"
+        | "authorFollowersCount"
+        | "income24h"
+        | "totalIncome"
+        | "donationIncome"
+        | "adIncome"
+        | "monthlyIncome"
+        | "wordCount"
+        | "tags"
+        | "authorIntroduction"
+        | "views"
+      > = {
+        title: bookData.title || "",
+        description: bookData.description || "",
+        category: bookData.category!,
+        ageRating: bookData.ageRating!,
+        status: bookData.status!,
+        publishStatus,
+        authorName: user?.displayName || "",
+        authorId: user?.id!,
+        chapters: bookData.chapters,
+        coverImageUrl: coverImageUrl
+      };
 
-        const bookDataToSave: Omit<
-          BookInfo,
-          | "id"
-          | "lastSaved"
-          | "createdAt"
-          | "latestChapterNumber"
-          | "latestChapterTitle"
-          | "followersCount"
-          | "commentsCount"
-          | "authorAvatarUrl"
-          | "favoritesCount"
-          | "authorFollowersCount"
-          | "income24h"
-          | "totalIncome"
-          | "donationIncome"
-          | "adIncome"
-          | "monthlyIncome"
-          | "wordCount"
-          | "tags"
-          | "authorIntroduction"
-          | "views"
-        > = {
-          title: bookData.title || "",
-          description: bookData.description || "",
-          category: bookData.category!,
-          ageRating: bookData.ageRating!,
-          status: bookData.status!,
-          publishStatus,
-          authorName: user.displayName || "",
-          authorId: user.id,
-          chapters: bookData.chapters,
-          coverImageUrl: coverImageUrl
-        };
+      const saveFunction =
+        publishStatus === "draft" ? uploadBookDraft : publishBook;
+      const response = await saveFunction(coverImageFile, bookDataToSave);
 
-        const saveFunction =
-          publishStatus === "draft" ? uploadBookDraft : publishBook;
-        const response = await saveFunction(
-          coverImageFile,
-          bookDataToSave,
-          token
+      if ("data" in response && response.code === 200) {
+        setBookData((prev) => ({
+          ...prev,
+          ...response.data,
+          publishStatus
+        }));
+
+        showSuccess(
+          publishStatus === "draft"
+            ? t("writingPage.draftSaved")
+            : t("writingPage.contentPublished")
         );
 
-        if (response.code === 200) {
-          setBookData((prev) => ({
-            ...prev,
-            ...response.data,
-            publishStatus
-          }));
-          showSuccess(
-            publishStatus === "draft"
-              ? t("writingPage.draftSaved")
-              : t("writingPage.contentPublished")
-          );
-          setTimeout(() => {
-            router.push(`/studio/${user.id}`);
-          }, 2000);
-        } else {
-          throw new Error(
-            publishStatus === "draft"
-              ? t("writingPage.saveDraftFailed")
-              : t("writingPage.publishContentFailed")
-          );
-        }
-      } catch (error) {
-        // 总是使用国际化的错误消息
+        setTimeout(() => {
+          router.push(`/studio/${user?.id}`);
+        }, 2000);
+      } else {
         showError(
           publishStatus === "draft"
             ? t("writingPage.saveDraftFailed")
             : t("writingPage.publishContentFailed")
         );
-
-        // 可以在这里记录实际的错误，以便于调试
-        console.error("Error in saveOrPublishBook:", error);
       }
+    } catch (err) {
+      showError(
+        publishStatus === "draft"
+          ? t("writingPage.saveDraftFailed")
+          : t("writingPage.publishContentFailed")
+      );
     }
   };
 
   const handleSaveDraft = () => saveOrPublishBook("draft");
   const handlePublish = () => saveOrPublishBook("published");
-
   const handleStatusChange = (status: BookInfo["status"]) => {
     handleBookDataChange("status", status);
   };
-
-  if (userError) {
-    return <div>{t("writingPage.userError", { error: userError })}</div>;
-  }
 
   if (!user) {
     return <div>{t("writingPage.noUserInfo")}</div>;
   }
 
+  if (userError) {
+    return <div>{t("writingPage.userError", { error: userError })}</div>;
+  }
+
   if (isMobile) {
     return <MobileWritingNotice />;
   }
+
   return (
     <div className="font-sans">
-      <div className="flex  bg-white">
+      <div className="flex bg-white">
         <WritingSidebar
           onSaveDraft={handleSaveDraft}
           onPublish={handlePublish}
           publishStatus={bookData.publishStatus as BookInfo["publishStatus"]}
         />
-        <div className="w-full px-20 flex justify-center  ">
+        <div className="w-full px-20 flex justify-center">
           <form className="" onSubmit={(e) => e.preventDefault()}>
-            <div id="intro" className="py-16  ">
+            <div id="intro" className="py-16">
               <BookIntro
                 book={{
                   title: bookData.title || "",

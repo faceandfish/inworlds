@@ -1,3 +1,4 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { checkFollowStatus } from "@/app/lib/action";
@@ -20,10 +21,16 @@ export default function UserActions({
   useEffect(() => {
     const fetchFollowStatus = async () => {
       try {
-        const status = await checkFollowStatus(userId);
-        setIsFollowing(status);
-      } catch (error) {
-        console.error("Failed to fetch follow status:", error);
+        const response = await checkFollowStatus(userId);
+        if ("data" in response && response.code === 200) {
+          setIsFollowing(response.data);
+        } else {
+          // 静默处理错误，因为这个状态不是致命的
+          setIsFollowing(false);
+        }
+      } catch (err) {
+        // 出错时默认为未关注状态
+        setIsFollowing(false);
       }
     };
 

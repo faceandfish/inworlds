@@ -43,7 +43,7 @@ const Alert: React.FC<AlertProps> = ({
   if (!isVisible) return null;
 
   return (
-    <div className="fixed px-6 md:px-0 inset-0 w-full flex items-center justify-center bg-black bg-opacity-50 z-50">
+    <div className="fixed px-6 md:px-0 inset-0 w-full flex items-center justify-center bg-black bg-opacity-50 z-[9999]">
       <div className="relative md:w-96 w-full bg-white rounded-lg shadow-xl">
         <div
           className={`p-4 ${

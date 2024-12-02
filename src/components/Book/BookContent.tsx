@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-
 import CommentSection from "@/components/Book/CommentSection";
 import { BookInfo, ChapterInfo, PaginatedData } from "@/app/lib/definitions";
 import Pagination from "../Main/Pagination";
@@ -11,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useTranslation } from "../useTranslation";
 import { ContentTabs } from "./ContentTabs";
 import { ChapterList } from "./ChapterList";
+import { logger } from "../Main/logger";
 
 interface BookContentProps {
   book: BookInfo;
@@ -24,15 +24,14 @@ export function BookContent({ book }: BookContentProps) {
   const [chapters, setChapters] = useState<ChapterInfo[]>([]);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const { user } = useUser(); // 使用 useUser 钩子获取用户信息
-  const router = useRouter(); // 使用 useRouter 钩子
+  const { user } = useUser();
+  const router = useRouter();
   const { t } = useTranslation("book");
   const [totalRecord, setTotalRecord] = useState(0);
-  const isLoggedIn = !!user; // 根据 user 是否存在来判断登录状态
+  const isLoggedIn = !!user;
 
   const handleLogin = () => {
-    // 跳转到登录页面
-    router.push("/login"); // 假设登录页面的路由是 '/login'
+    router.push("/login");
   };
 
   const fetchChapters = async (page: number) => {
@@ -40,11 +39,18 @@ export function BookContent({ book }: BookContentProps) {
     try {
       const response = await getPublicChapterList(book.id, page, 21);
 
-      setChapters(response.data.dataList);
-      setTotalPages(response.data.totalPage);
-      setTotalRecord(response.data.totalRecord);
+      if (response.code === 200 && "data" in response) {
+        setChapters(response.data.dataList);
+        setTotalPages(response.data.totalPage);
+        setTotalRecord(response.data.totalRecord);
+      } else {
+        // Handle error case
+        throw new Error(response.msg || "Failed to fetch chapters");
+      }
     } catch (error) {
-      console.error("Error fetching chapters:", error);
+      logger.error("Error fetching chapters", error, {
+        context: "BookContent"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +86,7 @@ export function BookContent({ book }: BookContentProps) {
           <ChapterList
             chapters={chapters}
             book={book}
-            className="mt-5 pb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 "
+            className="mt-5 pb-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           />
           {totalPages > 1 && (
             <Pagination

@@ -7,6 +7,7 @@ import { FaChevronRight } from "react-icons/fa";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
 import Alert from "../Main/Alert";
+import { logger } from "../Main/logger";
 
 interface LogoutButtonProps {
   onClick?: () => void;
@@ -20,7 +21,7 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onClick }) => {
 
   const router = useRouter();
   const { logoutUser } = useUser();
-  const { t } = useTranslation("navbar");
+  const { t, lang } = useTranslation("navbar");
 
   const handleLogoutClick = () => {
     setShowConfirmAlert(true);
@@ -46,13 +47,9 @@ const LogoutButton: React.FC<LogoutButtonProps> = ({ onClick }) => {
         onClick();
       }
 
-      // 延迟跳转到登录页
-      setTimeout(() => {
-        setShowStatusAlert(false);
-        router.replace("/login");
-      }, 2000);
+      router.replace(`/${lang}/login`);
     } catch (error) {
-      console.error(t("logoutError"), error);
+      logger.error("logoutError", error, { context: "logoutError" });
       setAlertType("error");
       setAlertMessage(t("logoutError"));
     }

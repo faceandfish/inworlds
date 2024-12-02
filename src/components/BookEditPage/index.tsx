@@ -1,17 +1,11 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  BookInfo,
-  ChapterInfo,
-  FileUploadData,
-  PaginatedData
-} from "@/app/lib/definitions";
+import { BookInfo, ChapterInfo, FileUploadData } from "@/app/lib/definitions";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Sidebar from "./Sidebar";
 import BookDetails from "./BookDetails";
 import ChapterList from "./ChapterList";
 import Pagination from "../Main/Pagination";
-import CoverUpload from "../WritingPage/CoverUpload";
 import StatusAndCategoryUpdate from "./StatusAndCategoryUpdate";
 import NewChapter from "./NewChapter";
 import {
@@ -24,6 +18,8 @@ import {
 } from "@/app/lib/action";
 import { getImageUrl } from "@/app/lib/imageUrl";
 import ExistingCoverUpload from "./ExistingCoverUpload";
+import BookPreviewCardSkeleton from "../Book/skeleton/BookPreviewCardSkeleton";
+import { logger } from "../Main/logger";
 
 const BookEditPage: React.FC = () => {
   const params = useParams();
@@ -44,46 +40,35 @@ const BookEditPage: React.FC = () => {
     const fetchBookData = async () => {
       try {
         const bookResponse = await getBookDetails(bookId);
-        if (bookResponse.code === 200 && bookResponse.data) {
+        if ("data" in bookResponse && bookResponse.code === 200) {
           setBook(bookResponse.data);
           if (bookResponse.data.coverImageUrl) {
-            const fullCoverImageUrl = getImageUrl(
-              bookResponse.data.coverImageUrl
-            );
-            setCoverImageUrl(fullCoverImageUrl);
-          } else {
-            console.warn("书籍没有封面图片 URL");
-            // 这里可以设置一个默认的封面图片 URL 或者其他适当的处理
+            setCoverImageUrl(getImageUrl(bookResponse.data.coverImageUrl));
           }
-        } else {
-          console.error("获取书籍详情失败:", bookResponse.msg);
         }
 
         const chapterResponse = await getChapterList(bookId, currentPage);
-
-        if (chapterResponse.code === 200 && chapterResponse.data) {
+        if ("data" in chapterResponse && chapterResponse.code === 200) {
           setChapters(chapterResponse.data.dataList);
           setTotalPages(chapterResponse.data.totalPage);
-        } else {
-          console.error("获取章节列表失败:", chapterResponse.msg);
         }
 
-        // 在数据加载完成后处理 URL 参数
         const section = searchParams.get("section");
         if (section === "chapters") {
           setActiveSection("chapters");
-          // 移除 URL 参数，但不改变路由
           router.replace(`/writing/${bookId}`);
         }
       } catch (error) {
-        console.error("获取书籍数据时出错:", error);
+        logger.error("Data fetch error", error, {
+          context: "fetchBookData"
+        });
       }
     };
 
     if (bookId) {
       fetchBookData();
     }
-  }, [bookId, currentPage]);
+  }, [bookId, currentPage, router, searchParams]);
 
   const handleBookDetailsUpdate = async (
     updatedBook: Partial<Pick<BookInfo, "title" | "description">>
@@ -91,16 +76,16 @@ const BookEditPage: React.FC = () => {
     if (book) {
       try {
         const response = await updateBookDetails(book.id, updatedBook);
-
-        if (response.code === 200) {
+        if ("data" in response && response.code === 200) {
           setBook(response.data);
           return true;
-        } else {
-          console.error("更新书籍详情失败:", response.msg);
-          return false;
         }
+        return false;
       } catch (error) {
-        console.error("更新书籍详情时出错:", error);
+        logger.error("Book details update error", error, {
+          context: "handleBookDetailsUpdate"
+        });
+
         return false;
       }
     }
@@ -116,27 +101,22 @@ const BookEditPage: React.FC = () => {
     url: BookInfo["coverImageUrl"]
   ) => {
     setCoverImage(file);
-    // Don't update coverImageUrl here, only preview it
   };
 
   const handleCoverUpload = async (): Promise<boolean> => {
-    if (coverImage && book) {
-      try {
-        const response = await updateBookCover(book.id, coverImage);
-        if (response.code === 200) {
-          const fullCoverImageUrl = getImageUrl(response.data);
-          setCoverImageUrl(fullCoverImageUrl);
-          return true;
-        } else {
-          console.error("更新书籍封面失败:", response.msg);
-          return false;
-        }
-      } catch (error) {
-        console.error("更新书籍封面时出错:", error);
-        return false;
+    if (!coverImage || !book) return false;
+
+    try {
+      const response = await updateBookCover(book.id, coverImage);
+      if ("data" in response && response.code === 200) {
+        setCoverImageUrl(getImageUrl(response.data));
+        return true;
       }
-    } else {
-      console.error("请先选择一个新的封面图片");
+      return false;
+    } catch (error) {
+      logger.error("Cover upload error", error, {
+        context: "handleCoverUpload"
+      });
       return false;
     }
   };
@@ -148,10 +128,11 @@ const BookEditPage: React.FC = () => {
   const handleSaveNewChapter = async (
     newChapter: Partial<ChapterInfo>
   ): Promise<{ success: boolean; data?: ChapterInfo }> => {
+    if (!newChapter.title || !newChapter.content) {
+      return { success: false };
+    }
+
     try {
-      if (!newChapter.title || !newChapter.content) {
-        return { success: false };
-      }
       type ChapterToSave = Omit<
         ChapterInfo,
         | "id"
@@ -175,25 +156,23 @@ const BookEditPage: React.FC = () => {
 
       const response = await addNewChapter(bookId, chapterToSave);
 
-      if (response.code === 200) {
+      if ("data" in response && response.code === 200) {
         setChapters((prevChapters) => [...prevChapters, response.data]);
-        setBook((prevBook) => {
-          if (prevBook) {
-            return {
+        setBook(
+          (prevBook) =>
+            prevBook && {
               ...prevBook,
               latestChapterNumber: response.data.chapterNumber ?? 0,
               latestChapterTitle: response.data.title
-            };
-          }
-          return prevBook;
-        });
-
+            }
+        );
         return { success: true, data: response.data };
-      } else {
-        return { success: false };
       }
+      return { success: false };
     } catch (error) {
-      console.error("保存新章节时出错:", error);
+      logger.error("New chapter save error", error, {
+        context: "handleSaveNewChapter"
+      });
       return { success: false };
     }
   };
@@ -204,13 +183,15 @@ const BookEditPage: React.FC = () => {
     if (book) {
       try {
         const response = await updateBookDetails(book.id, updates);
-        if (response.code === 200) {
+        if ("data" in response && response.code === 200) {
           setBook(response.data);
           return true;
-        } else {
-          return false;
         }
+        return false;
       } catch (error) {
+        logger.error("Status and category update error", error, {
+          context: "handleStatusAndCategoryUpdate"
+        });
         return false;
       }
     }
@@ -223,7 +204,7 @@ const BookEditPage: React.FC = () => {
   ): Promise<boolean> => {
     try {
       const response = await updateChapter(bookId, chapterNumber, updates);
-      if (response.code === 200) {
+      if ("data" in response && response.code === 200) {
         setChapters(
           chapters.map((chapter) =>
             chapter.chapterNumber === chapterNumber
@@ -232,7 +213,6 @@ const BookEditPage: React.FC = () => {
           )
         );
 
-        // 如果更新影响了书籍的最新章节信息，也更新书籍状态
         if (updates.publishStatus === "published" && book) {
           const updatedChapter = chapters.find((c) => c.id === chapterNumber);
           if (
@@ -248,20 +228,23 @@ const BookEditPage: React.FC = () => {
           }
         }
 
-        console.log("章节更新成功");
         return true;
-      } else {
-        console.error("更新章节失败:", response.msg);
-        return false;
       }
+      return false;
     } catch (error) {
-      console.error("更新章节时出错:", error);
+      logger.error("Chapter update error", error, {
+        context: "handleUpdateChapter"
+      });
       return false;
     }
   };
 
   if (!book) {
-    return <div>加载中...</div>;
+    return (
+      <div>
+        <BookPreviewCardSkeleton />
+      </div>
+    );
   }
 
   return (
@@ -270,7 +253,7 @@ const BookEditPage: React.FC = () => {
         activeSection={activeSection}
         setActiveSection={setActiveSection}
         onStartWriting={handleStartWriting}
-        className=" h-full fixed left-0 top-16 transition-all duration-300 w-64 opacity-100"
+        className="h-full fixed left-0 top-16 transition-all duration-300 w-64 opacity-100"
       />
       <div className="flex-1 overflow-auto bg-white h-screen p-8 transition-all duration-300 ml-64">
         {activeSection === "details" && (

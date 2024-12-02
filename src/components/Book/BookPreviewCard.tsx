@@ -7,6 +7,7 @@ import Image from "next/image";
 import AgeVerificationModal from "./AgeVerificationModal";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
+import { logger } from "../Main/logger";
 
 interface ClipProps {
   book: BookInfo;
@@ -24,6 +25,7 @@ const defaultCovers: string[] = [
 export const BookPreviewCard = React.memo(
   ({ book, width = "w-80", height = "h-48" }: ClipProps) => {
     const [showAgeVerification, setShowAgeVerification] = useState(false);
+    const [imageError, setImageError] = useState(false);
     const { user } = useUser();
     const { t } = useTranslation("book");
 
@@ -56,15 +58,22 @@ export const BookPreviewCard = React.memo(
               {book.coverImageUrl ? (
                 <>
                   <Image
+                    priority={true}
+                    loading="eager"
                     src={getImageUrl(book.coverImageUrl)}
                     width={400}
                     height={600}
                     alt={`${book.title} cover` || "cover"}
                     className="w-36 h-48 object-cover"
                     onError={(e) => {
-                      console.error(
-                        `Image loading failed: ${book.coverImageUrl}`
-                      );
+                      if (!imageError) {
+                        setImageError(true);
+                        logger.error(
+                          "Image loading failed",
+                          { coverUrl: book.coverImageUrl },
+                          { context: "BookPreviewCard" }
+                        );
+                      }
                     }}
                   />
                   {isDefaultCover && (

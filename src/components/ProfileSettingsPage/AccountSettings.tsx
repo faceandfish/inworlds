@@ -3,6 +3,7 @@ import { UpdateUserRequest, UserInfo } from "@/app/lib/definitions";
 import { useTranslation } from "../useTranslation";
 import { useUser } from "../UserContextProvider";
 import { LanguageSelector } from "./LanguageSelector";
+import { logger } from "../Main/logger";
 
 type AccountSettingsFields = Pick<
   UpdateUserRequest,
@@ -66,7 +67,8 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({ user, onSave }) => {
       if (error instanceof Error && error.message === "成功") {
         return;
       }
-      console.error("保存失败:", error);
+
+      logger.error("onSave error:", error, { context: "handleSubmit" });
     }
   };
 

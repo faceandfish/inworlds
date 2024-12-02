@@ -3,6 +3,7 @@ import ChapterContent from "@/components/Book/ChapterContent";
 import { getBookDetails, getPublicChapterContent } from "@/app/lib/action";
 import { Metadata } from "next";
 import { unstable_cache } from "next/cache";
+import { logger } from "@/components/Main/logger";
 
 interface ChapterPageProps {
   params: {
@@ -11,20 +12,29 @@ interface ChapterPageProps {
   };
 }
 
-// 缓存数据获取
+// Cache data fetching function
 const getCachedChapterData = unstable_cache(
   async (bookId: number, chapterNumber: number) => {
     const [bookResponse, chapterResponse] = await Promise.all([
       getBookDetails(bookId),
       getPublicChapterContent(bookId, chapterNumber)
     ]);
-    return {
-      book: bookResponse.data,
-      chapter: chapterResponse.data
-    };
+
+    if (
+      bookResponse.code === 200 &&
+      "data" in bookResponse &&
+      chapterResponse.code === 200 &&
+      "data" in chapterResponse
+    ) {
+      return {
+        book: bookResponse.data,
+        chapter: chapterResponse.data
+      };
+    }
+    return { book: null, chapter: null };
   },
   ["chapter-data"],
-  { revalidate: 60 } // 1分钟缓存
+  { revalidate: 60 } // 1 minute cache
 );
 
 export async function generateMetadata({
@@ -61,7 +71,10 @@ export async function generateMetadata({
           : undefined
       }
     };
-  } catch {
+  } catch (error) {
+    logger.error("Error generating metadata", error, {
+      context: "ChapterPage"
+    });
     return { title: "Error Loading Chapter" };
   }
 }
@@ -83,7 +96,9 @@ export default async function ChapterPage({ params }: ChapterPageProps) {
 
     return <ChapterContent chapter={chapter} book={book} />;
   } catch (error) {
-    console.error("Error fetching chapter data:", error);
+    logger.error("Error fetching chapter data", error, {
+      context: "ChapterPage"
+    });
     throw error;
   }
 }

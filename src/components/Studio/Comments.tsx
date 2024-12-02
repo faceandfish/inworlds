@@ -18,6 +18,7 @@ import CommentsSkeleton from "./Skeleton/CommentsSkeleton";
 import { useUser } from "../UserContextProvider";
 import { useTranslation } from "../useTranslation";
 import { BiCommentDetail } from "react-icons/bi";
+import { logger } from "../Main/logger";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -38,25 +39,47 @@ const Comments: React.FC = () => {
     type: "success" | "error";
   } | null>(null);
 
-  // 注释：获取所有评论数据
   const fetchComments = async (userId: number) => {
     setIsLoading(true);
     setError(null);
     try {
       const booksResponse = await fetchBooksList(1, 1000, "published");
-      const allBooks = booksResponse.data.dataList;
-      const allComments: CommentInfo[] = [];
+      if (
+        booksResponse.code === 200 &&
+        "data" in booksResponse &&
+        booksResponse.data?.dataList
+      ) {
+        const allBooks = booksResponse.data.dataList;
+        const allComments: CommentInfo[] = [];
 
-      for (const book of allBooks) {
-        const commentsResponse = await getBookComments(book.id, 1, 1000); // 获取所有评论
-        allComments.push(...commentsResponse.data.dataList);
+        for (const book of allBooks) {
+          const commentsResponse = await getBookComments(book.id, 1, 1000);
+          if (
+            commentsResponse.code === 200 &&
+            "data" in commentsResponse &&
+            commentsResponse.data?.dataList
+          ) {
+            allComments.push(...commentsResponse.data.dataList);
+          } else {
+            logger.warn(
+              `Failed to fetch comments for book ${book.id}:`,
+              commentsResponse,
+              { context: "Comments" }
+            );
+          }
+        }
+
+        setCommentsData({
+          comments: allComments,
+          books: allBooks
+        });
+      } else {
+        logger.warn("Failed to fetch books list:", booksResponse, {
+          context: "Comments"
+        });
       }
-
-      setCommentsData({
-        comments: allComments,
-        books: allBooks
-      });
     } catch (err) {
+      logger.error("Error fetching comments:", err, { context: "Comments" });
       setError(err instanceof Error ? err.message : "Failed to load comments");
     } finally {
       setIsLoading(false);
@@ -69,32 +92,36 @@ const Comments: React.FC = () => {
     }
   }, [user]);
 
-  // 分页评论
   const paginatedComments = useMemo(() => {
     if (!commentsData) return [];
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     return commentsData.comments.slice(startIndex, startIndex + ITEMS_PER_PAGE);
   }, [commentsData, currentPage]);
 
-  // 总页数
   const totalPages = useMemo(() => {
     if (!commentsData) return 0;
     return Math.ceil(commentsData.comments.length / ITEMS_PER_PAGE);
   }, [commentsData]);
 
-  // 注释：处理点赞操作
   const handleLike = async (commentId: number, isLiked: boolean) => {
     if (!user?.id) return;
     try {
-      await likeComment(commentId, isLiked);
-      setAlertInfo({ message: t("comments.likeSuccess"), type: "success" });
-      fetchComments(user.id);
+      const response = await likeComment(commentId, isLiked);
+      if (response.code === 200) {
+        setAlertInfo({ message: t("comments.likeSuccess"), type: "success" });
+        fetchComments(user.id);
+      } else {
+        logger.warn("Failed to like comment:", response, {
+          context: "Comments"
+        });
+        setAlertInfo({ message: t("comments.likeFail"), type: "error" });
+      }
     } catch (error) {
+      logger.error("Error liking comment:", error, { context: "Comments" });
       setAlertInfo({ message: t("comments.likeFail"), type: "error" });
     }
   };
 
-  // 注释：处理回复操作
   const handleReply = async (commentId: number, content: string) => {
     if (!user?.id || !commentsData) return;
     try {
@@ -102,41 +129,64 @@ const Comments: React.FC = () => {
         (c) => c.id === commentId
       )?.bookId;
       if (!bookId) throw new Error("Book ID not found");
-      await addCommentOrReply(bookId, content, commentId);
-      setAlertInfo({ message: t("comments.replySuccess"), type: "success" });
-      fetchComments(user.id);
+
+      const response = await addCommentOrReply(bookId, content, commentId);
+      if (response.code === 200) {
+        setAlertInfo({ message: t("comments.replySuccess"), type: "success" });
+        fetchComments(user.id);
+      } else {
+        logger.warn("Failed to reply to comment:", response, {
+          context: "Comments"
+        });
+        setAlertInfo({ message: t("comments.replyFail"), type: "error" });
+      }
     } catch (error) {
+      logger.error("Error replying to comment:", error, {
+        context: "Comments"
+      });
       setAlertInfo({ message: t("comments.replyFail"), type: "error" });
     }
   };
 
-  // 注释：处理删除操作
   const handleDelete = async (commentId: number) => {
     if (!user?.id) return;
     try {
-      await deleteComment(commentId);
-      setAlertInfo({ message: t("comments.deleteSuccess"), type: "success" });
-      fetchComments(user.id);
+      const response = await deleteComment(commentId);
+      if (response.code === 200) {
+        setAlertInfo({ message: t("comments.deleteSuccess"), type: "success" });
+        fetchComments(user.id);
+      } else {
+        logger.warn("Failed to delete comment:", response, {
+          context: "Comments"
+        });
+        setAlertInfo({ message: t("comments.deleteFail"), type: "error" });
+      }
     } catch (error) {
+      logger.error("Error deleting comment:", error, { context: "Comments" });
       setAlertInfo({ message: t("comments.deleteFail"), type: "error" });
     }
   };
 
-  // 注释：处理拉黑用户操作
   const handleBlock = async (userId: number) => {
     if (!user?.id || !commentsData) return;
     try {
       const bookId = commentsData.books[0]?.id;
       if (!bookId) throw new Error("No books available");
-      await blockUserInBook(userId, bookId);
-      setAlertInfo({ message: t("comments.blockSuccess"), type: "success" });
-      fetchComments(user.id);
+
+      const response = await blockUserInBook(userId, bookId);
+      if (response.code === 200) {
+        setAlertInfo({ message: t("comments.blockSuccess"), type: "success" });
+        fetchComments(user.id);
+      } else {
+        logger.warn("Failed to block user:", response, { context: "Comments" });
+        setAlertInfo({ message: t("comments.blockFail"), type: "error" });
+      }
     } catch (error) {
+      logger.error("Error blocking user:", error, { context: "Comments" });
       setAlertInfo({ message: t("comments.blockFail"), type: "error" });
     }
   };
 
-  // 注释：处理页码变化
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
   };
@@ -169,13 +219,13 @@ const Comments: React.FC = () => {
       </h1>
       {commentsData.comments.length > 0 ? (
         <>
-          <ul className="divide-y divide-gray-200 ">
+          <ul className="divide-y divide-gray-200">
             {paginatedComments.map((comment: CommentInfo) => {
               const book = commentsData.books.find(
                 (b: BookInfo) => b.id === comment.bookId
               );
               return (
-                <li key={comment.id} className="flex ">
+                <li key={comment.id} className="flex">
                   <div className="w-2/3">
                     <CommentItem
                       comment={comment}
@@ -198,7 +248,11 @@ const Comments: React.FC = () => {
                         alt={`${book.title} cover` || "cover"}
                         className="w-16 h-20 object-cover"
                         onError={(e) => {
-                          console.error(`图片加载失败: ${book.coverImageUrl}`);
+                          logger.error(
+                            "Image loading failed:",
+                            book.coverImageUrl,
+                            { context: "Comments" }
+                          );
                         }}
                       />
                       <p className="text-sm line-clamp-1 font-semibold mt-2">

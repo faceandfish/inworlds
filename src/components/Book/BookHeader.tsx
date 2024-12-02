@@ -17,6 +17,7 @@ import { useTranslation } from "../useTranslation";
 import BookHeaderSkeleton from "./skeleton/BookHeaderSkeleton";
 import Image from "next/image";
 import AuthorInfoSkeleton from "./skeleton/AuthorInfoSkeleton";
+import { logger } from "../Main/logger";
 
 interface BookHeaderProps {
   book: BookInfo;
@@ -36,7 +37,6 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
 
   const isLoggedIn = !!user;
 
-  // 格式化日期函数
   const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
     return `${date.getFullYear()}年${String(date.getMonth() + 1).padStart(
@@ -45,21 +45,23 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
     )}月${String(date.getDate()).padStart(2, "0")}日`;
   }, []);
 
-  // 检查收藏状态
   useEffect(() => {
     const checkFavoriteStatus = async () => {
       if (!isLoggedIn) return;
       try {
         const response = await checkBookFavoriteStatus(book.id);
-        setIsFavorited(response.data);
+        if (response.code === 200 && "data" in response) {
+          setIsFavorited(response.data);
+        }
       } catch (error) {
-        console.error("检查收藏状态失败:", error);
+        logger.error("Failed to check favorite status", error, {
+          context: "BookHeader"
+        });
       }
     };
     checkFavoriteStatus();
   }, [book.id, isLoggedIn]);
 
-  // 处理收藏/取消收藏
   const handleFavorite = async () => {
     if (isLoading) return;
 
@@ -73,25 +75,32 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
 
     setIsLoading(true);
     try {
+      let response;
       if (isFavorited) {
-        await unfavoriteBook(book.id);
-        setIsFavorited(false);
-        setFavoriteCount(favoriteCount - 1);
-        setAlert({
-          message: t("unfavoriteSuccess"),
-          type: "success"
-        });
+        response = await unfavoriteBook(book.id);
+        if (response.code === 200) {
+          setIsFavorited(false);
+          setFavoriteCount(favoriteCount - 1);
+          setAlert({
+            message: t("unfavoriteSuccess"),
+            type: "success"
+          });
+        }
       } else {
-        await favoriteBook(book.id);
-        setIsFavorited(true);
-        setFavoriteCount(favoriteCount + 1);
-        setAlert({
-          message: t("favoriteSuccess"),
-          type: "success"
-        });
+        response = await favoriteBook(book.id);
+        if (response.code === 200) {
+          setIsFavorited(true);
+          setFavoriteCount(favoriteCount + 1);
+          setAlert({
+            message: t("favoriteSuccess"),
+            type: "success"
+          });
+        }
       }
     } catch (error) {
-      console.error("收藏操作失败:", error);
+      logger.error("Failed to update favorite status", error, {
+        context: "BookHeader"
+      });
       setAlert({
         message: t("favoriteFailed"),
         type: "error"
@@ -106,13 +115,12 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
   };
 
   if (!isLoaded) {
-    return <BookHeaderSkeleton />; // 显示骨架屏
+    return <BookHeaderSkeleton />;
   }
 
   return (
     <div className="flex flex-col md:flex-row justify-between mt-5 md:mt-10 w-full md:h-56">
       <div className="flex flex-col md:flex-row gap-5 md:gap-10">
-        {/* 书籍封面 */}
         <div className="w-full md:w-44 h-64 md:h-56 shadow-md rounded-xl overflow-hidden">
           <Image
             src={getImageUrl(book.coverImageUrl || "")}
@@ -123,7 +131,6 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
           />
         </div>
 
-        {/* 书籍信息 */}
         <div className="flex flex-col justify-around mt-4 md:mt-0">
           <h2 className="text-2xl md:text-3xl font-bold">{book.title}</h2>
           <div className="flex gap-5 text-neutral-500 text-sm">
@@ -190,7 +197,6 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
         </div>
       </div>
 
-      {/* 作者信息组件 */}
       <div className="hidden md:block mt-8 md:mt-0">
         {isLoaded ? <AuthorInfo book={book} /> : <AuthorInfoSkeleton />}
       </div>

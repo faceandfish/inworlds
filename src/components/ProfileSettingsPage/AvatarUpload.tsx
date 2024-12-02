@@ -5,6 +5,7 @@ import Image from "next/image";
 import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { uploadAvatar } from "@/app/lib/action";
 import { useTranslation } from "../useTranslation";
+import { logger } from "../Main/logger";
 
 interface AvatarUploadProps {
   user: UserInfo;
@@ -24,18 +25,17 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // 检查文件大小（例如：2MB 限制）
       if (file.size > 2 * 1024 * 1024) {
         alert("图片大小不能超过 2MB");
         return;
       }
 
-      // 检查文件类型
       if (!file.type.startsWith("image/")) {
         alert("请选择图片文件");
         return;
       }
-      console.log("Selected file:", file);
+
+      logger.debug("Selected file:", file, { context: "AvatarUpload" });
       setAvatarFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -53,17 +53,22 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       };
       try {
         const response = await uploadAvatar(fileData);
-        if (response.code === 200 && response.data) {
-          // 响应的 data 字段直接就是新的头像 URL
+        if (response.code === 200 && "data" in response) {
           const newAvatarUrl = response.data;
           await onAvatarChange(newAvatarUrl);
           setAvatarPreview(null);
           setAvatarFile(null);
           alert(t("avatarUpload.uploadSuccess"));
         } else {
+          logger.warn("Failed to upload avatar:", response, {
+            context: "AvatarUpload"
+          });
           throw new Error(response.msg || t("avatarUpload.uploadFailed"));
         }
       } catch (error) {
+        logger.error("Error uploading avatar:", error, {
+          context: "AvatarUpload"
+        });
         alert(
           `${t("avatarUpload.uploadFailed")}${
             error instanceof Error ? error.message : "未知错误"
@@ -96,11 +101,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => {
-                console.log("File input onChange triggered");
-                console.log("Files:", e.target.files);
-                handleAvatarChange(e);
-              }}
+              onChange={handleAvatarChange}
               className="hidden"
             />
           </label>

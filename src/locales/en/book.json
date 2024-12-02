@@ -4,6 +4,7 @@
   "ageConfirmation": "Age Confirmation",
   "adultContentWarning": "contains adult content. Are you sure you want to continue?",
   "author": "Author",
+  "purchased": "Purchased",
   "userLazy": "This user is lazy and hasn't written an introduction yet.",
   "peopleFollowing": "following",
   "comments": "Comments",
@@ -146,6 +147,7 @@
     "fileSizeError": "File size cannot exceed 2 MB. Please choose a smaller file or compress the current one."
   },
   "writingPage": {
+    "noUserInfo": "No user information found",
     "enterTitle": "Please enter a title",
     "enterDescription": "Please enter a book description",
     "uploadCover": "Please upload a cover image",
@@ -192,5 +194,14 @@
     "characterCount": "{current}/{max} characters",
     "commentTooLong": "Comment cannot exceed {max} characters",
     "confirm": "Confirm"
+  },
+
+  "errors": {
+    "purchaseCheckFailed": "Purchase verification failed",
+    "purchaseError": "Purchase failed, please try again later"
+  },
+  "status": {
+    "processing": "Processing...",
+    "completed": "Completed"
   }
 }

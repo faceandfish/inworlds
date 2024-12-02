@@ -7,6 +7,7 @@ import { RegisterCredentials } from "../../lib/definitions";
 import { register } from "../../lib/action";
 import { useTranslation } from "@/components/useTranslation";
 import Alert from "@/components/Main/Alert";
+import { logger } from "@/components/Main/logger";
 
 const Register = () => {
   const router = useRouter();
@@ -86,7 +87,7 @@ const Register = () => {
       }
     } catch (error) {
       setError(t("registration_error"));
-      console.error("Registration error:", error);
+      logger.error("Registration error", error, { context: "Register" });
     } finally {
       setIsLoading(false);
     }

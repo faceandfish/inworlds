@@ -5,7 +5,6 @@ import {
   UserGroupIcon,
   BellIcon
 } from "@heroicons/react/24/outline";
-
 import NotificationCard from "./NotificationCard";
 import {
   getUserFavorites,
@@ -13,7 +12,6 @@ import {
   fetchSystemNotifications
 } from "@/app/lib/action";
 import {
-  ApiResponse,
   BookInfo,
   PaginatedData,
   PublicUserInfo,
@@ -30,10 +28,10 @@ import {
   TitleSkeleton
 } from "./MessagesSkeleton";
 import { useNotification } from "../NotificationContext";
+import { logger } from "../Main/logger";
 
 const Messages: React.FC = () => {
   const { t, isLoaded, lang } = useTranslation("message");
-
   const [activeSection, setActiveSection] = useState<SectionType>("books");
   const [data, setData] = useState({
     books: [] as BookInfo[],
@@ -47,52 +45,79 @@ const Messages: React.FC = () => {
     if (activeSection === "notifications") {
       markAllAsRead();
     }
-  }, [activeSection]);
+  }, [activeSection, markAllAsRead]);
 
   const fetchData = useCallback(async () => {
     if (data[activeSection].length > 0) {
-      return; // If current section has data, don't fetch again
+      return;
     }
     setError(null);
     try {
       switch (activeSection) {
         case "books": {
-          const response: ApiResponse<PaginatedData<BookInfo>> =
-            await getUserFavorites(1, 10);
-          setData((prev) => ({
-            ...prev,
-            books: response.data.dataList
-          }));
+          const response = await getUserFavorites(1, 10);
+          if (
+            response.code === 200 &&
+            "data" in response &&
+            response.data?.dataList
+          ) {
+            setData((prev) => ({
+              ...prev,
+              books: response.data.dataList
+            }));
+          } else {
+            logger.warn("Failed to fetch favorite books:", response, {
+              context: "Messages"
+            });
+          }
           break;
         }
         case "authors": {
-          const response: ApiResponse<PaginatedData<PublicUserInfo>> =
-            await fetchFollowedAuthors(1, 10);
-          setData((prev) => ({
-            ...prev,
-            authors: response.data.dataList
-          }));
+          const response = await fetchFollowedAuthors(1, 10);
+          if (
+            response.code === 200 &&
+            "data" in response &&
+            response.data?.dataList
+          ) {
+            setData((prev) => ({
+              ...prev,
+              authors: response.data.dataList
+            }));
+          } else {
+            logger.warn("Failed to fetch followed authors:", response, {
+              context: "Messages"
+            });
+          }
           break;
         }
         case "notifications": {
-          const response: PaginatedData<SystemNotification> =
-            await fetchSystemNotifications(1, 10);
-          setData((prev) => ({
-            ...prev,
-            notifications: response.dataList
-          }));
+          const response = await fetchSystemNotifications(1, 10);
+          if (
+            response.code === 200 &&
+            "data" in response &&
+            response.data?.dataList
+          ) {
+            setData((prev) => ({
+              ...prev,
+              notifications: response.data.dataList
+            }));
+          } else {
+            logger.warn("Failed to fetch notifications:", response, {
+              context: "Messages"
+            });
+          }
           break;
         }
       }
     } catch (error) {
-      console.error("Error fetching data:", error);
-      setError("获取数据时发生错误。请稍后再试。");
+      logger.error("Error fetching data:", error, { context: "Messages" });
+      setError(t("errorMessage"));
     }
-  }, [activeSection]);
+  }, [activeSection, data, t]);
 
   useEffect(() => {
     fetchData();
-  }, [fetchData, activeSection]);
+  }, [fetchData]);
 
   const handleSectionChange = useCallback((newSection: SectionType) => {
     setActiveSection(newSection);
@@ -221,7 +246,6 @@ const Messages: React.FC = () => {
 
   return (
     <div className="flex flex-col md:flex-row md:px-20 h-screen">
-      {/* Mobile top navigation */}
       <div className="md:hidden border-b">
         {!isLoaded ? (
           <SidebarSkeleton />
@@ -233,7 +257,6 @@ const Messages: React.FC = () => {
         )}
       </div>
 
-      {/* Desktop sidebar */}
       <div className="hidden md:block">
         {!isLoaded ? (
           <SidebarSkeleton />
@@ -245,9 +268,7 @@ const Messages: React.FC = () => {
         )}
       </div>
 
-      {/* Main content area */}
       <div className="flex-1 flex flex-col md:ml-64">
-        {/* Fixed title section */}
         <header className="bg-white p-4 md:p-8 md:border-b">
           {!isLoaded ? (
             <TitleSkeleton />
@@ -258,7 +279,6 @@ const Messages: React.FC = () => {
           )}
         </header>
 
-        {/* Scrollable content section */}
         <main className="flex-1 overflow-auto p-4 md:p-8 bg-white">
           <ContentComponent />
         </main>

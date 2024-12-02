@@ -6,7 +6,8 @@ import { useTranslation } from "../useTranslation";
 import { getSearchHistory } from "@/app/lib/action";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import { useUser } from "@/components/UserContextProvider";
-import { ApiResponse, SearchHistoryItem } from "@/app/lib/definitions";
+import { SearchHistoryItem } from "@/app/lib/definitions";
+import { logger } from "../Main/logger";
 
 interface SearchBarProps {
   isExpanded?: boolean;
@@ -38,7 +39,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // 确保点击的目标不是搜索框内的元素
       if (
         searchBarRef.current &&
         !searchBarRef.current.contains(event.target as Node) &&
@@ -50,14 +50,25 @@ const SearchBar: React.FC<SearchBarProps> = ({
       }
     };
 
-    // 将事件监听添加到捕获阶段
     document.addEventListener("mousedown", handleClickOutside, true);
 
-    // 清理函数
     return () => {
       document.removeEventListener("mousedown", handleClickOutside, true);
     };
   }, []);
+
+  useEffect(() => {
+    if (!pathname.includes("/search")) {
+      setQuery("");
+      setShowHistory(false);
+    } else {
+      const searchParams = new URLSearchParams(window.location.search);
+      const searchQuery = searchParams.get("q");
+      if (searchQuery) {
+        setQuery(searchQuery);
+      }
+    }
+  }, [pathname]);
 
   const fetchSearchHistory = async () => {
     if (!user) return;
@@ -65,15 +76,21 @@ const SearchBar: React.FC<SearchBarProps> = ({
     try {
       const response = await getSearchHistory();
 
-      if (response.code === 200) {
+      if (response.code === 200 && "data" in response) {
         const sortedHistory = response.data.sort(
           (a, b) =>
             new Date(b.createAt).getTime() - new Date(a.createAt).getTime()
         );
-        setHistory(sortedHistory); // 设置历史记录数组
+        setHistory(sortedHistory);
+      } else {
+        logger.warn("Failed to fetch search history:", response, {
+          context: "SearchBar"
+        });
       }
     } catch (error) {
-      console.error("Error fetching search history:", error);
+      logger.error("Error fetching search history:", error, {
+        context: "SearchBar"
+      });
     }
   };
 
@@ -97,12 +114,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
   };
 
   const handleHistoryItemClick = (keyword: string) => {
-    console.log("History item clicked:", keyword);
+    logger.debug("History item clicked:", keyword, { context: "SearchBar" });
     setQuery(keyword);
     setShowHistory(false);
-
     router.push(`/${lang}/search?q=${encodeURIComponent(keyword)}`);
-
     if (isExpanded && onClose) {
       onClose();
     }
@@ -111,10 +126,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const renderSearchBar = () => (
     <div className="flex w-full justify-center relative">
       <div ref={searchBarRef} className="w-full md:w-2/3 ">
-        <form className="flex w-full  text-neutral-600" onSubmit={handleSearch}>
+        <form className="flex w-full text-neutral-600" onSubmit={handleSearch}>
           <input
             ref={inputRef}
-            className="border-orange-400 border w-full  h-10 px-6 focus:outline-none font-light rounded-tl-3xl rounded-bl-3xl"
+            className="border-orange-400 border w-full h-10 px-6 focus:outline-none font-light rounded-tl-3xl rounded-bl-3xl"
             type="text"
             placeholder={t("searchPlaceholder")}
             value={query}
@@ -140,7 +155,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                     className="flex items-center px-4 py-2 hover:bg-neutral-50 cursor-pointer"
                     onClick={() => handleHistoryItemClick(item.keyword)}
                   >
-                    <ClockIcon className=" w-5 text-neutral-400 mr-3" />
+                    <ClockIcon className="w-5 text-neutral-400 mr-3" />
                     <span className="text-neutral-600">{item.keyword}</span>
                   </div>
                 ))
@@ -185,11 +200,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
               <div
                 key={index}
                 className="flex items-center px-6 py-4 hover:bg-gray-50 cursor-pointer border-b border-gray-100 last:border-b-0"
-                onClick={(e) => {
-                  e.stopPropagation(); // 阻止事件冒泡
-                  console.log("Item clicked"); // 添加日志
-                  handleHistoryItemClick(item.keyword);
-                }}
+                onClick={() => handleHistoryItemClick(item.keyword)}
               >
                 <ClockIcon className="w-5 text-neutral-400 mr-3 flex-shrink-0" />
                 <span className="text-neutral-600 truncate">

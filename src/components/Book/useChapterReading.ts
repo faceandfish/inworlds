@@ -23,13 +23,9 @@ export const useChapterReading = ({
   });
 
   // 使用 useCallback 包装回调函数，避免重复创建
-  const handleTimeThreshold = useCallback(() => {
-    console.log("阅读时间达到3分钟");
-  }, []);
+  const handleTimeThreshold = useCallback(() => {}, []);
 
-  const handleProgressThreshold = useCallback(() => {
-    console.log("阅读进度达到30%");
-  }, []);
+  const handleProgressThreshold = useCallback(() => {}, []);
 
   // 初始化阅读统计
   const { stats, updateProgress, pause, resume, resetStats } = useReadingStats({

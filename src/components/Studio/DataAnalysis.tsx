@@ -44,7 +44,7 @@ const DataAnalysis: React.FC = () => {
       setIsLoading(true);
       fetchBooksList(1, 999, "published")
         .then((response) => {
-          if (response.code === 200) {
+          if (response.code === 200 && "data" in response) {
             setBooks(response.data.dataList);
             if (response.data.dataList.length > 0 && !selectedBookId) {
               setSelectedBookId(response.data.dataList[0].id);
@@ -64,7 +64,7 @@ const DataAnalysis: React.FC = () => {
       setIsLoading(true);
       fetchSingleBookAnalytics(selectedBookId)
         .then((response) => {
-          if (response.code === 200) {
+          if (response.code === 200 && "data" in response) {
             setAnalyticsData(response.data);
           } else {
             throw new Error(response.msg || "获取分析数据失败");

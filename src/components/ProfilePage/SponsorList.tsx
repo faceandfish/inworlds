@@ -51,7 +51,7 @@ export const SponsorList: React.FC<SponsorListProps> = ({ userId }) => {
     setIsLoading(true);
     try {
       const response = await getSponsorList(userId, currentPage, itemsPerPage);
-      if (response.code === 200) {
+      if (response.code === 200 && "data" in response) {
         setSponsors(response.data.dataList);
         setTotalPages(response.data.totalPage);
         setError(null);

@@ -7,6 +7,7 @@ import { BookPreviewCard } from "@/components/Book/BookPreviewCard";
 import { UserPreviewCard } from "@/components/Messages/UserPreviewCard";
 import { useTranslation } from "@/components/useTranslation";
 import { useUser } from "../UserContextProvider";
+import { logger } from "../Main/logger";
 
 const SearchResultsPage = () => {
   const searchParams = useSearchParams();
@@ -20,20 +21,31 @@ const SearchResultsPage = () => {
   useEffect(() => {
     const fetchResults = async () => {
       if (!query) return;
-      // 如果和上一次的查询相同，不重复请求
       if (query === lastQueryRef.current) return;
 
       setIsLoading(true);
       lastQueryRef.current = query;
 
       try {
-        // 根据用户登录状态选择不同的搜索函数
         const results = user
           ? await searchBooks(query)
           : await publicSearchBooks(query);
-        setSearchResults(results.data);
+
+        if (results.code === 200 && "data" in results) {
+          setSearchResults(results.data);
+        } else {
+          logger.error("Search API error", {
+            response: results,
+            isLoggedIn: !!user,
+            context: "SearchResultsPage.fetchResults"
+          });
+        }
       } catch (error) {
-        console.error("Search error:", error);
+        logger.error("Search error", {
+          error,
+          isLoggedIn: !!user,
+          context: "SearchResultsPage.fetchResults"
+        });
       } finally {
         setIsLoading(false);
       }
@@ -66,14 +78,9 @@ const SearchResultsPage = () => {
 
   return (
     <div className="py-5 px-4 sm:px-6 md:px-8 lg:px-20">
-      <h1 className="text-xl sm:text-2xl font-bold mb-4">
-        {t("searchResultsFor")} "{query}"
-      </h1>
-
       {searchResults.users.length > 0 && (
         <div className="mb-8">
-          <h2 className="text-lg font-semibold mb-3">{t("users")}</h2>
-          <div className="grid grid-cols-1 w-full sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className=" w-full ">
             {searchResults.users.map((user) => (
               <UserPreviewCard key={user.id} user={user} />
             ))}
@@ -83,12 +90,11 @@ const SearchResultsPage = () => {
 
       {searchResults.books.length > 0 && (
         <div>
-          <h2 className="text-lg font-semibold mb-3">{t("books")}</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {searchResults.books.map((book) => (
-              <BookPreviewCard key={book.id} book={book} />
-            ))}
-          </div>
+          {searchResults.books.map((book) => (
+            <div key={book.id} className="mb-4">
+              <BookPreviewCard book={book} width="w-full" />
+            </div>
+          ))}
         </div>
       )}
     </div>

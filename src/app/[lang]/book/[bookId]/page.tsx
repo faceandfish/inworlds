@@ -6,6 +6,8 @@ import { BookDescription } from "@/components/Book/BookDescription";
 import { BookContent } from "@/components/Book/BookContent";
 import { Metadata } from "next";
 import { unstable_cache } from "next/cache";
+import { ApiResponse, BookInfo } from "@/app/lib/definitions";
+import { logger } from "@/components/Main/logger";
 
 interface BookPageProps {
   params: {
@@ -13,18 +15,19 @@ interface BookPageProps {
   };
 }
 
-// 缓存数据获取函数
+// Cache data fetching function
 const getCachedBookData = unstable_cache(
   async (bookId: number) => {
     const bookResponse = await getBookDetails(bookId);
-
-    return bookResponse.data;
+    if (bookResponse.code === 200 && "data" in bookResponse) {
+      return bookResponse.data;
+    }
+    return null;
   },
   ["book-data"],
-  { revalidate: 60 } // 1分钟缓存
+  { revalidate: 60 } // 1 minute cache
 );
 
-// 添加generateMetadata函数
 export async function generateMetadata({
   params
 }: BookPageProps): Promise<Metadata> {
@@ -57,6 +60,7 @@ export async function generateMetadata({
       }
     };
   } catch (error) {
+    logger.error("Error generating metadata", error, { context: "BookPage" });
     return { title: "Error Loading Book" };
   }
 }
@@ -81,7 +85,7 @@ export default async function BookPage({ params }: BookPageProps) {
       </div>
     );
   } catch (error) {
-    console.error("获取书籍数据时出错:", error);
+    logger.error("Error fetching book data", error, { context: "BookPage" });
     throw error;
   }
 }

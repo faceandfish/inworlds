@@ -1,13 +1,13 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { BookInfo, PaginatedData, SponsorInfo } from "@/app/lib/definitions";
-
 import { BookPreviewCard } from "../Book/BookPreviewCard";
 import { SponsorList } from "./SponsorList";
 import { useParams } from "next/navigation";
 import { fetchPublicBooksList } from "@/app/lib/action";
 import WorksSectionSkeleton from "./skeleton/WorksSectionSkeleton";
 import { useTranslation } from "../useTranslation";
+import { logger } from "../Main/logger";
 
 export default function WorksSection() {
   const [books, setBooks] = useState<BookInfo[] | null>(null);
@@ -23,24 +23,23 @@ export default function WorksSection() {
       try {
         const response = await fetchPublicBooksList(userId);
 
-        if (response.code === 200) {
+        if (response.code === 200 && "data" in response && response.data) {
           setBooks(response.data);
         } else {
+          logger.warn("Failed to fetch books list:", response, {
+            context: "WorksSection"
+          });
           setError(response.msg || t("worksSection.noBooksFound"));
         }
       } catch (err) {
+        logger.error("Error loading books:", err, { context: "WorksSection" });
         setError(t("worksSection.error"));
-        if (err instanceof Error) {
-          console.error("Error details:", err.message);
-        } else {
-          console.error("Unknown error:", err);
-        }
       } finally {
         setIsLoading(false);
       }
     };
     loadBooks();
-  }, [userId]);
+  }, [userId, t]);
 
   if (isLoading) {
     return <WorksSectionSkeleton />;

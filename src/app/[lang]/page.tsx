@@ -13,7 +13,10 @@ export default async function Home({ params }: Props) {
   const dict = await getDictionary(lang, "navbar" as Namespace);
 
   const initialBooksResponse = await fetchHomepageBooks(1);
-  const initialBooks = initialBooksResponse.data.dataList;
+  const initialBooks =
+    initialBooksResponse.code === 200 && "data" in initialBooksResponse
+      ? initialBooksResponse.data.dataList
+      : [];
 
   return <HomePage initialBooks={initialBooks} />;
 }
@@ -21,7 +24,6 @@ export default async function Home({ params }: Props) {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const lang = params.lang;
 
-  // 直接在代码中维护优化过的SEO内容
   const seoContent = {
     en: {
       title: "InWorlds - Write Stories & Earn Like YouTube Creators",

@@ -3,6 +3,7 @@ import React, { useCallback, useState } from "react";
 import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { ChangePasswordRequest } from "@/app/lib/definitions";
 import { useTranslation } from "../useTranslation";
+import { logger } from "../Main/logger";
 
 interface SecuritySettingsProps {
   onPasswordChange: (passwordData: ChangePasswordRequest) => Promise<void>;
@@ -51,8 +52,9 @@ const SecuritySettings: React.FC<SecuritySettingsProps> = ({
         setNewPassword("");
         setConfirmPassword("");
       } catch (error) {
-        // onPasswordChange 现在负责显示错误消息，所以这里不需要额外的错误处理
-        console.error("Password change error:", error);
+        logger.error("Password change error:", error, {
+          context: "onPasswordChange"
+        });
       } finally {
         setIsSubmitting(false);
       }
@@ -96,7 +98,9 @@ const SecuritySettings: React.FC<SecuritySettingsProps> = ({
   return (
     <div className="md:space-y-10 w-full">
       <div className="hidden md:block border-b pb-2">
-        <h2 className="text-2xl font-bold text-neutral-600">安全设置</h2>
+        <h2 className="text-2xl font-bold text-neutral-600">
+          {t("securitySettings.title")}
+        </h2>
       </div>
       <form className="space-y-10" onSubmit={handleSubmit}>
         {renderPasswordField(
