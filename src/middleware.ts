@@ -25,12 +25,6 @@ export async function middleware(request: NextRequest) {
     // 如果 auth() 成功完成，用户已认证
     return NextResponse.next();
   } catch (error) {
-    // 如果 auth() 抛出错误，用户未认证
-    // 这里您可以决定如何处理未认证的用户
-    // 例如，重定向到登录页面：
-    // return NextResponse.redirect(new URL('/login', request.url));
-
-    // 或者，如果您只想继续处理请求：
     return NextResponse.next();
   }
 }

@@ -60,6 +60,8 @@
     "bestSize": "正方形の画像を推奨します。理想的なサイズは200x200ピクセルです。",
     "uploading": "アップロード中...",
     "saveNewAvatar": "新しいアバターを保存",
+    "sizeError": "画像サイズは1MB以下にしてください",
+    "typeError": "画像ファイルを選択してください",
     "uploadSuccess": "アバターのアップロードに成功しました！",
     "uploadFailed": "アバターのアップロードに失敗しました：",
     "unknownError": "不明なエラー"

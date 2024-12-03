@@ -1022,8 +1022,9 @@ export const checkFollowStatus = async (
     const token = getToken();
     if (!token) {
       return {
-        code: 401,
-        msg: "Unauthorized"
+        code: 200,
+        msg: "Unauthorized",
+        data: false
       };
     }
     const response = await api.get<ApiResponse<{ isFollowing: boolean }>>(
@@ -1035,6 +1036,13 @@ export const checkFollowStatus = async (
       }
     );
 
+    if (!response.data || !response.data.data) {
+      return {
+        code: 200,
+        msg: "No data",
+        data: false
+      };
+    }
     return {
       code: response.data.code,
       msg: response.data.msg,

@@ -61,6 +61,8 @@
     "uploading": "上傳中...",
     "saveNewAvatar": "保存新頭像",
     "uploadSuccess": "頭像上傳成功！",
+    "sizeError": "圖片大小不能超過1MB",
+    "typeError": "請選擇圖片文件",
     "uploadFailed": "頭像上傳失敗：",
     "unknownError": "未知錯誤"
   },

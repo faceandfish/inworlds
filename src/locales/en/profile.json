@@ -61,8 +61,10 @@
     "bestSize": "Square images are recommended, with an ideal size of 200x200 pixels.",
     "uploading": "Uploading...",
     "saveNewAvatar": "Save New Avatar",
-    "uploadSuccess": "Avatar uploaded successfully!",
-    "uploadFailed": "Avatar upload failed:",
+    "sizeError": "Image size cannot exceed 1MB",
+    "typeError": "Please select an image file",
+    "uploadSuccess": "Avatar uploaded successfully",
+    "uploadFailed": "Failed to upload avatar: ",
     "unknownError": "Unknown error"
   },
 
