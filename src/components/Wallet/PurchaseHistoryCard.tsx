@@ -21,7 +21,7 @@ export const PurchaseHistoryCard: React.FC<PurchaseHistoryCardProps> = ({
         <HiShoppingCart className="mr-2 text-orange-400 text-2xl" />
         {t("wallet.historyTable.purchaseTitle")}
       </h2>
-      {purchaseHistory.dataList.length === 0 ? (
+      {!purchaseHistory?.dataList || purchaseHistory.dataList.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-4 text-center">
           <p className="text-neutral-500">{t("wallet.noRecords")}</p>
         </div>

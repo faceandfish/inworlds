@@ -29,6 +29,8 @@ export const BookPreviewCard = React.memo(
     const { user } = useUser();
     const { t } = useTranslation("book");
 
+    console.log("src", book.coverImageUrl);
+
     const handleBookClick = (e: React.MouseEvent) => {
       if (book.ageRating === "adult") {
         e.preventDefault();
@@ -60,7 +62,7 @@ export const BookPreviewCard = React.memo(
                   <Image
                     priority={true}
                     loading="eager"
-                    src={getImageUrl(book.coverImageUrl)}
+                    src={book.coverImageUrl}
                     width={400}
                     height={600}
                     alt={`${book.title} cover` || "cover"}

@@ -13,9 +13,11 @@
     "@heroicons/react": "^2.1.5",
     "@prisma/client": "^5.16.0",
     "axios": "^1.7.3",
+    "crypto-js": "^4.2.0",
     "framer-motion": "^11.3.17",
     "next": "14.2.4",
     "next-auth": "^5.0.0-beta.19",
+    "pako": "^2.1.0",
     "react": "^18",
     "react-dom": "^18",
     "react-hook-form": "^7.52.1",
@@ -27,7 +29,9 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/crypto-js": "^4.2.2",
     "@types/node": "^20",
+    "@types/pako": "^2.0.3",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "eslint": "^8",

@@ -1,4 +1,5 @@
 import { Locale } from "../i18n-config";
+import https from "https";
 import {
   CreateUserRequest,
   UpdateUserRequest,
@@ -63,11 +64,16 @@ const handleApiError = (error: any, context: string): ApiErrorResponse => {
 
 // 创建 axios 实例
 const api = axios.create({
-  baseURL: "https://api.inworlds.xyz/inworlds/api",
-  //baseURL: "http://192.168.0.103:8088/inworlds/api",
+  //baseURL: "https://api.inworlds.xyz/inworlds/api",
+  baseURL: "http://192.168.0.103:8088/inworlds/api",
   headers: {
     "Content-Type": "application/json"
-  }
+  },
+  httpsAgent: new https.Agent({
+    minVersion: "TLSv1.2",
+    maxVersion: "TLSv1.3",
+    secureProtocol: "TLSv1_2_method"
+  })
 });
 
 api.interceptors.request.use((config) => {

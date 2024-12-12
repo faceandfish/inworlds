@@ -1,7 +1,9 @@
 import { logger } from "@/components/Main/logger";
 
 const IMAGE_BASE_URL = "https://api.inworlds.xyz:9000/book-bucket/";
+//const IMAGE_BASE_URL = "http://192.168.3.130:9000/book-bucket/";
 const AVATAR_BASE_URL = "https://api.inworlds.xyz:9000/avatar-bucket/";
+//const AVATAR_BASE_URL = "http://192.168.3.130:9000/avatar-bucket/";
 
 export function getImageUrl(path: string): string {
   if (!path) {
