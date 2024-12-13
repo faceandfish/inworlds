@@ -1,8 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { RegisterCredentials } from "../../lib/definitions";
 import { register } from "../../lib/action";
 import { useTranslation } from "@/components/useTranslation";
@@ -10,7 +8,6 @@ import Alert from "@/components/Main/Alert";
 import { logger } from "@/components/Main/logger";
 
 const Register = () => {
-  const router = useRouter();
   const { t } = useTranslation("navbar");
   const [formData, setFormData] = useState<RegisterCredentials>({
     username: "",

@@ -50,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <nav className="w-64 bg-white pt-10">
       <div className="mb-5 flex gap-5 flex-col items-center">
         <Image
-          src={user.avatarUrl || ""}
+          src={user.avatarUrl || "/defaultImg.png"}
           alt={user.username || "User Avatar"}
           width={200}
           height={200}

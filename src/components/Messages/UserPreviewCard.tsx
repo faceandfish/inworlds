@@ -17,7 +17,7 @@ export const UserPreviewCard: React.FC<UserPreviewCardProps> = ({ user }) => {
         className="flex items-center pb-5 border-b "
       >
         <Image
-          src={user.avatarUrl!}
+          src={user.avatarUrl || "/defaultImg.png"}
           alt={user.displayName || "username"}
           width={200}
           height={200}

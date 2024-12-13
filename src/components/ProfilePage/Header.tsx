@@ -61,7 +61,7 @@ const Header: React.FC = () => {
         <div className="relative h-32 sm:h-48 bg-gradient-to-r from-orange-200 to-purple-200">
           <div className="absolute -bottom-12 sm:-bottom-16 left-1/2 transform -translate-x-1/2  ">
             <Image
-              src={user.avatarUrl!}
+              src={user.avatarUrl || "/defaultImg.png"}
               alt={user.displayName || "username"}
               width={200}
               height={200}

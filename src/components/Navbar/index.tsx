@@ -14,12 +14,10 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ className = "" }) => {
-  const { user, loading, refetch } = useUser();
+  const { user, loading } = useUser();
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const router = useRouter();
-
   // 检查是否为章节页面，支持任意两个小写字母的语言代码
   const isChapterPage = /^\/[a-z]{2}\/book\/\d+\/chapter\/\d+$/.test(pathname);
 

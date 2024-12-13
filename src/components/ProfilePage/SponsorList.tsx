@@ -21,7 +21,7 @@ const SponsorListItem: React.FC<SponsorListItemProps> = ({ sponsor }) => {
       </div>
       <div className="w-10 h-10 rounded-full overflow-hidden">
         <Image
-          src={sponsor.avatarUrl}
+          src={sponsor.avatarUrl || "/defaultImg.png"}
           alt={`${sponsor.userName}'s avatar` || "avatar"}
           width={40}
           height={40}

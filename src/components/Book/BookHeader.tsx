@@ -179,7 +179,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
                 className="md:hidden text-sm flex gap-2 items-center text-neutral-600"
               >
                 <Image
-                  src={book.authorAvatarUrl}
+                  src={book.authorAvatarUrl || "/defaultImg.png"}
                   alt={book.authorName}
                   width={200}
                   height={200}

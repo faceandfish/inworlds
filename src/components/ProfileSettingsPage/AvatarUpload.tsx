@@ -117,7 +117,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       <div className="flex flex-col items-center space-y-6 p-6">
         <div className="relative">
           <Image
-            src={avatarPreview || user.avatarUrl!}
+            src={avatarPreview || user.avatarUrl || "/defaultImg.png"}
             alt={user.displayName || "avatar"}
             width={160}
             height={160}

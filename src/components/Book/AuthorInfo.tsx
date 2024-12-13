@@ -18,7 +18,7 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({ book }) => {
     <div className="w-full md:w-80 px-10 md:border-l border-gray-100 pt-6 md:pt-0 mt-6 md:mt-0 flex flex-col items-center justify-around space-y-4  pb-6 md:pb-0">
       <Link href={`/user/${book.authorId}`}>
         <Image
-          src={book.authorAvatarUrl}
+          src={book.authorAvatarUrl || "/defaultImg.png"}
           alt={book.authorName || "authorname"}
           width={200}
           height={200}
