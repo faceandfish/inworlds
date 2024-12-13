@@ -1,6 +1,5 @@
 import React from "react";
 import Image from "next/image";
-import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { PublicUserInfo } from "@/app/lib/definitions";
 import Link from "next/link";
 import { useTranslation } from "../useTranslation";
@@ -18,7 +17,7 @@ export const UserPreviewCard: React.FC<UserPreviewCardProps> = ({ user }) => {
         className="flex items-center pb-5 border-b "
       >
         <Image
-          src={getAvatarUrl(user.avatarUrl!)}
+          src={user.avatarUrl!}
           alt={user.displayName || "username"}
           width={200}
           height={200}

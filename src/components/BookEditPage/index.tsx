@@ -16,7 +16,6 @@ import {
   addNewChapter,
   updateChapter
 } from "@/app/lib/action";
-import { getImageUrl } from "@/app/lib/imageUrl";
 import ExistingCoverUpload from "./ExistingCoverUpload";
 import BookPreviewCardSkeleton from "../Book/skeleton/BookPreviewCardSkeleton";
 import { logger } from "../Main/logger";
@@ -43,7 +42,7 @@ const BookEditPage: React.FC = () => {
         if ("data" in bookResponse && bookResponse.code === 200) {
           setBook(bookResponse.data);
           if (bookResponse.data.coverImageUrl) {
-            setCoverImageUrl(getImageUrl(bookResponse.data.coverImageUrl));
+            setCoverImageUrl(bookResponse.data.coverImageUrl);
           }
         }
 
@@ -109,7 +108,7 @@ const BookEditPage: React.FC = () => {
     try {
       const response = await updateBookCover(book.id, coverImage);
       if ("data" in response && response.code === 200) {
-        setCoverImageUrl(getImageUrl(response.data));
+        setCoverImageUrl(response.data);
         return true;
       }
       return false;

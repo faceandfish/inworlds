@@ -12,7 +12,6 @@ import {
 import CommentItem from "../Main/CommentItem";
 import Alert from "../Main/Alert";
 import Pagination from "../Main/Pagination";
-import { getImageUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import CommentsSkeleton from "./Skeleton/CommentsSkeleton";
 import { useUser } from "../UserContextProvider";
@@ -242,7 +241,7 @@ const Comments: React.FC = () => {
                   {book && (
                     <div className="w-1/3 flex items-center gap-10">
                       <Image
-                        src={getImageUrl(book.coverImageUrl || "")}
+                        src={book.coverImageUrl || ""}
                         width={400}
                         height={600}
                         alt={`${book.title} cover` || "cover"}

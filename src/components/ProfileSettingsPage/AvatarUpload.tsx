@@ -2,7 +2,6 @@ import React, { useState, useRef } from "react";
 import { CameraIcon } from "@heroicons/react/24/outline";
 import { FileUploadData, UserInfo } from "@/app/lib/definitions";
 import Image from "next/image";
-import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { uploadAvatar } from "@/app/lib/action";
 import { useTranslation } from "../useTranslation";
 import { logger } from "../Main/logger";
@@ -118,7 +117,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
       <div className="flex flex-col items-center space-y-6 p-6">
         <div className="relative">
           <Image
-            src={avatarPreview || getAvatarUrl(user.avatarUrl!)}
+            src={avatarPreview || user.avatarUrl!}
             alt={user.displayName || "avatar"}
             width={160}
             height={160}

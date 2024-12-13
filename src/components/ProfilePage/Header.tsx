@@ -5,8 +5,6 @@ import { PublicUserInfo, ApiResponse } from "@/app/lib/definitions";
 import UserActions from "./UserActions";
 import Link from "next/link";
 import { getUserById } from "@/app/lib/action";
-
-import { getAvatarUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import { useUser } from "../UserContextProvider";
 import HeaderSkeleton from "./skeleton/HeaderSkeleton";
@@ -63,7 +61,7 @@ const Header: React.FC = () => {
         <div className="relative h-32 sm:h-48 bg-gradient-to-r from-orange-200 to-purple-200">
           <div className="absolute -bottom-12 sm:-bottom-16 left-1/2 transform -translate-x-1/2  ">
             <Image
-              src={getAvatarUrl(user.avatarUrl!)}
+              src={user.avatarUrl!}
               alt={user.displayName || "username"}
               width={200}
               height={200}

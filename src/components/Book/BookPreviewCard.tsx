@@ -2,7 +2,6 @@
 import Link from "next/link";
 import React, { useState } from "react";
 import { BookInfo } from "@/app/lib/definitions";
-import { getImageUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import AgeVerificationModal from "./AgeVerificationModal";
 import { useUser } from "../UserContextProvider";

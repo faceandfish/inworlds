@@ -2,7 +2,6 @@ import React from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { BookInfo } from "@/app/lib/definitions";
-import { getImageUrl } from "@/app/lib/imageUrl";
 import { useTranslation } from "../useTranslation";
 
 interface FavoriteBookPreviewCardProps {
@@ -16,7 +15,7 @@ export const FavoriteBookPreviewCard: React.FC<
   return (
     <div className="flex items-center space-x-4 p-4 bg-white shadow rounded-lg">
       <Image
-        src={getImageUrl(book.coverImageUrl || "")}
+        src={book.coverImageUrl || ""}
         alt={`Cover of ${book.title}` || "booktitle"}
         width={80}
         height={80}

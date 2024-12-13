@@ -7,7 +7,6 @@ import {
 import { AiOutlineCopyrightCircle } from "react-icons/ai";
 import { MdAttachMoney } from "react-icons/md";
 import Image from "next/image";
-import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { UserInfo } from "@/app/lib/definitions";
 import { useTranslation } from "../useTranslation";
 
@@ -51,7 +50,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     <nav className="w-64 bg-white pt-10">
       <div className="mb-5 flex gap-5 flex-col items-center">
         <Image
-          src={getAvatarUrl(user.avatarUrl || "")}
+          src={user.avatarUrl || ""}
           alt={user.username || "User Avatar"}
           width={200}
           height={200}

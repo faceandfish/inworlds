@@ -2,7 +2,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { BookInfo } from "@/app/lib/definitions";
 import AuthorInfo from "./AuthorInfo";
-import { getAvatarUrl, getImageUrl } from "@/app/lib/imageUrl";
 import { FireIcon } from "@heroicons/react/24/solid";
 import {
   favoriteBook,
@@ -123,7 +122,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
       <div className="flex flex-col md:flex-row gap-5 md:gap-10">
         <div className="w-full md:w-44 h-64 md:h-56 shadow-md rounded-xl overflow-hidden">
           <Image
-            src={getImageUrl(book.coverImageUrl || "")}
+            src={book.coverImageUrl || ""}
             alt={`${book.title} cover`}
             className="w-full h-full object-cover"
             width={400}
@@ -180,7 +179,7 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
                 className="md:hidden text-sm flex gap-2 items-center text-neutral-600"
               >
                 <Image
-                  src={getAvatarUrl(book.authorAvatarUrl)}
+                  src={book.authorAvatarUrl}
                   alt={book.authorName}
                   width={200}
                   height={200}

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { FiThumbsUp, FiMessageSquare, FiTrash2, FiSlash } from "react-icons/fi";
-import { getAvatarUrl } from "@/app/lib/imageUrl";
 import Image from "next/image";
 import Alert from "./Alert";
 import { CommentInfo } from "../../app/lib/definitions";
@@ -115,7 +114,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   return (
     <div className="flex justify-start py-5 gap-2">
       <Image
-        src={getAvatarUrl(comment.avatarUrl)}
+        src={comment.avatarUrl}
         alt={comment.username || "username"}
         width={200}
         height={200}

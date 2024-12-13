@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { SponsorInfo } from "@/app/lib/definitions";
 import { getSponsorList } from "@/app/lib/action";
-import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { useTranslation } from "../useTranslation";
 import Pagination from "../Main/Pagination";
 
@@ -22,7 +21,7 @@ const SponsorListItem: React.FC<SponsorListItemProps> = ({ sponsor }) => {
       </div>
       <div className="w-10 h-10 rounded-full overflow-hidden">
         <Image
-          src={getAvatarUrl(sponsor.avatarUrl)}
+          src={sponsor.avatarUrl}
           alt={`${sponsor.userName}'s avatar` || "avatar"}
           width={40}
           height={40}

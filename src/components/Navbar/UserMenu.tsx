@@ -6,7 +6,6 @@ import { IoMdClose } from "react-icons/io";
 import Link from "next/link";
 import Image from "next/image";
 import { UserInfo } from "@/app/lib/definitions";
-import { getAvatarUrl } from "@/app/lib/imageUrl";
 import { useTranslation } from "../useTranslation";
 import UserOptionsMenu from "./UserOptionsMenu";
 import { useRouter } from "next/navigation";
@@ -86,7 +85,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
 
         <div className="group/profiles flex-shrink-0" ref={menuRef}>
           <Image
-            src={getAvatarUrl(user.avatarUrl || "")}
+            src={user.avatarUrl || ""}
             alt={user.displayName || "avatar"}
             width={200}
             height={200}
