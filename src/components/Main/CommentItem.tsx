@@ -8,8 +8,8 @@ import { useWordCount } from "../WritingPage/useWordCount";
 import { logger } from "./logger";
 
 interface CommentActions {
-  onLike: (commentId: number, isLiked: boolean) => Promise<void>;
-  onReply: (commentId: number, content: string) => Promise<void>;
+  onLike?: (commentId: number, isLiked: boolean) => Promise<void>;
+  onReply?: (commentId: number, content: string) => Promise<void>;
   onDelete?: (commentId: number, isReply: boolean) => Promise<void>;
   onBlock?: (userId: number) => Promise<void>;
 }
@@ -53,13 +53,13 @@ const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   const handleReplySubmit = async () => {
-    if (!replyContent.trim()) return;
+    if (!replyContent.trim() || !actions.onReply) return;
     if (isMaxLength) {
       return;
     }
     try {
       await actions.onReply(comment.id, replyContent);
-      handleTextChange(""); // 清空回复内容
+      handleTextChange("");
     } catch (error) {
       logger.error("handleReplySubmit", error, {
         context: "handleReplySubmit"
@@ -68,6 +68,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
   };
 
   const handleLike = async () => {
+    if (!actions.onLike) return;
     try {
       await actions.onLike(comment.id, !comment.isLiked);
     } catch (error) {
@@ -214,7 +215,10 @@ const CommentItem: React.FC<CommentItemProps> = ({
                   <CommentItem
                     key={reply.id}
                     comment={reply}
-                    actions={actions}
+                    actions={{
+                      onLike: actions.onLike,
+                      onDelete: actions.onDelete
+                    }}
                     currentUserId={currentUserId}
                     showDeleteButton={currentUserId === reply.userId}
                     showBlockButton={showBlockButton}
