@@ -122,15 +122,19 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
     setCurrentPage(page);
     fetchChapters(page);
   };
-  // 格式化内容
+  // 格式化内容的函数
   const formatContent = useMemo(
     () => (content: string) => {
       if (!content) return null;
-      return content.split("\n").map((line, index) => (
-        <React.Fragment key={index}>
-          {line || <br />}
-          <br />
-        </React.Fragment>
+
+      // 将 \\ 替换为 \n 进行标准化处理
+      const normalizedContent = content.replace(/\\\s*/g, "\n");
+
+      // 分割文本并渲染
+      return normalizedContent.split("\n").map((line, index) => (
+        <p key={index} className="mb-4 last:mb-0">
+          {line.trim() || <br />}
+        </p>
       ));
     },
     []
@@ -236,7 +240,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
             </div>
           </div>
 
-          {/* 章节标题和信息 */}
+          {/* ��节标题和信息 */}
           <h2 className="text-xl md:text-2xl h-full text-neutral-800 font-medium pt-4 md:pt-8 mb-2 md:mb-3">
             {chapter.chapterNumber} {chapter.title}
           </h2>
@@ -276,7 +280,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
           >
             <div
               ref={contentRef}
-              className="w-full h-full text-neutral-800 text-lg leading-10"
+              className="w-full h-full text-neutral-800 text-lg leading-8"
             >
               {formatContent(chapter.content)}
             </div>
