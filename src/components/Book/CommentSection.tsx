@@ -157,6 +157,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
           );
         } else {
           setComments(comments.filter((comment) => comment.id !== commentId));
+          onCommentCountChange?.(comments.length - 1);
         }
       } else {
         throw new Error(response.msg);
