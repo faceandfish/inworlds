@@ -10,7 +10,7 @@ interface BookDescriptionProps {
 export const BookDescription: React.FC<BookDescriptionProps> = ({ book }) => {
   const { t, isLoaded } = useTranslation("book");
   if (!isLoaded) {
-    return <BookDescriptionSkeleton />; // 显示骨架屏
+    return <BookDescriptionSkeleton />; 
   }
   return (
     <div className="w-full min-h-32 my-8 md:my-16">

@@ -19,6 +19,7 @@ interface CommentSectionProps {
   isLoggedIn: boolean;
   onLogin: () => void;
   currentUserId: number | null;
+  onCommentCountChange?: (newCount: number) => void;
 }
 
 const MAX_COMMENT_LENGTH = 1000;
@@ -27,7 +28,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({
   bookId,
   isLoggedIn,
   onLogin,
-  currentUserId
+  currentUserId,
+  onCommentCountChange
 }) => {
   const [comments, setComments] = useState<CommentInfo[]>([]);
   const [loading, setLoading] = useState(false);
@@ -88,8 +90,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     try {
       const response = await addCommentOrReply(bookId, newComment);
       if (response.code === 200 && "data" in response) {
-        setComments([response.data, ...comments]);
+        const newCommentData = {
+          ...response.data,
+          replies: [],
+          replyCount: 0
+        };
+        setComments([newCommentData, ...comments]);
         handleTextChange("");
+        onCommentCountChange?.(comments.length + 1);
       } else {
         throw new Error(response.msg);
       }

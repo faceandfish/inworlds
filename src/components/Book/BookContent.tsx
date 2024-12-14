@@ -16,7 +16,8 @@ interface BookContentProps {
   book: BookInfo;
 }
 
-export function BookContent({ book }: BookContentProps) {
+export function BookContent({ book: initialBook }: BookContentProps) {
+  const [book, setBook] = useState(initialBook);
   const [activeTab, setActiveTab] = useState<"comments" | "chapters">(
     "comments"
   );
@@ -64,6 +65,13 @@ export function BookContent({ book }: BookContentProps) {
     setCurrentPage(page);
   };
 
+  const handleCommentCountChange = (newCount: number) => {
+    setBook((prev) => ({
+      ...prev,
+      commentsCount: newCount
+    }));
+  };
+
   return (
     <div className="mt-6 md:mt-10 min-h-screen">
       <ContentTabs
@@ -79,6 +87,7 @@ export function BookContent({ book }: BookContentProps) {
           isLoggedIn={isLoggedIn}
           onLogin={handleLogin}
           currentUserId={user?.id || null}
+          onCommentCountChange={handleCommentCountChange}
         />
       )}
       {activeTab === "chapters" && (
