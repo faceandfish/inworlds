@@ -71,7 +71,6 @@ const UserSettingsPage: React.FC = () => {
       };
       updateUser(updatedUser);
     }
-    showAlert(t("userSettings.avatarUpdateSuccess"), "success");
   };
 
   const handlePasswordChange = async (passwordData: ChangePasswordRequest) => {
