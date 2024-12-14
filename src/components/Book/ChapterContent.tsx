@@ -273,33 +273,29 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
             book={book}
             isPurchased={isPurchased}
             onPurchaseSuccess={() => setIsPurchased(true)}
-          />
-
-          {(!chapter.isPaid || isPurchased) && (
-            <>
-              <div
-                ref={contentRef}
-                className="w-full h-full text-neutral-800 text-lg leading-10"
-              >
-                {formatContent(chapter.content)}
-              </div>
-              {chapter.authorNote && (
-                <div className="w-full px-6 md:px-20 text-neutral-500 pt-10 border-t mt-10">
-                  <p>{t("authorNoteTitle")}</p>
-                  <div className="bg-orange-50 min-h-32 rounded-md p-5 text-neutral-500 border">
-                    {chapter.authorNote}
-                  </div>
+          >
+            <div
+              ref={contentRef}
+              className="w-full h-full text-neutral-800 text-lg leading-10"
+            >
+              {formatContent(chapter.content)}
+            </div>
+            {chapter.authorNote && (
+              <div className="w-full px-6 md:px-20 text-neutral-500 pt-10 border-t mt-10">
+                <p>{t("authorNoteTitle")}</p>
+                <div className="bg-orange-50 min-h-32 rounded-md p-5 text-neutral-500 border">
+                  {chapter.authorNote}
                 </div>
-              )}
-              <div className="flex justify-center py-6 md:py-24">
-                <TipButton
-                  bookId={book.id}
-                  chapterId={chapter.id}
-                  className="bg-red-500 hover:bg-red-600 text-white md:text-xl text-md px-14 md:py-5 py-2 rounded-full transition duration-300"
-                />
               </div>
-            </>
-          )}
+            )}
+            <div className="flex justify-center py-6 md:py-24">
+              <TipButton
+                bookId={book.id}
+                chapterId={chapter.id}
+                className="bg-red-500 hover:bg-red-600 text-white md:text-xl text-md px-14 md:py-5 py-2 rounded-full transition duration-300"
+              />
+            </div>
+          </PaidChapterContent>
 
           {/* 章节导航 */}
           <ChapterNavigation

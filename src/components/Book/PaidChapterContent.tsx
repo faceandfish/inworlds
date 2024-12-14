@@ -14,10 +14,11 @@ interface PaidChapterContentProps {
   book: BookInfo;
   isPurchased: boolean;
   onPurchaseSuccess: () => void;
+  children?: React.ReactNode;
 }
 
 const PaidChapterContent: React.FC<PaidChapterContentProps> = React.memo(
-  ({ chapter, book, isPurchased, onPurchaseSuccess }) => {
+  ({ chapter, book, isPurchased, onPurchaseSuccess, children }) => {
     const { t } = useTranslation("book");
     const { user } = useUser();
     const router = useRouter();
@@ -161,7 +162,7 @@ const PaidChapterContent: React.FC<PaidChapterContentProps> = React.memo(
     );
 
     if (!chapter.isPaid || isPurchased || isAuthor) {
-      return alertElements;
+      return <>{children}</>;
     }
 
     return (
