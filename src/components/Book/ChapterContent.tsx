@@ -58,8 +58,6 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
   const menuRef = useRef<HTMLDivElement>(null);
   const isInitialMount = useRef(true);
 
-  // 检查购买状态
-  // 简化为
   useEffect(() => {
     const checkPurchaseStatus = async () => {
       if (!purchaseLoading && isInitialMount.current && user) {
@@ -132,7 +130,7 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
 
       // 分割文本并渲染
       return normalizedContent.split("\n").map((line, index) => (
-        <p key={index} className="mb-4 last:mb-0">
+        <p key={index} className="mb-1 last:mb-0">
           {line.trim() || <br />}
         </p>
       ));
@@ -240,7 +238,6 @@ const ChapterContent: React.FC<ChapterContentPageProps> = ({
             </div>
           </div>
 
-          {/* ��节标题和信息 */}
           <h2 className="text-xl md:text-2xl h-full text-neutral-800 font-medium pt-4 md:pt-8 mb-2 md:mb-3">
             {chapter.chapterNumber} {chapter.title}
           </h2>
