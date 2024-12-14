@@ -127,8 +127,8 @@ const CommentItem: React.FC<CommentItemProps> = ({
         </div>
         <p className="py-2 mb-3 pr-10">{comment.content}</p>
         <div className="flex space-x-10 text-sm">
-          {isTopLevel && (
-            <div className="flex space-x-10 text-sm">
+          <div className="flex space-x-10 text-sm">
+            {isTopLevel && (
               <button
                 onClick={handleReplyToggle}
                 className="text-gray-500 hover:text-orange-500 flex items-center"
@@ -136,18 +136,18 @@ const CommentItem: React.FC<CommentItemProps> = ({
                 <FiMessageSquare className="mr-1 text-xl" />{" "}
                 {comment.replyCount}
               </button>
-              <button
-                onClick={handleLike}
-                className={`flex items-center ${
-                  comment.isLiked
-                    ? "text-red-500"
-                    : "text-gray-500 hover:text-red-500"
-                }`}
-              >
-                <FiThumbsUp className="mr-1 text-xl" /> {comment.likes}
-              </button>
-            </div>
-          )}
+            )}
+            <button
+              onClick={handleLike}
+              className={`flex items-center ${
+                comment.isLiked
+                  ? "text-red-500"
+                  : "text-gray-500 hover:text-red-500"
+              }`}
+            >
+              <FiThumbsUp className="mr-1 text-xl" /> {comment.likes}
+            </button>
+          </div>
 
           {showDeleteButton && (
             <button
