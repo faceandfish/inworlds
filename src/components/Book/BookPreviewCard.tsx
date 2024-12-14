@@ -45,21 +45,10 @@ export const BookPreviewCard = React.memo(
     };
 
     const isDefaultCover =
-      book.coverImageUrl && defaultCovers.includes(book.coverImageUrl);
-
-    console.log({
-      coverImageUrl: book.coverImageUrl,
-      isDefaultCover,
-      defaultCovers
-    });
-
-    console.log("Default covers check:", {
-      bookCover: book.coverImageUrl,
-      isMatch: book.coverImageUrl && defaultCovers.includes(book.coverImageUrl),
-      exactMatch: defaultCovers.find((cover) =>
-        book.coverImageUrl?.endsWith(cover)
-      )
-    });
+      book.coverImageUrl &&
+      defaultCovers.some((cover) =>
+        book.coverImageUrl?.split("?")[0].endsWith(cover)
+      );
 
     return (
       <>
@@ -90,10 +79,7 @@ export const BookPreviewCard = React.memo(
                     }}
                   />
                   {isDefaultCover && (
-                    <div
-                      className="absolute inset-x-0 top-1/3 transform -translate-y-1/2 flex items-center justify-center p-2"
-                      style={{ background: "rgba(255,0,0,0.3)" }}
-                    >
+                    <div className="absolute inset-x-0 top-1/3 transform -translate-y-1/2 flex items-center justify-center p-2">
                       <div className="w-full max-w-[90%] bg-black bg-opacity-50 rounded px-3 py-2">
                         <p className="text-white text-center font-bold line-clamp-5 break-all whitespace-pre-line">
                           {book.title}

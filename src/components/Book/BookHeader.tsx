@@ -127,6 +127,8 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
             className="w-full h-full object-cover"
             width={400}
             height={600}
+            priority={true}
+            loading="eager"
           />
         </div>
 
@@ -184,6 +186,8 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
                   width={200}
                   height={200}
                   className="rounded-full w-8 h-8 cursor-pointer hover:brightness-90 transition-all duration-200"
+                  priority={true}
+                  loading="eager"
                 />
                 <p>{book.authorName}</p>
               </Link>
