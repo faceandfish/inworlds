@@ -221,7 +221,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
                     }}
                     currentUserId={currentUserId}
                     showDeleteButton={currentUserId === reply.userId}
-                    showBlockButton={showBlockButton}
+                    showBlockButton={false}
                     isTopLevel={false}
                   />
                 ))}

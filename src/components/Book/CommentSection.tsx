@@ -128,8 +128,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               : comment
           )
         );
-      } else {
-        throw new Error(response.msg);
       }
     } catch (err) {
       setError(t("replyFailed"));
@@ -174,25 +172,53 @@ const CommentSection: React.FC<CommentSectionProps> = ({
     }
 
     try {
-      const currentComment = comments.find((c) => c.id === commentId);
-      if (!currentComment) return;
+      // 查找评论（包括子回复）
+      let targetComment: CommentInfo | undefined;
+      for (const comment of comments) {
+        if (comment.id === commentId) {
+          targetComment = comment;
+          break;
+        }
+        if (comment.replies) {
+          targetComment = comment.replies.find(
+            (reply) => reply.id === commentId
+          );
+          if (targetComment) break;
+        }
+      }
 
-      const response = await likeComment(commentId, !currentComment.isLiked);
+      if (!targetComment) return;
+
+      const response = await likeComment(commentId, !targetComment.isLiked);
 
       if (response.code === 200 && "data" in response) {
+        // 更新评论或子回复的点赞状态
         setComments(
-          comments.map((comment) =>
-            comment.id === commentId
-              ? {
-                  ...comment,
-                  isLiked: response.data.isLiked,
-                  likes: response.data.likes
-                }
-              : comment
-          )
+          comments.map((comment) => {
+            if (comment.id === commentId) {
+              return {
+                ...comment,
+                isLiked: response.data.isLiked,
+                likes: response.data.likes
+              };
+            }
+            if (comment.replies) {
+              return {
+                ...comment,
+                replies: comment.replies.map((reply) =>
+                  reply.id === commentId
+                    ? {
+                        ...reply,
+                        isLiked: response.data.isLiked,
+                        likes: response.data.likes
+                      }
+                    : reply
+                )
+              };
+            }
+            return comment;
+          })
         );
-      } else {
-        throw new Error(response.msg);
       }
     } catch (err) {
       setError(t("likeFailed"));
@@ -270,6 +296,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({
               onReply: handleReply,
               onDelete: handleDeleteComment
             }}
+            currentUserId={currentUserId}
             showDeleteButton={currentUserId === comment.userId}
             showBlockButton={false}
           />
