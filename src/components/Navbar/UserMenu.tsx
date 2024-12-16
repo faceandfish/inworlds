@@ -31,7 +31,10 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  const handleAvatarClick = (e: React.MouseEvent) => {
+  const handleAvatarClick = (
+    e: React.MouseEvent<HTMLImageElement, MouseEvent>
+  ) => {
+    e.preventDefault();
     e.stopPropagation();
     setOptionMenu((prev) => !prev);
   };
@@ -83,7 +86,11 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
           </div>
         </Link>
 
-        <div className="group/profiles flex-shrink-0" ref={menuRef}>
+        <div
+          className="group/profiles flex-shrink-0"
+          ref={menuRef}
+          onClick={(e) => e.preventDefault()}
+        >
           <Image
             src={user.avatarUrl || "/defaultImg.png"}
             alt={user.displayName || "avatar"}
