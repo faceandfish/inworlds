@@ -118,7 +118,7 @@ const ChapterEditPage: React.FC = () => {
           onContentChange={handleContentChange}
         />
       </div>
-      <div className="my-10 flex justify-between items-center">
+      <div className="mb-10 mt-5 flex justify-between items-center">
         <button
           onClick={handleReturn}
           className="bg-neutral-400 hover:bg-neutral-500 text-white font-bold py-2 px-4 rounded transition duration-300"

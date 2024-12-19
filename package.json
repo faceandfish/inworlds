@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:load": "k6 run src/tests/performance/load-test.js",
+    "test:api": "k6 run src/tests/performance/api-test.js",
+    "test:concurrent": "k6 run src/tests/performance/concurrent-test.js"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.4.1",
