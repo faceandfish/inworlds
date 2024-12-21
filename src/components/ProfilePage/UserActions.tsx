@@ -5,6 +5,8 @@ import { checkFollowStatus } from "@/app/lib/action";
 import FollowButton from "./FollowButton";
 import TipButton from "../Main/TipButton";
 import { useTranslation } from "../useTranslation";
+import { BecomeCreatorModal } from "../Main/NewUserView";
+import { useUser } from "../UserContextProvider";
 
 interface UserActionsProps {
   isCurrentUser: boolean;
@@ -17,6 +19,8 @@ export default function UserActions({
 }: UserActionsProps) {
   const { t } = useTranslation("profile");
   const [isFollowing, setIsFollowing] = useState(false);
+  const [showCreatorModal, setShowCreatorModal] = useState(false);
+  const { user } = useUser();
 
   useEffect(() => {
     const fetchFollowStatus = async () => {
@@ -25,11 +29,9 @@ export default function UserActions({
         if ("data" in response && response.code === 200) {
           setIsFollowing(response.data);
         } else {
-          // 静默处理错误，因为这个状态不是致命的
           setIsFollowing(false);
         }
       } catch (err) {
-        // 出错时默认为未关注状态
         setIsFollowing(false);
       }
     };
@@ -43,6 +45,13 @@ export default function UserActions({
     setIsFollowing(newStatus);
   };
 
+  const handleManageWorksClick = (e: React.MouseEvent) => {
+    if (user?.userType !== "creator") {
+      e.preventDefault(); // 阻止默认的导航行为
+      setShowCreatorModal(true);
+    }
+  };
+
   return (
     <div>
       {isCurrentUser ? (
@@ -53,7 +62,10 @@ export default function UserActions({
             </button>
           </Link>
           <Link href={`/studio/${userId}`}>
-            <button className="ml-4 px-4 py-2 rounded-md text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out">
+            <button
+              onClick={handleManageWorksClick}
+              className="ml-4 px-4 py-2 rounded-md text-white bg-orange-400 hover:bg-orange-500 transition duration-300 ease-in-out"
+            >
               {t("userActions.manageWorks")}
             </button>
           </Link>
@@ -67,6 +79,17 @@ export default function UserActions({
           <TipButton authorId={userId} className="ml-4" />
         </>
       )}
+
+      {/* 成为创作者模态框 */}
+      <BecomeCreatorModal
+        isOpen={showCreatorModal}
+        onClose={() => setShowCreatorModal(false)}
+        onSuccess={() => {
+          setShowCreatorModal(false);
+          // 成功后导航到工作室页面
+          window.location.href = `/studio/${userId}`;
+        }}
+      />
     </div>
   );
 }
