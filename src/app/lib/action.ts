@@ -96,22 +96,20 @@ api.interceptors.response.use(
   }
 );
 
-// 登录函数
 export const login = async (
   username: string,
   password: string
 ): Promise<ApiResult<string>> => {
   try {
-    const loginData = {
-      username,
-      password
-    };
+    const formData = new FormData();
+    formData.append("username", username);
+    formData.append("password", password);
 
     const response: AxiosResponse<ApiResponse<string>> = await api.post(
       "/login",
-      loginData,
+      formData,
       {
-        headers: { "Content-Type": "application/json" } // 修改 Content-Type
+        headers: { "Content-Type": "multipart/form-data" }
       }
     );
 
