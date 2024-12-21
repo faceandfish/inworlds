@@ -122,7 +122,7 @@ const TipButton: React.FC<TipButtonProps> = ({
     setIsProcessing(true);
 
     try {
-      let response: ApiResult<TipResponse>; // 在这里明确声明类型
+      let response: ApiResult<TipResponse>;
 
       if (bookId && chapterId) {
         response = await tipChapter(selectedAmount, bookId, chapterId);
@@ -142,7 +142,7 @@ const TipButton: React.FC<TipButtonProps> = ({
           "success"
         );
       } else if (response.code === 602) {
-        showAlert(t("insufficientBalance"), "error");
+        showAlert(t("insufficientBalanceForTip"), "error");
       } else {
         showAlert(t("tipError"), "error");
       }
