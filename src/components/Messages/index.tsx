@@ -48,9 +48,11 @@ const Messages: React.FC = () => {
   }, [activeSection, markAllAsRead]);
 
   const fetchData = useCallback(async () => {
-    if (data[activeSection].length > 0) {
+    const currentData = data[activeSection];
+    if (currentData.length > 0) {
       return;
     }
+
     setError(null);
     try {
       switch (activeSection) {
@@ -65,10 +67,6 @@ const Messages: React.FC = () => {
               ...prev,
               books: response.data.dataList
             }));
-          } else {
-            logger.warn("Failed to fetch favorite books:", response, {
-              context: "Messages"
-            });
           }
           break;
         }
@@ -113,7 +111,7 @@ const Messages: React.FC = () => {
       logger.error("Error fetching data:", error, { context: "Messages" });
       setError(t("errorMessage"));
     }
-  }, [activeSection, data, t]);
+  }, [activeSection, t]);
 
   useEffect(() => {
     fetchData();
