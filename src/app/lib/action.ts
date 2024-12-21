@@ -102,15 +102,16 @@ export const login = async (
   password: string
 ): Promise<ApiResult<string>> => {
   try {
-    const formData = new FormData();
-    formData.append("username", username);
-    formData.append("password", password);
+    const loginData = {
+      username,
+      password
+    };
 
     const response: AxiosResponse<ApiResponse<string>> = await api.post(
       "/login",
-      formData,
+      loginData,
       {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "application/json" } // 修改 Content-Type
       }
     );
 
@@ -191,17 +192,12 @@ export const register = async (
   credentials: CreateUserRequest
 ): Promise<ApiResult<string>> => {
   try {
-    const formData = new FormData();
-    formData.append("username", credentials.username);
-    formData.append("password", credentials.password);
-    formData.append("rePassword", credentials.rePassword);
-    formData.append("email", credentials.email);
-
+    // 直接使用 credentials 对象，不需要 FormData
     const response: AxiosResponse<ApiResponse<string>> = await api.post(
       "/register",
-      formData,
+      credentials,
       {
-        headers: { "Content-Type": "multipart/form-data" }
+        headers: { "Content-Type": "application/json" }
       }
     );
     return response.data;
