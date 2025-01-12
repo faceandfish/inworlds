@@ -7,11 +7,7 @@ import React, {
   useEffect,
   useRef
 } from "react";
-import {
-  PurchasedChapterInfo,
-  ApiResult,
-  PaginatedData
-} from "@/app/lib/definitions";
+
 import { getBookPurchasedChapters } from "@/app/lib/action";
 import { logger } from "./Main/logger";
 
@@ -34,11 +30,9 @@ const PurchasedChaptersContext = createContext<
 
 // 缓存键常量
 const STORAGE_KEY = "purchasedChapters";
-const CACHE_EXPIRY_TIME = 1000 * 60 * 60; // 1小时缓存过期
 
 interface CacheData {
   data: { [bookId: number]: number[] };
-  timestamp: number;
 }
 
 export const PurchasedChaptersProvider: React.FC<
@@ -50,37 +44,31 @@ export const PurchasedChaptersProvider: React.FC<
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fetchedBooksRef = useRef<Set<number>>(new Set());
-  const lastFetchTimeRef = useRef<{ [bookId: number]: number }>({});
 
-  // 初始化时从 localStorage 加载数据
+  // 修改初始化逻辑
   useEffect(() => {
     try {
       const savedData = localStorage.getItem(STORAGE_KEY);
       if (savedData) {
         const parsedData: CacheData = JSON.parse(savedData);
-        const now = Date.now();
+        // 直接使用缓存数据，不检查过期时间
+        setPurchasedChapters(parsedData.data);
+        // 将已缓存的书籍ID添加到已获取集合中
+        Object.keys(parsedData.data).forEach((bookId) => {
+          fetchedBooksRef.current.add(Number(bookId));
+        });
 
-        // 检查缓存是否过期
-        if (now - parsedData.timestamp < CACHE_EXPIRY_TIME) {
-          setPurchasedChapters(parsedData.data);
-          // 将已缓存的书籍ID添加到已获取集合中
-          Object.keys(parsedData.data).forEach((bookId) => {
-            fetchedBooksRef.current.add(Number(bookId));
-            lastFetchTimeRef.current[Number(bookId)] = parsedData.timestamp;
-          });
-        } else {
-          // 缓存过期，清除本地存储
-          localStorage.removeItem(STORAGE_KEY);
-        }
+        // 在后台静默更新数据
+        Object.keys(parsedData.data).forEach((bookId) => {
+          fetchPurchasedChapters(Number(bookId));
+        });
       }
     } catch (error) {
       logger.error("Error loading cached purchased chapters", error, {
         context: "PurchasedChaptersProvider"
       });
-      localStorage.removeItem(STORAGE_KEY);
     }
   }, []);
-
   // 清除错误
   const clearError = useCallback(() => {
     setError(null);
@@ -88,17 +76,6 @@ export const PurchasedChaptersProvider: React.FC<
 
   // 获取已购买章节
   const fetchPurchasedChapters = useCallback(async (bookId: number) => {
-    const now = Date.now();
-
-    // 检查是否需要重新获取数据
-    if (
-      fetchedBooksRef.current.has(bookId) &&
-      lastFetchTimeRef.current[bookId] &&
-      now - lastFetchTimeRef.current[bookId] < CACHE_EXPIRY_TIME
-    ) {
-      return;
-    }
-
     setLoading(true);
     setError(null);
 
@@ -112,24 +89,17 @@ export const PurchasedChaptersProvider: React.FC<
 
         setPurchasedChapters((prev) => {
           const updated = { ...prev, [bookId]: chapterIds };
-          // 更新缓存
-          const cacheData: CacheData = {
-            data: updated,
-            timestamp: now
-          };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+          // 更新缓存，不再需要timestamp
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({ data: updated }));
           return updated;
         });
 
-        // 更新获取状态
         fetchedBooksRef.current.add(bookId);
-        lastFetchTimeRef.current[bookId] = now;
       } else {
-        // 处理 data 为 null 的情况
-        setPurchasedChapters((prev) => {
-          const updated = { ...prev, [bookId]: [] };
-          return updated;
-        });
+        setPurchasedChapters((prev) => ({
+          ...prev,
+          [bookId]: []
+        }));
         throw new Error(response.msg || "Failed to fetch purchased chapters");
       }
     } catch (error) {
@@ -138,9 +108,7 @@ export const PurchasedChaptersProvider: React.FC<
           ? error.message
           : "Error fetching purchased chapters";
       setError(errorMessage);
-      logger.error("Error fetching purchased chapters", error, {
-        context: "PurchasedChaptersProvider"
-      });
+      logger.error("Error fetching purchased chapters", error);
     } finally {
       setLoading(false);
     }
@@ -149,21 +117,14 @@ export const PurchasedChaptersProvider: React.FC<
   // 同步多本书的购买状态
   const syncPurchasedChapters = useCallback(
     async (bookIds: number[]) => {
-      const now = Date.now();
       for (const bookId of bookIds) {
-        // 检查缓存是否有效
-        if (
-          !fetchedBooksRef.current.has(bookId) ||
-          !lastFetchTimeRef.current[bookId] ||
-          now - lastFetchTimeRef.current[bookId] >= CACHE_EXPIRY_TIME
-        ) {
+        if (!fetchedBooksRef.current.has(bookId)) {
           await fetchPurchasedChapters(bookId);
         }
       }
     },
     [fetchPurchasedChapters]
   );
-
   // 检查章节是否已购买
   const isChapterPurchased = useCallback(
     (bookId: number, chapterId: number): boolean => {
@@ -186,12 +147,8 @@ export const PurchasedChaptersProvider: React.FC<
           [bookId]: [...(prev[bookId] || []), chapterId].sort((a, b) => a - b)
         };
 
-        // 更新缓存
-        const cacheData: CacheData = {
-          data: updated,
-          timestamp: Date.now()
-        };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(cacheData));
+        // 修改为
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({ data: updated }));
 
         return updated;
       });

@@ -4,6 +4,7 @@ import { getBookDetails, getPublicChapterContent } from "@/app/lib/action";
 import { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 import { logger } from "@/components/Main/logger";
+export const dynamic = "force-dynamic";
 
 interface ChapterPageProps {
   params: {
