@@ -125,6 +125,12 @@ const Income: React.FC = () => {
   const validateTransferAmount = (value: string) => {
     const amount = Number(value);
 
+    // 首先确保有余额值
+    if (typeof totalIncome !== "number") {
+      setTransferError(t("income.balanceError"));
+      return false;
+    }
+
     // Check if empty
     if (!value.trim()) {
       setTransferError(t("income.required"));
@@ -149,8 +155,8 @@ const Income: React.FC = () => {
       return false;
     }
 
-    // Check if exceeds total balance
-    if (amount > (user?.totalIncome || 0)) {
+    // 使用组件状态中的 totalIncome 而不是 user.totalIncome
+    if (amount > totalIncome) {
       setTransferError(t("income.insufficientBalance"));
       return false;
     }
