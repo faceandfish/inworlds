@@ -25,7 +25,7 @@ const getCachedBookData = unstable_cache(
     return null;
   },
   ["book-data"],
-  { revalidate: 60 } // 1 minute cache
+  { revalidate: 600 } // 1 minute cache
 );
 
 export async function generateMetadata({

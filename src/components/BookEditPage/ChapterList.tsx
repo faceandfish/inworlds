@@ -2,11 +2,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { BookInfo, ChapterInfo } from "@/app/lib/definitions";
-import {
-  CalendarIcon,
-  XMarkIcon,
-  CurrencyDollarIcon
-} from "@heroicons/react/24/outline";
+import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import Alert from "../Main/Alert";
 import AuthorNote from "../WritingPage/AuthorNote";
 import { useTranslation } from "../useTranslation";
@@ -120,8 +116,10 @@ const ChapterList: React.FC<ChapterListProps> = ({
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
+    // 使用用户浏览器的本地时区显示
     return date
-      .toLocaleString(lang, {
+      .toLocaleString(undefined, {
+        // [修改] 使用undefined让浏览器自动选择locale
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -130,14 +128,13 @@ const ChapterList: React.FC<ChapterListProps> = ({
         second: "2-digit",
         hour12: false
       })
-      .replace(/\//g, "-")
-      .replace(/,/g, "");
+      .replace(/\//g, "-");
   };
 
   const formatDateForDisplay = (dateString: string) => {
     const date = new Date(dateString.replace(/-/g, "/"));
     return date
-      .toLocaleString(lang, {
+      .toLocaleString(undefined, {
         year: "numeric",
         month: "2-digit",
         day: "2-digit",
@@ -151,19 +148,8 @@ const ChapterList: React.FC<ChapterListProps> = ({
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = new Date(e.target.value);
     if (selectedDate > new Date()) {
-      // 使用用户本地时间，格式化为 "YYYY-MM-DD HH:mm:ss"
-      const formattedDate = selectedDate
-        .toLocaleString("zh-CN", {
-          year: "numeric",
-          month: "2-digit",
-          day: "2-digit",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
-          hour12: false
-        })
-        .replace(/\//g, "-")
-        .replace(",", "");
+      // 直接使用 ISO 字符串，保留用户本地时区信息
+      const formattedDate = selectedDate.toISOString();
       setNewDate(formattedDate);
     } else {
       setAlert({ message: t("chapterList.selectFutureTime"), type: "error" });

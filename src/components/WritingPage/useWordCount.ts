@@ -97,7 +97,7 @@ export const useWordCount = (
 
   const handleTextChange = useCallback(
     (newText: string | null | undefined) => {
-      const safeNewText = newText?.trim() || ""; // 安全地处理输入
+      const safeNewText = newText || ""; // 安全地处理输入
       const currentLength = text?.length || 0; // 使用可选链和默认值
       const newCount = countWords(safeNewText); // 已经是安全的文本
 
