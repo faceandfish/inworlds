@@ -116,41 +116,36 @@ const ChapterList: React.FC<ChapterListProps> = ({
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
-    // 使用用户浏览器的本地时区显示
-    return date
-      .toLocaleString(undefined, {
-        // [修改] 使用undefined让浏览器自动选择locale
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false
-      })
-      .replace(/\//g, "-");
+    return date.toLocaleString(undefined, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false
+    });
   };
 
   const formatDateForDisplay = (dateString: string) => {
-    const date = new Date(dateString.replace(/-/g, "/"));
-    return date
-      .toLocaleString(undefined, {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false
-      })
-      .replace(/\//g, "-");
+    const date = new Date(dateString);
+    return date.toLocaleString(undefined, {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false
+    });
   };
-
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const selectedDate = new Date(e.target.value);
     if (selectedDate > new Date()) {
       // 直接使用 ISO 字符串，保留用户本地时区信息
-      const formattedDate = selectedDate.toISOString();
-      setNewDate(formattedDate);
+      const localDate = new Date(
+        selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000
+      ).toISOString();
+      setNewDate(localDate);
     } else {
       setAlert({ message: t("chapterList.selectFutureTime"), type: "error" });
     }
