@@ -16,7 +16,6 @@ interface BookIntroProps {
 const BookIntro: React.FC<BookIntroProps> = ({
   book,
   onBookChange,
-  error,
   descriptionRows = 14,
   className = ""
 }) => {
@@ -33,14 +32,14 @@ const BookIntro: React.FC<BookIntroProps> = ({
     wordCount: titleCount,
     handleTextChange: handleTitleChange,
     isMaxLength: isTitleMaxLength
-  } = useWordCount(book.title, TITLE_MAX_LENGTH);
+  } = useWordCount(book?.title || "", TITLE_MAX_LENGTH);
 
   const {
     text: description,
     wordCount: descriptionCount,
     handleTextChange: handleDescriptionChange,
     isMaxLength: isDescriptionMaxLength
-  } = useWordCount(book.description, DESCRIPTION_MAX_LENGTH);
+  } = useWordCount(book?.description || "", DESCRIPTION_MAX_LENGTH);
 
   const handleTitleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleTitleChange(e.target.value);

@@ -25,14 +25,14 @@ const ContentEditor: React.FC<ContentEditorProps> = ({
     wordCount: contentCount,
     handleTextChange: handleContentChange,
     isMaxLength: isContentMaxLength
-  } = useWordCount(chapter.content || "", CONTENT_MAX_LENGTH);
+  } = useWordCount(chapter?.content || "", CONTENT_MAX_LENGTH);
 
   const {
     text: title,
     wordCount: titleCount,
     handleTextChange: handleTitleChange,
     isMaxLength: isTitleMaxLength
-  } = useWordCount(chapter.title || "", TITLE_MAX_LENGTH);
+  } = useWordCount(chapter?.title || "", TITLE_MAX_LENGTH);
 
   const handleTitleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     handleTitleChange(e.target.value);

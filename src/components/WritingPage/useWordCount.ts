@@ -2,14 +2,18 @@ import { useState, useCallback, useEffect } from "react";
 
 type Language = "en" | "cn" | "jp" | "mixed";
 
-export const useWordCount = (initialText: string = "", maxCount: number) => {
-  const [text, setText] = useState(initialText);
+export const useWordCount = (
+  initialText: string | null | undefined = "",
+  maxCount: number
+) => {
+  const [text, setText] = useState(initialText || "");
   const [wordCount, setWordCount] = useState(0);
   const [language, setLanguage] = useState<Language>("en");
   const [isMaxLength, setIsMaxLength] = useState(false);
 
   // 检测语言类型
   const detectLanguage = useCallback((text: string): Language => {
+    if (!text || text.trim() === "") return "en";
     const chineseRegex = /[\u4e00-\u9fa5]/;
     const japaneseRegex = /[\u3040-\u309f\u30a0-\u30ff]/;
     const englishRegex = /[a-zA-Z]/;
@@ -33,7 +37,8 @@ export const useWordCount = (initialText: string = "", maxCount: number) => {
 
   // 修正后的计算字数逻辑
   const countWords = useCallback(
-    (text: string): number => {
+    (text: string | null | undefined): number => {
+      if (!text || text.trim() === "") return 0;
       const language = detectLanguage(text);
 
       if (language === "jp") {
@@ -77,6 +82,12 @@ export const useWordCount = (initialText: string = "", maxCount: number) => {
   );
 
   useEffect(() => {
+    if (!text) {
+      // 添加这行
+      setWordCount(0); // 添加这行
+      setIsMaxLength(false); // 添加这行
+      return; // 添加这行
+    }
     const detectedLanguage = detectLanguage(text);
     setLanguage(detectedLanguage);
     const newWordCount = countWords(text);
@@ -85,22 +96,26 @@ export const useWordCount = (initialText: string = "", maxCount: number) => {
   }, [text, countWords, detectLanguage, maxCount]);
 
   const handleTextChange = useCallback(
-    (newText: string) => {
-      const newCount = countWords(newText);
-      if (newCount <= maxCount || newText.length < text.length) {
-        setText(newText);
+    (newText: string | null | undefined) => {
+      const safeNewText = newText?.trim() || ""; // 安全地处理输入
+      const currentLength = text?.length || 0; // 使用可选链和默认值
+      const newCount = countWords(safeNewText); // 已经是安全的文本
+
+      if (newCount <= maxCount || safeNewText.length <= currentLength) {
+        // 使用安全的文本比较
+        setText(safeNewText); // 保存安全的文本
         setIsMaxLength(newCount >= maxCount);
       }
     },
-    [countWords, maxCount, text.length]
+    [countWords, maxCount, text]
   );
 
   return {
-    text,
-    wordCount,
+    text: text || "",
+    wordCount: Math.max(0, wordCount),
     language,
     handleTextChange,
-    isMaxLength,
+    isMaxLength: Boolean(isMaxLength),
     countWords
   };
 };
