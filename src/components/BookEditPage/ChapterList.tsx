@@ -142,10 +142,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
     const selectedDate = new Date(e.target.value);
     if (selectedDate > new Date()) {
       // 直接使用 ISO 字符串，保留用户本地时区信息
-      const localDate = new Date(
-        selectedDate.getTime() - selectedDate.getTimezoneOffset() * 60000
-      ).toISOString();
-      setNewDate(localDate);
+      setNewDate(e.target.value + ":00");
     } else {
       setAlert({ message: t("chapterList.selectFutureTime"), type: "error" });
     }
