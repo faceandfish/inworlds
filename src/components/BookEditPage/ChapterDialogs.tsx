@@ -1,6 +1,6 @@
 // ChapterDialogs.tsx
 import React from "react";
-import { XMarkIcon, CalendarIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon } from "@heroicons/react/24/outline";
 import { ChapterInfo } from "@/app/lib/definitions";
 import AuthorNote from "../WritingPage/AuthorNote";
 
@@ -12,13 +12,9 @@ interface DialogProps {
 interface StatusDialogProps extends DialogProps {
   isOpen: boolean;
   selectedChapter: ChapterInfo | null;
-  newStatus: "draft" | "published" | "scheduled";
-  newDate: string;
-  minDateTime: string;
-  handleStatusChange: (status: "draft" | "published" | "scheduled") => void;
-  handleDateChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  newStatus: "draft" | "published";
+  handleStatusChange: (status: "draft" | "published") => void;
   handleConfirmUpdate: () => void;
-  formatDateForDisplay: (date: string) => string;
 }
 
 interface AuthorNoteDialogProps extends DialogProps {
@@ -42,12 +38,8 @@ export const StatusDialog: React.FC<StatusDialogProps> = ({
   t,
   onClose,
   newStatus,
-  newDate,
-  minDateTime,
   handleStatusChange,
-  handleDateChange,
-  handleConfirmUpdate,
-  formatDateForDisplay
+  handleConfirmUpdate
 }) => {
   if (!isOpen) return null;
 
@@ -69,39 +61,15 @@ export const StatusDialog: React.FC<StatusDialogProps> = ({
           <select
             value={newStatus}
             onChange={(e) =>
-              handleStatusChange(
-                e.target.value as "draft" | "published" | "scheduled"
-              )
+              handleStatusChange(e.target.value as "draft" | "published")
             }
             className="w-full border rounded p-2 text-neutral-600 focus:outline-none"
           >
             <option value="draft">{t("chapterList.saveDraft")}</option>
             <option value="published">{t("chapterList.publishChapter")}</option>
-            <option value="scheduled">
-              {t("chapterList.schedulePublish")}
-            </option>
           </select>
         </div>
 
-        {newStatus === "scheduled" && (
-          <div className="mb-4 relative">
-            <input
-              type="datetime-local"
-              value={newDate ? newDate.slice(0, 16).replace(" ", "T") : ""}
-              min={minDateTime}
-              onChange={handleDateChange}
-              className="w-full border rounded p-2 pl-8"
-            />
-            <CalendarIcon className="h-5 w-5 text-gray-400 absolute left-2 top-2.5" />
-          </div>
-        )}
-        {newStatus === "scheduled" && newDate && (
-          <div className="mb-4 bg-gray-100 p-3 rounded-md">
-            <p className="text-sm text-gray-600 whitespace-nowrap">
-              发布时间：{formatDateForDisplay(newDate)}
-            </p>
-          </div>
-        )}
         <div className="flex justify-end">
           <button
             onClick={handleConfirmUpdate}

@@ -4,7 +4,6 @@ import Link from "next/link";
 import { BookInfo, ChapterInfo } from "@/app/lib/definitions";
 import { CurrencyDollarIcon } from "@heroicons/react/24/outline";
 import Alert from "../Main/Alert";
-import AuthorNote from "../WritingPage/AuthorNote";
 import { useTranslation } from "../useTranslation";
 import {
   AuthorNoteDialog,
@@ -32,10 +31,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   const [selectedChapter, setSelectedChapter] = useState<ChapterInfo | null>(
     null
   );
-  const [newStatus, setNewStatus] = useState<
-    "draft" | "published" | "scheduled"
-  >("draft");
-  const [newDate, setNewDate] = useState<string>("");
+  const [newStatus, setNewStatus] = useState<"draft" | "published">("draft");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isAuthorNoteDialogOpen, setIsAuthorNoteDialogOpen] = useState(false);
   const [currentAuthorNote, setCurrentAuthorNote] = useState<string>("");
@@ -44,8 +40,6 @@ const ChapterList: React.FC<ChapterListProps> = ({
     type: "success" | "error";
   } | null>(null);
 
-  const [minDateTime, setMinDateTime] = useState("");
-  const [forceUpdate, setForceUpdate] = useState(false);
   // 新增: 收费设置相关的状态
   const [isPricingMenuOpen, setIsPricingMenuOpen] = useState(false);
   const [selectedChapterForPricing, setSelectedChapterForPricing] =
@@ -53,51 +47,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   const [isPaid, setIsPaid] = useState(false);
   const [price, setPrice] = useState(0);
 
-  useEffect(() => {
-    const now = new Date();
-    now.setMinutes(now.getMinutes() + 1, 0, 0);
-    setMinDateTime(now.toISOString().slice(0, 16));
-  }, []);
-
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setChapters((prevChapters) => {
-        const updatedChapters = prevChapters.map((chapter) => {
-          if (
-            chapter.publishStatus === "scheduled" &&
-            new Date(chapter.publishDate!) <= new Date()
-          ) {
-            // 如果预定发布时间已到，更新状态
-            onUpdateChapter(chapter.id!, { publishStatus: "published" });
-            return { ...chapter, publishStatus: "published" as const };
-          }
-          return chapter;
-        });
-
-        // 新增：检查是否有任何更改
-        const hasChanges = updatedChapters.some(
-          (chapter, index) =>
-            chapter.publishStatus !== prevChapters[index].publishStatus
-        );
-
-        // 新增：如果有更改，强制重新渲染
-        if (hasChanges) {
-          setForceUpdate((prev) => !prev);
-        }
-
-        return updatedChapters;
-      });
-    }, 60000); // 每分钟检查一次
-    return () => clearInterval(intervalId);
-  }, [onUpdateChapter]);
-
   const getChapterStatus = useCallback((chapter: ChapterInfo) => {
-    if (
-      chapter.publishStatus === "scheduled" &&
-      new Date(chapter.publishDate!) <= new Date()
-    ) {
-      return "published";
-    }
     return chapter.publishStatus;
   }, []);
 
@@ -107,53 +57,13 @@ const ChapterList: React.FC<ChapterListProps> = ({
     return sortOrder === "asc" ? aNumber - bNumber : bNumber - aNumber;
   });
 
-  const handleStatusChange = (status: "draft" | "published" | "scheduled") => {
+  const handleStatusChange = (status: "draft" | "published") => {
     setNewStatus(status);
-    if (status !== "scheduled") {
-      setNewDate("");
-    }
-  };
-
-  const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false
-    });
-  };
-
-  const formatDateForDisplay = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleString(undefined, {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false
-    });
-  };
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedDate = new Date(e.target.value);
-    if (selectedDate > new Date()) {
-      // 直接使用 ISO 字符串，保留用户本地时区信息
-      setNewDate(e.target.value + ":00");
-    } else {
-      setAlert({ message: t("chapterList.selectFutureTime"), type: "error" });
-    }
   };
 
   const handleConfirmUpdate = async () => {
     if (selectedChapter) {
       const updates: Partial<ChapterInfo> = { publishStatus: newStatus };
-      if (newStatus === "scheduled" && newDate) {
-        updates.publishDate = newDate; // newDate is already in the correct format with ":00" for seconds
-      }
       const success = await onUpdateChapter(
         selectedChapter.chapterNumber!,
         updates
@@ -174,8 +84,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
 
   const openDialog = (chapter: ChapterInfo) => {
     setSelectedChapter(chapter);
-    setNewStatus(chapter.publishStatus as "draft" | "published" | "scheduled");
-    setNewDate(chapter.publishDate ? chapter.publishDate : "");
+    setNewStatus(chapter.publishStatus as "draft" | "published");
     setIsDialogOpen(true);
   };
 
@@ -253,8 +162,6 @@ const ChapterList: React.FC<ChapterListProps> = ({
         return "草稿箱";
       case "published":
         return "已发布";
-      case "scheduled":
-        return "定时发布";
       default:
         return status;
     }
@@ -325,23 +232,13 @@ const ChapterList: React.FC<ChapterListProps> = ({
               </button>
               <button
                 onClick={() => openDialog(chapter)}
-                className={`flex-shrink-0 p-2 w-20 rounded border border-neutral-400 shadow-sm text-sm hover:bg-neutral-400 hover:text-white whitespace-nowrap overflow-hidden ${
+                className={`flex-shrink-0 p-2 w-20 rounded border border-neutral-400 shadow-sm text-sm hover:bg-neutral-400 hover:text-white ${
                   getChapterStatus(chapter) === "published"
                     ? "text-neutral-400"
-                    : getChapterStatus(chapter) === "draft"
-                    ? "text-orange-400"
-                    : "text-blue-400"
+                    : "text-orange-400"
                 }`}
               >
-                {getChapterStatus(chapter) === "scheduled" ? (
-                  <div className="animate-scroll ">
-                    {getStatusDisplay(getChapterStatus(chapter))}
-                    {chapter.publishDate &&
-                      ` (${formatDate(chapter.publishDate)})`}
-                  </div>
-                ) : (
-                  getStatusDisplay(getChapterStatus(chapter))
-                )}
+                {getStatusDisplay(getChapterStatus(chapter))}
               </button>
             </div>
           </li>
@@ -354,12 +251,8 @@ const ChapterList: React.FC<ChapterListProps> = ({
         onClose={() => setIsDialogOpen(false)}
         selectedChapter={selectedChapter}
         newStatus={newStatus}
-        newDate={newDate}
-        minDateTime={minDateTime}
         handleStatusChange={handleStatusChange}
-        handleDateChange={handleDateChange}
         handleConfirmUpdate={handleConfirmUpdate}
-        formatDateForDisplay={formatDateForDisplay}
       />
 
       <AuthorNoteDialog
@@ -389,25 +282,6 @@ const ChapterList: React.FC<ChapterListProps> = ({
           onClose={() => setAlert(null)}
         />
       )}
-      <style jsx>{`
-        @keyframes scroll {
-          0% {
-            transform: translateX(0%);
-          }
-
-          100% {
-            transform: translateX(-100%);
-          }
-        }
-        .animate-scroll {
-          display: inline-block;
-          white-space: nowrap;
-          animation: scroll 12s linear infinite;
-        }
-        .animate-scroll:hover {
-          animation-play-state: paused;
-        }
-      `}</style>
     </>
   );
 };

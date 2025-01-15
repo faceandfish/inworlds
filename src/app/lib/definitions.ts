@@ -128,7 +128,7 @@ export interface ChapterInfo {
   lastModified: string;
   wordCount?: number;
   authorNote?: string;
-  publishStatus: "draft" | "published" | "scheduled"; // 新增：章节的发布状态
+  publishStatus: "draft" | "published"; // 新增：章节的发布状态
   publishDate?: string; //"scheduled"定时发布时间确定
   // 新增: 表示章节是否收费
   isPaid: boolean;
