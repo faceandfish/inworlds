@@ -65,7 +65,7 @@ const handleApiError = (error: any, context: string): ApiErrorResponse => {
 // 创建 axios 实例
 const api = axios.create({
   //baseURL: "https://api.inworlds.xyz/inworlds/api",
-  baseURL: "http://192.168.0.103:8088/inworlds/api",
+  baseURL: "http://192.168.151.198:8088/inworlds/api",
   headers: {
     "Content-Type": "application/json"
   },
