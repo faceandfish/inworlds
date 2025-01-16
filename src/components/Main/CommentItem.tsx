@@ -119,7 +119,7 @@ const CommentItem: React.FC<CommentItemProps> = ({
         alt={comment.username || "username"}
         width={200}
         height={200}
-        className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all duration-200"
+        className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all duration-200 object-cover object-center"
       />
       <div className="flex flex-col justify-between flex-grow">
         <div className="text-neutral-400 space-x-5">

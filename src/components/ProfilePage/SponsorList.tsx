@@ -25,7 +25,7 @@ const SponsorListItem: React.FC<SponsorListItemProps> = ({ sponsor }) => {
           alt={`${sponsor.userName}'s avatar` || "avatar"}
           width={40}
           height={40}
-          className="object-cover"
+          className="object-cover  object-center"
         />
       </div>
     </div>

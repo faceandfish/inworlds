@@ -418,7 +418,7 @@ const Income: React.FC = () => {
                             src={sponsor.avatarUrl || "/defaultImg.png"}
                             alt={sponsor.userName}
                             fill
-                            className="object-cover"
+                            className="object-cover  object-center"
                           />
                         </div>
                         <div>

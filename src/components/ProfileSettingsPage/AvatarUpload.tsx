@@ -121,7 +121,7 @@ const AvatarUpload: React.FC<AvatarUploadProps> = ({
             alt={user.displayName || "avatar"}
             width={160}
             height={160}
-            className="rounded-full object-cover w-40 h-40"
+            className="rounded-full object-cover w-40 h-40  object-center"
           />
           <label className="absolute bottom-0 right-0 rounded-full p-3 bg-orange-500 hover:bg-orange-600 transition-colors duration-200 text-white shadow-lg cursor-pointer">
             <CameraIcon className="h-6 w-6" />

@@ -21,7 +21,7 @@ export const UserPreviewCard: React.FC<UserPreviewCardProps> = ({ user }) => {
           alt={user.displayName || "username"}
           width={200}
           height={200}
-          className="rounded-full w-16 h-16"
+          className="rounded-full w-16 h-16 object-cover object-center"
         />
         <div className="ml-8">
           <h3 className="font-semibold">{user.displayName || user.username}</h3>

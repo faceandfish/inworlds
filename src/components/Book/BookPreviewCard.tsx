@@ -66,7 +66,7 @@ export const BookPreviewCard = React.memo(
                     width={400}
                     height={600}
                     alt={`${book.title} cover` || "cover"}
-                    className="w-36 h-48 object-cover"
+                    className="w-36 h-48 object-cover  object-center"
                     onError={(e) => {
                       if (!imageError) {
                         setImageError(true);

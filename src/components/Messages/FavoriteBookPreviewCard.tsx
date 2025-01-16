@@ -19,7 +19,7 @@ export const FavoriteBookPreviewCard: React.FC<
         alt={`Cover of ${book.title}` || "booktitle"}
         width={80}
         height={80}
-        className="object-cover rounded"
+        className="object-cover rounded object-center"
       />
       <div className="flex-grow">
         <Link href={`/book/${book.id}`}>

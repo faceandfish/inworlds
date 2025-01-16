@@ -245,7 +245,7 @@ const Comments: React.FC = () => {
                         width={400}
                         height={600}
                         alt={`${book.title} cover` || "cover"}
-                        className="w-16 h-20 object-cover"
+                        className="w-16 h-20 object-cover object-center"
                         onError={(e) => {
                           logger.error(
                             "Image loading failed:",

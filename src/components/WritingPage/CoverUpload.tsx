@@ -84,7 +84,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
         <div>
           <div className="relative w-44 h-56 border-2 border-gray-300 border-dashed rounded-lg overflow-hidden">
             {currentCoverUrl ? (
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full object-cover object-center">
                 <Image
                   src={currentCoverUrl}
                   alt="Book cover preview"
@@ -147,6 +147,7 @@ const CoverUpload: React.FC<CoverUploadProps> = ({
                     height={600}
                     objectFit="cover"
                     alt="Default cover"
+                    className="w-full h-full object-cover object-center"
                   />
                 </button>
               ))}

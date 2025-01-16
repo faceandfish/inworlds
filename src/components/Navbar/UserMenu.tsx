@@ -97,7 +97,7 @@ const UserMenu = ({ user }: { user: UserInfo }) => {
             width={200}
             height={200}
             onClick={handleAvatarClick}
-            className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all duration-200"
+            className="rounded-full w-10 h-10 cursor-pointer hover:brightness-90 transition-all object-cover object-center duration-200"
           />
 
           {optionMenu && (

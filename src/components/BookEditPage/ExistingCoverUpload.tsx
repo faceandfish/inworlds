@@ -58,7 +58,7 @@ const ExistingCoverUpload: React.FC<ExistingCoverUploadProps> = ({
               alt="Book cover"
               width={400}
               height={600}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover  object-center"
             />
           </div>
           <button

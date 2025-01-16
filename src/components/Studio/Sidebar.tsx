@@ -54,7 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           alt={user.username || "User Avatar"}
           width={200}
           height={200}
-          className="rounded-full object-cover w-24 h-24"
+          className="rounded-full object-cover  object-center w-24 h-24"
         />
         <p className="text-neutral-700">{user.displayName || user.username}</p>
       </div>
