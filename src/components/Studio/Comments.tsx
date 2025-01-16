@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
-import { CommentInfo, BookInfo } from "@/app/lib/definitions";
+import { CommentInfo } from "@/app/lib/definitions";
 import {
   blockUserInBook,
   deleteComment,
-  fetchBooksList,
   getBookComments,
   likeComment,
   addCommentOrReply
@@ -21,16 +20,11 @@ import { logger } from "../Main/logger";
 
 const ITEMS_PER_PAGE = 10;
 
-interface CommentsData {
-  comments: CommentInfo[];
-  books: BookInfo[];
-}
-
 const Comments: React.FC = () => {
   const { t } = useTranslation("studio");
   const { user } = useUser();
   const [currentPage, setCurrentPage] = useState(1);
-  const [commentsData, setCommentsData] = useState<CommentsData | null>(null);
+  const [comments, setComments] = useState<CommentInfo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [alertInfo, setAlertInfo] = useState<{
@@ -42,38 +36,16 @@ const Comments: React.FC = () => {
     setIsLoading(true);
     setError(null);
     try {
-      const booksResponse = await fetchBooksList(1, 1000, "published");
+      // Since we have bookId in each comment, we can use any single book's comments endpoint
+      const commentsResponse = await getBookComments(1, 1, 1000);
       if (
-        booksResponse.code === 200 &&
-        "data" in booksResponse &&
-        booksResponse.data?.dataList
+        commentsResponse.code === 200 &&
+        "data" in commentsResponse &&
+        commentsResponse.data?.dataList
       ) {
-        const allBooks = booksResponse.data.dataList;
-        const allComments: CommentInfo[] = [];
-
-        for (const book of allBooks) {
-          const commentsResponse = await getBookComments(book.id, 1, 1000);
-          if (
-            commentsResponse.code === 200 &&
-            "data" in commentsResponse &&
-            commentsResponse.data?.dataList
-          ) {
-            allComments.push(...commentsResponse.data.dataList);
-          } else {
-            logger.warn(
-              `Failed to fetch comments for book ${book.id}:`,
-              commentsResponse,
-              { context: "Comments" }
-            );
-          }
-        }
-
-        setCommentsData({
-          comments: allComments,
-          books: allBooks
-        });
+        setComments(commentsResponse.data.dataList);
       } else {
-        logger.warn("Failed to fetch books list:", booksResponse, {
+        logger.warn("Failed to fetch comments:", commentsResponse, {
           context: "Comments"
         });
       }
@@ -92,15 +64,13 @@ const Comments: React.FC = () => {
   }, [user]);
 
   const paginatedComments = useMemo(() => {
-    if (!commentsData) return [];
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return commentsData.comments.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [commentsData, currentPage]);
+    return comments.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [comments, currentPage]);
 
   const totalPages = useMemo(() => {
-    if (!commentsData) return 0;
-    return Math.ceil(commentsData.comments.length / ITEMS_PER_PAGE);
-  }, [commentsData]);
+    return Math.ceil(comments.length / ITEMS_PER_PAGE);
+  }, [comments]);
 
   const handleLike = async (commentId: number, isLiked: boolean) => {
     if (!user?.id) return;
@@ -122,14 +92,16 @@ const Comments: React.FC = () => {
   };
 
   const handleReply = async (commentId: number, content: string) => {
-    if (!user?.id || !commentsData) return;
+    if (!user?.id) return;
     try {
-      const bookId = commentsData.comments.find(
-        (c) => c.id === commentId
-      )?.bookId;
-      if (!bookId) throw new Error("Book ID not found");
+      const comment = comments.find((c) => c.id === commentId);
+      if (!comment?.bookId) throw new Error("Book ID not found");
 
-      const response = await addCommentOrReply(bookId, content, commentId);
+      const response = await addCommentOrReply(
+        comment.bookId,
+        content,
+        commentId
+      );
       if (response.code === 200) {
         setAlertInfo({ message: t("comments.replySuccess"), type: "success" });
         fetchComments(user.id);
@@ -167,9 +139,10 @@ const Comments: React.FC = () => {
   };
 
   const handleBlock = async (userId: number) => {
-    if (!user?.id || !commentsData) return;
+    if (!user?.id || comments.length === 0) return;
     try {
-      const bookId = commentsData.books[0]?.id;
+      // Use the bookId from the first comment
+      const bookId = comments[0]?.bookId;
       if (!bookId) throw new Error("No books available");
 
       const response = await blockUserInBook(userId, bookId);
@@ -200,7 +173,7 @@ const Comments: React.FC = () => {
     );
   }
 
-  if (!commentsData || commentsData.comments.length === 0) {
+  if (comments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 rounded-lg">
         <BiCommentDetail className="w-16 h-16 text-neutral-300 mb-4" />
@@ -216,52 +189,46 @@ const Comments: React.FC = () => {
       <h1 className="text-2xl font-bold pb-6 border-b">
         {t("comments.title")}
       </h1>
-      {commentsData.comments.length > 0 ? (
+      {comments.length > 0 ? (
         <>
           <ul className="divide-y divide-gray-200">
-            {paginatedComments.map((comment: CommentInfo) => {
-              const book = commentsData.books.find(
-                (b: BookInfo) => b.id === comment.bookId
-              );
-              return (
-                <li key={comment.id} className="flex">
-                  <div className="w-2/3">
-                    <CommentItem
-                      comment={comment}
-                      actions={{
-                        onLike: handleLike,
-                        onReply: handleReply,
-                        onDelete: handleDelete,
-                        onBlock: handleBlock
-                      }}
-                      showDeleteButton={true}
-                      showBlockButton={true}
-                    />
-                  </div>
-                  {book && (
-                    <div className="w-1/3 flex items-center gap-10">
-                      <Image
-                        src={book.coverImageUrl || ""}
-                        width={400}
-                        height={600}
-                        alt={`${book.title} cover` || "cover"}
-                        className="w-16 h-20 object-cover object-center"
-                        onError={(e) => {
-                          logger.error(
-                            "Image loading failed:",
-                            book.coverImageUrl,
-                            { context: "Comments" }
-                          );
-                        }}
-                      />
-                      <p className="text-sm line-clamp-1 font-semibold mt-2">
-                        {book.title}
-                      </p>
-                    </div>
-                  )}
-                </li>
-              );
-            })}
+            {paginatedComments.map((comment: CommentInfo) => (
+              <li key={comment.id} className="flex py-4">
+                <div className="w-2/3">
+                  <CommentItem
+                    comment={comment}
+                    actions={{
+                      onLike: handleLike,
+                      onReply: handleReply,
+                      onDelete: handleDelete,
+                      onBlock: handleBlock
+                    }}
+                    showDeleteButton={true}
+                    showBlockButton={true}
+                  />
+                </div>
+                <div className="w-1/3 flex items-center gap-10">
+                  <Image
+                    src={comment.bookCoverUrl || ""}
+                    width={400}
+                    height={600}
+                    alt={comment.bookTitle || "book cover"}
+                    className="w-16 h-20 object-cover object-center"
+                    unoptimized
+                    onError={(e) => {
+                      logger.error(
+                        "Image loading failed:",
+                        comment.bookCoverUrl,
+                        { context: "Comments" }
+                      );
+                    }}
+                  />
+                  <p className="text-sm line-clamp-1 font-semibold mt-2">
+                    {comment.bookTitle}
+                  </p>
+                </div>
+              </li>
+            ))}
           </ul>
           <div className="my-20">
             <Pagination

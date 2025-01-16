@@ -184,6 +184,8 @@ export interface BookInfo {
 // 评论信息
 export interface CommentInfo {
   id: number;
+  bookCoverUrl: string;
+  bookTitle: string;
   content: string;
   replyCount: number;
   username: string;
