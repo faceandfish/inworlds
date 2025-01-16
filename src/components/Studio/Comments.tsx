@@ -6,7 +6,8 @@ import {
   deleteComment,
   getBookComments,
   likeComment,
-  addCommentOrReply
+  addCommentOrReply,
+  getAuthorComments
 } from "@/app/lib/action";
 import CommentItem from "../Main/CommentItem";
 import Alert from "../Main/Alert";
@@ -32,12 +33,22 @@ const Comments: React.FC = () => {
     type: "success" | "error";
   } | null>(null);
 
+  useEffect(() => {
+    if (user?.id) {
+      fetchComments(user.id);
+    }
+  }, [user]);
+
   const fetchComments = async (userId: number) => {
     setIsLoading(true);
     setError(null);
     try {
-      // Since we have bookId in each comment, we can use any single book's comments endpoint
-      const commentsResponse = await getBookComments(1, 1, 1000);
+      // 这里直接使用传入的 userId，因为在调用时已经确保它存在
+      const commentsResponse = await getAuthorComments(
+        userId,
+        currentPage,
+        ITEMS_PER_PAGE
+      );
       if (
         commentsResponse.code === 200 &&
         "data" in commentsResponse &&
@@ -56,12 +67,6 @@ const Comments: React.FC = () => {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (user?.id) {
-      fetchComments(user.id);
-    }
-  }, [user]);
 
   const paginatedComments = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;

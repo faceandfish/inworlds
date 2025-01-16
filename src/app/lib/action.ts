@@ -652,6 +652,34 @@ export const getBookComments = async (
     return handleApiError(error, "getBookComments");
   }
 };
+export const getAuthorComments = async (
+  authorId: number,
+  currentPage: number = 1,
+  pageSize: number = 20
+): Promise<ApiResult<PaginatedData<CommentInfo>>> => {
+  try {
+    const token = getToken();
+    if (!token) {
+      return {
+        code: 401,
+        msg: "Unauthorized"
+      };
+    }
+
+    const response = await api.get<ApiResponse<PaginatedData<CommentInfo>>>(
+      `/user/${authorId}/comments`,
+      {
+        params: { currentPage, pageSize },
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    return handleApiError(error, "getAuthorComments");
+  }
+};
 
 export const likeComment = async (
   commentId: number,
