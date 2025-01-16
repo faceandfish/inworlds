@@ -124,11 +124,12 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
           <Image
             src={book.coverImageUrl || ""}
             alt={`${book.title} cover`}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover  object-center"
             width={400}
             height={600}
             priority={true}
             loading="eager"
+            unoptimized
           />
         </div>
 
@@ -185,9 +186,10 @@ export const BookHeader: React.FC<BookHeaderProps> = ({ book }) => {
                   alt={book.authorName}
                   width={200}
                   height={200}
-                  className="rounded-full w-8 h-8 cursor-pointer hover:brightness-90 transition-all duration-200"
+                  className="rounded-full w-8 h-8 cursor-pointer hover:brightness-90 transition-all duration-200 object-cover object-center"
                   priority={true}
                   loading="eager"
+                  unoptimized
                 />
                 <p>{book.authorName}</p>
               </Link>

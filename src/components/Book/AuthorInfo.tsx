@@ -22,7 +22,8 @@ export const AuthorInfo: React.FC<AuthorInfoProps> = ({ book }) => {
           alt={book.authorName || "authorname"}
           width={200}
           height={200}
-          className="rounded-full w-24 h-24 cursor-pointer hover:brightness-90 transition-all duration-200"
+          className="rounded-full w-24 h-24 object-cover object-center cursor-pointer hover:brightness-90 transition-all duration-200"
+          unoptimized
         />
       </Link>
       <p>{book.authorName || t("author")}</p>
