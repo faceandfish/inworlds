@@ -5,6 +5,11 @@
     "updateError": "更新图书详情时发生错误"
   },
   "chapterList": {
+    "editChapter": "章节编辑",
+    "wordCountLabel": "字数",
+    "cancel": "取消",
+    "saveAuthorNote": "保存留言",
+    "clearAlert": "清除提示",
     "title": "章节列表",
     "ongoing": "连载中",
     "completed": "已完结",

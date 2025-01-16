@@ -1,5 +1,4 @@
 import React, { useState, useRef } from "react";
-import { BookInfo, FileUploadData } from "@/app/lib/definitions";
 import Alert from "../Main/Alert";
 import { useTranslation } from "../useTranslation";
 import Image from "next/image";

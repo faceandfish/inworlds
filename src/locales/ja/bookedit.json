@@ -5,6 +5,11 @@
     "updateError": "書籍の詳細の更新中にエラーが発生しました"
   },
   "chapterList": {
+    "editChapter": "チャプター編集",
+    "wordCountLabel": "文字数",
+    "cancel": "キャンセル",
+    "saveAuthorNote": "作者コメントを保存",
+    "clearAlert": "アラートをクリア",
     "title": "チャプターリスト",
     "ongoing": "連載中",
     "completed": "完結",

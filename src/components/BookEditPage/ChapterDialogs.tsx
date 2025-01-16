@@ -75,7 +75,7 @@ export const StatusDialog: React.FC<StatusDialogProps> = ({
             onClick={handleConfirmUpdate}
             className="px-4 py-2 bg-orange-400 text-white rounded hover:bg-orange-500"
           >
-            确认更新
+            t("chapterList.confirmUpdate")
           </button>
         </div>
       </div>
@@ -106,13 +106,13 @@ export const AuthorNoteDialog: React.FC<AuthorNoteDialogProps> = ({
             onClick={onClose}
             className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400"
           >
-            取消
+            t("general.cancel")
           </button>
           <button
             onClick={handleSaveAuthorNote}
             className="px-4 py-2 bg-orange-400 text-white rounded hover:bg-orange-500"
           >
-            保存留言
+            t("chapterList.saveAuthorNote")
           </button>
         </div>
       </div>

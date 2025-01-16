@@ -25,7 +25,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
   book,
   onUpdateChapter
 }) => {
-  const { t, lang } = useTranslation("bookedit");
+  const { t } = useTranslation("bookedit");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [chapters, setChapters] = useState(initialChapters);
   const [selectedChapter, setSelectedChapter] = useState<ChapterInfo | null>(
@@ -74,9 +74,15 @@ const ChapterList: React.FC<ChapterListProps> = ({
             ch.id === selectedChapter.id ? { ...ch, ...updates } : ch
           )
         );
-        setAlert({ message: "章节状态更新成功", type: "success" });
+        setAlert({
+          message: t("chapterList.chapterStatusUpdateSuccess"),
+          type: "success"
+        });
       } else {
-        setAlert({ message: "章节状态更新失败", type: "error" });
+        setAlert({
+          message: t("chapterList.chapterStatusUpdateFail"),
+          type: "error"
+        });
       }
       setIsDialogOpen(false);
     }
@@ -119,9 +125,15 @@ const ChapterList: React.FC<ChapterListProps> = ({
             ch.id === selectedChapterForPricing.id ? { ...ch, ...updates } : ch
           )
         );
-        setAlert({ message: "章节收费设置更新成功", type: "success" });
+        setAlert({
+          message: t("chapterList.pricingUpdateSuccess"),
+          type: "success"
+        });
       } else {
-        setAlert({ message: "章节收费设置更新失败", type: "error" });
+        setAlert({
+          message: t("chapterList.pricingUpdateFail"),
+          type: "error"
+        });
       }
       setIsPricingMenuOpen(false);
     }
@@ -144,9 +156,15 @@ const ChapterList: React.FC<ChapterListProps> = ({
             ch.id === selectedChapter.id ? { ...ch, ...updates } : ch
           )
         );
-        setAlert({ message: "作者留言更新成功", type: "success" });
+        setAlert({
+          message: t("chapterList.authorNoteUpdateSuccess"),
+          type: "success"
+        });
       } else {
-        setAlert({ message: "作者留言更新失败", type: "error" });
+        setAlert({
+          message: t("chapterList.authorNoteUpdateFail"),
+          type: "error"
+        });
       }
       setIsAuthorNoteDialogOpen(false);
     }
@@ -159,9 +177,9 @@ const ChapterList: React.FC<ChapterListProps> = ({
   const getStatusDisplay = (status: string) => {
     switch (status) {
       case "draft":
-        return "草稿箱";
+        return t("chapterList.draft");
       case "published":
-        return "已发布";
+        return t("chapterList.published");
       default:
         return status;
     }
@@ -170,7 +188,9 @@ const ChapterList: React.FC<ChapterListProps> = ({
   return (
     <>
       <div className="flex items-center gap-10 mb-4">
-        <h2 className="text-2xl font-bold text-neutral-600">章节列表</h2>
+        <h2 className="text-2xl font-bold text-neutral-600">
+          {t("chapterList.title")}
+        </h2>
         <span
           className={`px-2 py-1 rounded text-sm ${
             book.status === "ongoing"
@@ -208,7 +228,7 @@ const ChapterList: React.FC<ChapterListProps> = ({
               </Link>
               <div className="space-x-5 text-neutral-400 text-sm">
                 <span>
-                  {t("chapterList.lastModified")} {chapter.wordCount}
+                  {t("chapterList.wordCount")} {chapter.wordCount}
                 </span>
                 <span>
                   {t("chapterList.lastModified")}

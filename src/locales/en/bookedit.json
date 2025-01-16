@@ -5,6 +5,11 @@
     "updateError": "Error occurred while updating book details"
   },
   "chapterList": {
+    "editChapter": "Chapter Edit",
+    "wordCountLabel": "Word Count",
+    "cancel": "Cancel",
+    "saveAuthorNote": "Save Author's Note",
+    "clearAlert": "Clear Alert",
     "title": "Chapter List",
     "ongoing": "Ongoing",
     "completed": "Completed",
