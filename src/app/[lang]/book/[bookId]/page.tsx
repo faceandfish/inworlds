@@ -20,12 +20,23 @@ const getCachedBookData = unstable_cache(
   async (bookId: number) => {
     const bookResponse = await getBookDetails(bookId);
     if (bookResponse.code === 200 && "data" in bookResponse) {
-      return bookResponse.data;
+      // 分离需要预签名的 URL 和其他数据
+      const { coverImageUrl, authorAvatarUrl, ...restData } = bookResponse.data;
+
+      // 每次都重新获取预签名 URL
+      const freshResponse = await getBookDetails(bookId);
+      if (freshResponse.code === 200 && "data" in freshResponse) {
+        return {
+          ...restData,
+          coverImageUrl: freshResponse.data.coverImageUrl,
+          authorAvatarUrl: freshResponse.data.authorAvatarUrl
+        };
+      }
     }
     return null;
   },
   ["book-data"],
-  { revalidate: 600 } // 1 minute cache
+  { revalidate: 600 }
 );
 
 export async function generateMetadata({
